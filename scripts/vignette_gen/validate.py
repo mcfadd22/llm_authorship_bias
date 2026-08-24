@@ -16,11 +16,18 @@ def _has_comment(code: str) -> bool:
 
 
 def _is_docstring_expr(node: ast.stmt) -> bool:
-    return (
-        isinstance(node, ast.Expr)
-        and isinstance(node.value, ast.Constant)
+    if not isinstance(node, ast.Expr):
+        return False
+    # Check for plain string constant (traditional docstring)
+    if (
+        isinstance(node.value, ast.Constant)
         and isinstance(node.value.value, str)
-    )
+    ):
+        return True
+    # Check for f-string (which LLM could use to sneak in explanatory text)
+    if isinstance(node.value, ast.JoinedStr):
+        return True
+    return False
 
 
 def validate_code(code: str) -> None:
@@ -49,6 +56,12 @@ def validate_code(code: str) -> None:
         )
 
     func = top_level_funcs[0]
+    func_index = tree.body.index(func)
+
+    # Verify all imports appear before the function
+    for i, node in enumerate(tree.body):
+        if isinstance(node, (ast.Import, ast.ImportFrom)) and i >= func_index:
+            raise ValidationError("import statements must appear before the function definition")
 
     for node in ast.walk(func):
         if node is not func and isinstance(node, (ast.FunctionDef, ast.ClassDef)):

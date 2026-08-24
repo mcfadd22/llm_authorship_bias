@@ -112,3 +112,36 @@ def test_too_many_lines_is_rejected():
     code = f"def f(x):\n{body_lines}\n    return x\n"
     with pytest.raises(ValidationError, match="8-25"):
         validate_code(code)
+
+
+def test_import_after_function_is_rejected():
+    code = """def f(x):
+    total = 0
+    for i in range(x):
+        total += i
+        total += 1
+        total += 2
+        total += 3
+        total += 4
+    return total
+
+
+import json
+"""
+    with pytest.raises(ValidationError, match="before the function"):
+        validate_code(code)
+
+
+def test_fstring_as_first_statement_is_rejected():
+    code = '''def f(x):
+    f"""Computes something useful from x."""
+    total = 0
+    total += 1
+    total += 2
+    total += 3
+    total += 4
+    total += 5
+    return total
+'''
+    with pytest.raises(ValidationError, match="docstring"):
+        validate_code(code)
