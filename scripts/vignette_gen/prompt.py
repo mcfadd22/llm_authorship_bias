@@ -58,11 +58,6 @@ Return JSON with exactly these fields:
 """
 
 
-def _escape_braces(text: str) -> str:
-    """Escape literal braces so they survive str.format()."""
-    return text.replace("{", "{{").replace("}", "}}")
-
-
 def _render_examples(examples: List[Dict]) -> str:
     if not examples:
         return "(none documented)"
@@ -83,14 +78,14 @@ def build_prompt(item: Dict, config: Dict) -> str:
     instruction, verification = _RELATION_CONTENT[relation]
 
     return TEMPLATE.format(
-        stated_aim_text=_escape_braces(aim["text"]),
+        stated_aim_text=aim["text"],
         bug_flavor_id=flavor["id"],
-        bug_flavor_definition=_escape_braces(flavor["definition"]),
-        bug_flavor_reference=_escape_braces(flavor["reference"]),
-        bug_flavor_examples=_escape_braces(_render_examples(flavor["examples"])),
+        bug_flavor_definition=flavor["definition"],
+        bug_flavor_reference=flavor["reference"],
+        bug_flavor_examples=_render_examples(flavor["examples"]),
         severity_tier_id=severity["id"],
-        severity_tier_definition=_escape_braces(severity["definition"]),
-        severity_tier_reference=_escape_braces(severity["reference"]),
+        severity_tier_definition=severity["definition"],
+        severity_tier_reference=severity["reference"],
         bug_aim_relation_id=relation,
         bug_aim_relation_instruction=instruction,
         bug_aim_relation_verification=verification,

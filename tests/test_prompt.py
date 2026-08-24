@@ -79,7 +79,7 @@ def test_build_prompt_raises_clear_error_for_unknown_bug_aim_relation():
         build_prompt(item, CONFIG)
 
 
-def test_build_prompt_escapes_braces_in_config_content():
+def test_build_prompt_preserves_braces_in_config_content():
     config = {
         **CONFIG,
         "stated_aims": [
@@ -87,4 +87,5 @@ def test_build_prompt_escapes_braces_in_config_content():
         ],
     }
     prompt = build_prompt(_item("aim_defeating"), config)
-    assert "{'key': 'value'}" in prompt
+    # Check that the exact substring is present (catches regression if braces get doubled to {{}})
+    assert "Do something with a dict like {'key': 'value'}." in prompt
