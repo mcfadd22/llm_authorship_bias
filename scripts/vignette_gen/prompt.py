@@ -29,7 +29,7 @@ Requirements:
 - No suggestive variable/function names or coding style that hints at
   whether the bug is intentional, careless, or reflects a competence gap.
   Use names that would be typical and neutral for this task.
-- The function body should be approximately 8-25 lines (signature through
+- The function body should be approximately 5-25 lines (signature through
   return) - long enough for the bug to be clearly present, not padded
   with unrelated logic.
 

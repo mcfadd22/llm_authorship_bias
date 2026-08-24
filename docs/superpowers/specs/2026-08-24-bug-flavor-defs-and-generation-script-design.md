@@ -217,7 +217,7 @@ artifacts can often be inserted without a described second step).
   Sends the built prompt, expects the `{"code": ..., "rationale": ...}` JSON back. (Switched
   from a direct Anthropic SDK integration because only an OpenRouter key was available.)
 - **Validator** — `ast.parse` for syntax; structural checks for:
-  - 8–25 body lines (signature through return), counted on the function body only — leading
+  - 5–25 body lines (signature through return), counted on the function body only — leading
     module-level `import` statements (see below) don't count toward this range.
   - Exactly one top-level `def`, no top-level `class`. Leading module-level `import` statements are
     permitted before the function (several plausible items need one, e.g. `parse_config` needs

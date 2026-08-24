@@ -103,14 +103,14 @@ def test_too_few_lines_is_rejected():
     code = """def f(x):
     return x
 """
-    with pytest.raises(ValidationError, match="8-25"):
+    with pytest.raises(ValidationError, match="5-25"):
         validate_code(code)
 
 
 def test_too_many_lines_is_rejected():
     body_lines = "\n".join(f"    x += {i}" for i in range(30))
     code = f"def f(x):\n{body_lines}\n    return x\n"
-    with pytest.raises(ValidationError, match="8-25"):
+    with pytest.raises(ValidationError, match="5-25"):
         validate_code(code)
 
 
