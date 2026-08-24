@@ -1,0 +1,4 @@
+{
+  "pool": [],
+  "resolution_rule": "For each judge/item, select two distinct entries from `pool`, excluding any entry whose id matches the current judge, and rotate assignment across items so no single rival is confounded with a specific item/bug. Assign one to other_model_A, one to other_model_B."
+}

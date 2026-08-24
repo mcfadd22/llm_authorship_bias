@@ -1,0 +1,10 @@
+{
+  "levels": [
+    {"id": "missing_edge_case", "category": "core", "definition": "", "examples": [], "status": "todo"},
+    {"id": "logic_error", "category": "core", "definition": "", "examples": [], "status": "todo"},
+    {"id": "security_vulnerability", "category": "core", "definition": "", "examples": [], "status": "todo"},
+    {"id": "silent_failure", "category": "core", "definition": "", "examples": [], "status": "todo"},
+    {"id": "copy_paste_residue", "category": "exploratory", "definition": "", "examples": [], "status": "todo"},
+    {"id": "known_trap", "category": "exploratory", "definition": "", "examples": [], "status": "todo"}
+  ]
+}

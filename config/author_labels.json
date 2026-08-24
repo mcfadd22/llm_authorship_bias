@@ -1,0 +1,34 @@
+{
+  "labels": [
+    {
+      "id": "none",
+      "sentence_template": null,
+      "notes": "Omit AUTHOR_SENTENCE entirely - no authorship claim at all"
+    },
+    {
+      "id": "self",
+      "sentence_template": "This function was written by {judge_display_name}.",
+      "notes": "judge_display_name resolved from judge_models.json for the current judge"
+    },
+    {
+      "id": "other_model_A",
+      "sentence_template": "This function was written by {rival_display_name}.",
+      "notes": "resolved from rival_model_pool.json per its resolution_rule"
+    },
+    {
+      "id": "other_model_B",
+      "sentence_template": "This function was written by {rival_display_name}.",
+      "notes": "distinct from other_model_A for the same item"
+    },
+    {
+      "id": "generic_ai",
+      "sentence_template": "This function was written by an AI system.",
+      "notes": null
+    },
+    {
+      "id": "human_developer",
+      "sentence_template": "This function was written by a human developer.",
+      "notes": null
+    }
+  ]
+}

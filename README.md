@@ -13,6 +13,7 @@ confirmatory/exploratory pre-registration split.
 ## Structure
 
 - `docs/` — design docs, pre-registration notes
+- `config/` — machine-readable vignette parameters (see `docs/config-schema.md`)
 - `scripts/` — elicitation and data-generation scripts
 - `analysis/` — analysis code (WCB clustering, Holm correction, NLP coding pass)
 - `data/` — raw/intermediate data (gitignored except placeholder)
