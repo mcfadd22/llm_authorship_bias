@@ -1,6 +1,0 @@
-{
-  "levels": [
-    {"id": "aim_defeating", "notes": "Bug undermines exactly what STATED_AIM promises"},
-    {"id": "aim_orthogonal", "notes": "Bug is incidental to STATED_AIM; stated purpose still works"}
-  ]
-}
