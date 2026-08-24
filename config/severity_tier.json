@@ -1,6 +1,18 @@
 {
   "levels": [
-    {"id": "trivial", "definition": "", "examples": [], "status": "todo"},
-    {"id": "significant", "definition": "", "examples": [], "status": "todo"}
+    {
+      "id": "trivial",
+      "definition": "",
+      "examples": [],
+      "reference": "No clean external standard applies (CVSS-style scoring is security-specific, not general correctness severity) - anchor this to a self-authored criterion, e.g. narrow input range / cosmetic / easily caught by basic testing.",
+      "status": "todo"
+    },
+    {
+      "id": "significant",
+      "definition": "",
+      "examples": [],
+      "reference": "No clean external standard applies - anchor this to a self-authored criterion, e.g. silent wrong output / data loss / security exposure.",
+      "status": "todo"
+    }
   ]
 }

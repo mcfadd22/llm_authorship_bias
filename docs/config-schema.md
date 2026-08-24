@@ -97,37 +97,67 @@ a `stated_aim` and a bug (design.md §1a, matched-pair construction).
 Classification rubric. `definition`/`examples` start empty (`"status":
 "todo"`) — to be filled in collaboratively, since "trivial" vs. "significant"
 is a judgment call that needs a tight, shared definition to apply
-consistently.
+consistently. `reference` notes that, unlike `bug_flavor`, no clean external
+standard applies here (CVSS-style severity scoring is security-specific);
+this factor's definitions will be self-authored rather than anchored to an
+external taxonomy.
 
 ```json
 {
   "levels": [
-    {"id": "trivial", "definition": "", "examples": [], "status": "todo"},
-    {"id": "significant", "definition": "", "examples": [], "status": "todo"}
+    {"id": "trivial", "definition": "", "examples": [], "reference": "...", "status": "todo"},
+    {"id": "significant", "definition": "", "examples": [], "reference": "...", "status": "todo"}
   ]
 }
 ```
 
 ### `config/bug_flavor.json`
 
-Classification rubric, same shape as `severity_tier.json`, plus a `category`
-field distinguishing the core primary-factorial flavors from the optional
-exploratory ones (design.md §1a). All six start empty/`"todo"` — `known_trap`
-in particular needs a tight definition, since design.md itself flags it as
-the flavor most likely to be judged inconsistently across items/coders.
+Classification rubric, same shape as `severity_tier.json`, plus `category`
+(distinguishing core primary-factorial flavors from the optional exploratory
+ones, per design.md §1a) and `reference` — a pointer to an established
+external taxonomy or source grounding that flavor, pre-filled since it's
+factual/citable rather than a judgment call:
+
+- `missing_edge_case` / `logic_error`: mutation-testing operators (Offutt et
+  al. — ROR, COR, AOR, boundary/statement operators) and the QuixBugs
+  benchmark for real example defects.
+- `security_vulnerability`: MITRE CWE (CWE-89 SQL injection, CWE-306 missing
+  auth, CWE-287 improper auth, CWE-798 hardcoded credentials).
+- `silent_failure`: CWE-1069 (Empty Exception Block), CWE-703, and static
+  analysis rules that codify it (Bandit B110, CodeQL empty-except).
+- `copy_paste_residue`: Fowler's code-smell catalog (Duplicated Code, Dead
+  Code) — a canonical but informal practitioner reference, not a numbered
+  standard.
+- `known_trap`: community-documented Python gotchas (e.g. mutable default
+  arguments) — informal consensus, not a formal taxonomy; treat as
+  lower-confidence than the CWE/mutation-testing-grounded flavors, consistent
+  with design.md's own flag on this flavor.
+
+`definition`/`examples` still start empty/`"todo"` — the `reference` gives
+whoever fills them in a concrete anchor rather than a blank page. This same
+field is intended to do double duty as both the classification rubric
+(verifying an item after the fact) and a constraint fed to the generation
+prompt (steering what gets planted) — one source of truth for both, so the
+two can't drift apart. `known_trap` needs particular care since design.md
+flags it as the flavor most likely to be judged inconsistently across
+items/coders.
 
 ```json
 {
   "levels": [
-    {"id": "missing_edge_case", "category": "core", "definition": "", "examples": [], "status": "todo"},
-    {"id": "logic_error", "category": "core", "definition": "", "examples": [], "status": "todo"},
-    {"id": "security_vulnerability", "category": "core", "definition": "", "examples": [], "status": "todo"},
-    {"id": "silent_failure", "category": "core", "definition": "", "examples": [], "status": "todo"},
-    {"id": "copy_paste_residue", "category": "exploratory", "definition": "", "examples": [], "status": "todo"},
-    {"id": "known_trap", "category": "exploratory", "definition": "", "examples": [], "status": "todo"}
+    {"id": "missing_edge_case", "category": "core", "definition": "", "examples": [], "reference": "...", "status": "todo"},
+    {"id": "logic_error", "category": "core", "definition": "", "examples": [], "reference": "...", "status": "todo"},
+    {"id": "security_vulnerability", "category": "core", "definition": "", "examples": [], "reference": "...", "status": "todo"},
+    {"id": "silent_failure", "category": "core", "definition": "", "examples": [], "reference": "...", "status": "todo"},
+    {"id": "copy_paste_residue", "category": "exploratory", "definition": "", "examples": [], "reference": "...", "status": "todo"},
+    {"id": "known_trap", "category": "exploratory", "definition": "", "examples": [], "reference": "...", "status": "todo"}
   ]
 }
 ```
+
+See `config/bug_flavor.json` and `config/severity_tier.json` for the actual
+pre-filled `reference` text.
 
 ### `config/judge_models.json`
 

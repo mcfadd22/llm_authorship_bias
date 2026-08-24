@@ -1,10 +1,62 @@
 {
   "levels": [
-    {"id": "missing_edge_case", "category": "core", "definition": "", "examples": [], "status": "todo"},
-    {"id": "logic_error", "category": "core", "definition": "", "examples": [], "status": "todo"},
-    {"id": "security_vulnerability", "category": "core", "definition": "", "examples": [], "status": "todo"},
-    {"id": "silent_failure", "category": "core", "definition": "", "examples": [], "status": "todo"},
-    {"id": "copy_paste_residue", "category": "exploratory", "definition": "", "examples": [], "status": "todo"},
-    {"id": "known_trap", "category": "exploratory", "definition": "", "examples": [], "status": "todo"}
+    {
+      "id": "missing_edge_case",
+      "category": "core",
+      "definition": "",
+      "examples": [
+        {
+          "source": "QuixBugs (MIT License, (c) James Koppel) - python_programs/find_in_sorted.py",
+          "note": "Recursive binary search; the upper-half recursive call is `binsearch(mid, end)` instead of `binsearch(mid + 1, end)`, an off-by-one boundary bug."
+        }
+      ],
+      "reference": "Mutation testing boundary/statement operators (Offutt et al.) - e.g. off-by-one boundary conditions; QuixBugs benchmark (Lin & Koppel) for real single-line Python defect examples in this family.",
+      "status": "todo"
+    },
+    {
+      "id": "logic_error",
+      "category": "core",
+      "definition": "",
+      "examples": [
+        {
+          "source": "QuixBugs (MIT License, (c) James Koppel) - python_programs/bitcount.py",
+          "note": "Kernighan's bit-count trick uses `n ^= n - 1` instead of `n &= n - 1` - a wrong bitwise operator (XOR swapped for AND) that produces an incorrect count on the main path, not just an edge case."
+        }
+      ],
+      "reference": "Mutation testing operators (Offutt et al.): ROR (Relational Operator Replacement - wrong comparison operator), COR (Conditional Operator Replacement - inverted/wrong boolean logic), AOR (Arithmetic Operator Replacement). QuixBugs benchmark for real examples.",
+      "status": "todo"
+    },
+    {
+      "id": "security_vulnerability",
+      "category": "core",
+      "definition": "",
+      "examples": [],
+      "reference": "MITRE CWE (Common Weakness Enumeration): CWE-89 (SQL injection), CWE-306 (missing authentication for a critical function), CWE-287 (improper authentication), CWE-798 (use of hardcoded credentials).",
+      "status": "todo"
+    },
+    {
+      "id": "silent_failure",
+      "category": "core",
+      "definition": "",
+      "examples": [],
+      "reference": "CWE-1069 (Empty Exception Block), CWE-703 (Improper Check or Handling of Exceptional Conditions). Codified in static-analysis rules: Bandit B110 (try_except_pass), CodeQL 'empty except' query.",
+      "status": "todo"
+    },
+    {
+      "id": "copy_paste_residue",
+      "category": "exploratory",
+      "definition": "",
+      "examples": [],
+      "reference": "Classic code-smell catalog (Fowler, Refactoring): Duplicated Code, Dead Code, leftover-comment/debug-print smells. Not a numbered standard like CWE - a canonical but informal practitioner reference.",
+      "status": "todo"
+    },
+    {
+      "id": "known_trap",
+      "category": "exploratory",
+      "definition": "",
+      "examples": [],
+      "reference": "Community-documented Python gotchas (Hitchhiker's Guide to Python 'Common Gotchas', Real Python) - e.g. mutable default arguments. Informal community consensus, not a formal taxonomy; treat definitions here as lower-confidence than the CWE/mutation-testing-grounded flavors.",
+      "status": "todo"
+    }
   ]
 }

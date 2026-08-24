@@ -16,7 +16,7 @@ not seeded.
 |---|---|---|
 | `author_label` | `none` (baseline), `self`, `other_model_A`, `other_model_B`, `generic_ai`, `human_developer` | `self` is resolved per judge model at elicitation time (e.g. judge=llama → label="Llama"). `other_model_A/B` should be named commercial models distinct from the judge, rotated so no single rival model is confounded with a specific bug/item. |
 | `stated_aim` | fixed per item, not manipulated | Plain functional description of what the code is supposed to do (e.g. "validate a password-reset token before allowing a password change," "sort a list of files by extension"). Held constant across all other-factor cells for a given item; exists to give `bug_aim_relation` something to be defined against. |
-| `bug_aim_relation` | `aim_defeating`, `aim_orthogonal` | Does the bug undermine exactly what the function was stated to do, or is it incidental to that stated purpose? Independent of `severity_tier` (severity = technical consequence; aim_relation = relationship to stated purpose) and independent of `bug_flavor` (any flavor can in principle be either relation — see §1a). Construct as matched pairs within each item/flavor (see §1a) rather than independently randomizing, since not every flavor naturally supports both relations for an arbitrary stated aim. |
+| `bug_aim_relation` | `aim_defeating`, `aim_orthogonal` | Does the bug undermine exactly what the function was stated to do, or is it incidental to that stated purpose? Independent of `severity_tier` (severity = technical consequence; aim_relation = relationship to stated purpose) and independent of `bug_flavor` (any flavor can in principle be either relation — see §1a). Constructed independently per item (not as matched pairs — see §1a): not every flavor naturally supports both relations for an arbitrary stated aim, and forcing a matched sibling for every item was judged not worth the construction cost. Analyzed as a between-item comparison, clustered by `item_id`. |
 | `severity_tier` | `trivial`, `significant` | Property of the planted bug itself (technical consequence), held constant across all label/aim-relation cells for a given item. |
 | `bug_flavor` | `missing_edge_case`, `logic_error`, `security_vulnerability`, `silent_failure` (core); `copy_paste_residue`, `known_trap` (exploratory, optional) | Not a primary test factor, but should be balanced across items so competence/carelessness/malice narratives have room to differ; worth exploratory `bug_flavor:author_label` and `bug_flavor:bug_aim_relation` interactions. See §1a for definitions, examples, and predicted folk-psych profile per flavor. |
 
@@ -55,23 +55,24 @@ Recommended allocation: use `missing_edge_case`, `logic_error`,
 contrasts). Add `copy_paste_residue` and `known_trap` only if the item
 bank can support the extra cells without underpowering the core set.
 
-**Constructing `bug_aim_relation` matched pairs.** `bug_aim_relation` is
-a separate crossed factor, not a property of `bug_flavor` — any of the
-four core flavors can in principle be either aim-defeating or
-aim-orthogonal depending on where the bug sits relative to the
-function's stated purpose, so it answers a different question
-(relationship to purpose) than `bug_flavor` does (type of technical
-mistake). Rather than independently randomizing bug placement per item
-(not every flavor naturally supports both relations for an arbitrary
-stated aim — a `security_vulnerability` that's genuinely orthogonal to
-an aim like "sort files by extension" is a stretch to write
-convincingly), construct each item as a **matched pair**: write the same
-technical bug (same flavor, same severity) twice, once positioned so it
-breaks exactly what `STATED_AIM` promises, once positioned so it's
-incidental to that promise, keeping code length/complexity as close to
-identical as possible between the pair. Example (`silent_failure`,
-`STATED_AIM` = "validate a password-reset token before allowing a
-password change"):
+**Constructing `bug_aim_relation` instances.** `bug_aim_relation` is a
+separate crossed factor, not a property of `bug_flavor` — any of the four
+core flavors can in principle be either aim-defeating or aim-orthogonal
+depending on where the bug sits relative to the function's stated
+purpose, so it answers a different question (relationship to purpose)
+than `bug_flavor` does (type of technical mistake). Each item is
+constructed independently: for a given `stated_aim`/`bug_flavor`/
+`severity_tier`, decide where the bug sits and label the item
+accordingly — no requirement to also construct a matched sibling item
+with the opposite `bug_aim_relation`. This was a deliberate simplification:
+not every flavor naturally supports both relations for an arbitrary
+stated aim (a `security_vulnerability` that's genuinely orthogonal to an
+aim like "sort files by extension" is a stretch to write convincingly),
+and forcing a matched pair for every item raised the construction cost
+without a proportional gain, given `bug_aim_relation` is analyzed
+between-item (clustered by `item_id`) rather than as a within-pair
+repeated measure. Example (`silent_failure`, `STATED_AIM` = "validate a
+password-reset token before allowing a password change"):
 
 - `aim_defeating`: the token-expiry check's exception is swallowed,
   silently allowing an expired token through — the exact thing the
@@ -80,9 +81,8 @@ password change"):
   elsewhere in the same function; the token validation itself is
   correct.
 
-This keeps `author_label`, `severity_tier`, and `bug_flavor` fixed
-within a pair, isolating `bug_aim_relation` as the only thing that
-differs.
+Both illustrate the same `bug_flavor`/`severity_tier`, but there is no
+requirement that both be constructed from the same specific item.
 
 ## 2. Prompt template (elicitation turn)
 
@@ -171,16 +171,11 @@ item are complete)
 ## 4. Response schema (per elicitation row)
 
 ```
-item_id, pair_id, judge_family, judge_tuning, author_label,
+item_id, judge_family, judge_tuning, author_label,
 bug_aim_relation, severity_tier, bug_flavor, question_type,
 scale_response, reasoning_text, authorship_belief_raw,
 authorship_belief_coded
 ```
-
-`pair_id` links the two `bug_aim_relation` variants (aim_defeating /
-aim_orthogonal) constructed from the same underlying bug/flavor/severity,
-per the matched-pair method in §1a — needed to run within-pair
-comparisons cleanly rather than relying on between-item averaging.
 
 `question_type` ∈ {q_intentionality, q_explanation, q_blame,
 q_authorship_belief}. `authorship_belief_*` fields are null except on
@@ -236,7 +231,10 @@ families, or tuning states:
   author_label_c * bug_aim_relation_c`, testing whether the label
   effect from H1 grows, shrinks, or holds when the bug defeats the
   stated aim vs. is incidental to it. This is the test of whether label
-  bias survives a more diagnostic bug, not just an ambiguous one.
+  bias survives a more diagnostic bug, not just an ambiguous one. WCB
+  clustered by item_id (aim-defeating and aim-orthogonal items are
+  constructed independently per §1a, not as matched pairs, so this is a
+  between-item comparison, not a within-pair one).
 - **H4 — label main effect on the ability-vs-diligence explanation
   item** (`q_explanation`): the actor-observer prediction specifically
   — does `self` skew toward the ability-gap end and `other_model`/
@@ -294,31 +292,25 @@ came back significant.
 
 ## 7. Open decisions before piloting
 
-- Whether `other_model_A/B` should be fixed named models across the
-  whole item bank or resolved per-judge (e.g. always "the other two
-  frontier models excluding the judge") — fixed names risk brand-name
-  connotation confounds; per-judge resolution risks losing
-  cross-family comparability.
+- ~~Whether `other_model_A/B` should be fixed named models across the
+  whole item bank or resolved per-judge~~ — **Resolved**: a fixed pool of
+  named rival models, with `other_model_A`/`other_model_B` resolved per
+  judge/item by excluding whichever model is the current judge and
+  rotating assignment across items. See `docs/config-schema.md`
+  (`rival_model_pool.json`) for the exact resolution rule.
 - Whether q_intentionality/q_explanation/q_blame should all run on
   every item for every label/aim-relation cell, or whether a partial
   (Latin-square) design is needed to keep elicitation cost tractable —
-  the design is now `author_label` (6) × `bug_aim_relation` (2) ×
-  `severity_tier` (2) × `bug_flavor` (4 core), i.e. 96 cells per matched
-  base bug before even multiplying by question type; full crossing on
-  every planted bug is likely not affordable, so decide early whether to
-  (a) run the full cross on a small number of base bugs, (b) run a
-  reduced label set (e.g. drop one of `other_model_A/B` or
-  `human_developer`) on more base bugs, or (c) treat `bug_aim_relation`
-  as within-pair and `bug_flavor`/`severity_tier` as between-item, so no
-  single base bug needs every cell.
+  the design is `author_label` (6) × `bug_aim_relation` (2) ×
+  `severity_tier` (2) × `bug_flavor` (4 core), i.e. 96 cells per item
+  before even multiplying by question type; full crossing on every item
+  is likely not affordable, so decide early whether to (a) run the full
+  cross on a small number of items, or (b) run a reduced label set (e.g.
+  drop one of `other_model_A/B` or `human_developer`) on more items.
 - Number and diversity of `bug_flavor` items needed per severity tier to
   support the exploratory `bug_flavor:author_label` and
   `bug_flavor:bug_aim_relation` interactions without under-powering the
   primary tests.
-- Whether `bug_aim_relation` should be analyzed as a within-pair
-  repeated measure (cluster by `pair_id`, more powerful, requires every
-  pair to be elicited under the same `author_label` draw) or treated as
-  fully between-item (cluster by `item_id`, simpler, allows independent
-  randomization of label per aim-relation variant) — affects both the
-  WCB clustering choice in §6 and how matched pairs get assigned to
-  label conditions during elicitation.
+- ~~Whether `bug_aim_relation` should be analyzed as a within-pair
+  repeated measure or treated as fully between-item~~ — **Resolved**:
+  fully between-item, clustered by `item_id` (see §1a, §6.1 H3).
