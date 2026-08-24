@@ -1,5 +1,7 @@
 import json
 
+import anthropic
+
 from vignette_gen.orchestrate import RunOptions, generate_one, run
 
 CONFIG = {
@@ -40,6 +42,16 @@ class _ScriptedClient:
     def generate(self, prompt):
         self.calls += 1
         return self._responses.pop(0)
+
+
+class _RaisingClient:
+    def __init__(self, error):
+        self._error = error
+        self.calls = 0
+
+    def generate(self, prompt):
+        self.calls += 1
+        raise self._error
 
 
 def test_generate_one_returns_code_and_rationale_on_first_success():
@@ -161,3 +173,44 @@ def test_run_records_failure_and_continues(tmp_path):
     failures = (tmp_path / "failures.jsonl").read_text().splitlines()
     assert len(failures) == 1
     assert json.loads(failures[0])["item_id"] == ITEM["item_id"]
+
+
+def test_generate_one_retries_on_api_error_then_raises_runtime_error():
+    error = anthropic.APIError(
+        message="rate limited", request=None, body=None
+    )
+    client = _RaisingClient(error)
+
+    try:
+        generate_one(client, ITEM, CONFIG, max_retries=3)
+        assert False, "expected RuntimeError"
+    except RuntimeError:
+        pass
+
+    assert client.calls == 3
+
+
+def test_run_logs_api_error_as_failure_and_continues(tmp_path):
+    error = anthropic.APIError(message="rate limited", request=None, body=None)
+    client = _RaisingClient(error)
+    options = RunOptions(
+        model="claude-sonnet-5",
+        samples_per_cell=1,
+        limit=1,
+        dry_run=False,
+        overwrite=False,
+        max_retries=3,
+        items_dir=tmp_path / "items",
+        failures_path=tmp_path / "failures.jsonl",
+    )
+
+    counts = run(
+        client,
+        options,
+        load_config_fn=lambda: CONFIG,
+        build_items_fn=lambda config, samples_per_cell, limit: [ITEM],
+    )
+
+    assert counts == {"generated": 0, "skipped": 0, "failed": 1}
+    failures = (tmp_path / "failures.jsonl").read_text().splitlines()
+    assert len(failures) == 1

@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
+import anthropic
+
 from .cells import enumerate_cells, expand_items
 from .config import load_config as _default_load_config
 from .prompt import build_prompt
@@ -44,7 +46,7 @@ def generate_one(client, item: Dict, config: Dict, max_retries: int) -> Dict:
             rationale = parsed["rationale"]
             validate_code(code)
             return {"code": code, "rationale": rationale}
-        except (json.JSONDecodeError, KeyError, ValidationError) as exc:
+        except (json.JSONDecodeError, KeyError, ValidationError, anthropic.APIError) as exc:
             last_error = str(exc)
     raise RuntimeError(f"failed after {max_retries} attempts: {last_error}")
 
