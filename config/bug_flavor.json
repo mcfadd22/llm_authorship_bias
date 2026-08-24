@@ -57,6 +57,14 @@
       "examples": [],
       "reference": "Real Python, 'Common Gotchas For Python Developers'; The Hitchhiker's Guide to Python, 'Common Gotchas' section. Informal community consensus, not a formal taxonomy - treat as lower-confidence than the CWE/mutation-testing-grounded flavors.",
       "status": "done"
+    },
+    {
+      "id": "wrong_algorithm",
+      "category": "exploratory",
+      "definition": "A function containing no missing-edge-case gap, no wrong operator/comparison on an otherwise-correct approach, no swallowed error, and no leftover artifact - the code is clean and internally consistent - but it implements an approach that doesn't accomplish the stated aim at all (e.g. computing a sum when asked for an average with no division step anywhere, sorting ascending when descending was asked and every other behavior is otherwise fine, checking the wrong field entirely). Distinguishing test from logic_error: logic_error is one wrong piece within an otherwise-correct approach (swap `<` for `<=`, swap `+` for `-`); wrong_algorithm is fine at the level of 'is this code well-formed and self-consistent' but wrong at the level of 'does this even attempt the right computation.'",
+      "examples": [],
+      "reference": "Chillarege et al., Orthogonal Defect Classification (ODC) - 'Function' defect type (affects significant capability/feature correctness, as opposed to ODC's 'Algorithm' type which covers efficiency/logic issues within an otherwise-correct approach). Distinct from the mutation-testing-grounded logic_error/missing_edge_case flavors - ODC's Function category doesn't presuppose a single injectable operator swap.",
+      "status": "done"
     }
   ]
 }
