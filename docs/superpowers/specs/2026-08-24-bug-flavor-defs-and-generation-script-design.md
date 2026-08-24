@@ -104,6 +104,16 @@ flag on this flavor.
   wrong state, silently drops data other code depends on, or (for `security_vulnerability`) allows
   unauthorized data exposure/modification or credential compromise.
 
+**Disambiguating "silently drops data other code depends on."** This clause is scoped to
+structured, multi-field values that other code configures/drives itself from (e.g. a parsed config
+object where a `silent_failure` bug causes one field to go silently missing/defaulted) — not any
+scalar return value that a caller happens to act on, since essentially every function's output is
+"used downstream" and that broader reading would make `significant` fail to discriminate anything.
+A function returning a single number or boolean (an average, a shipping cost, an eligibility
+decision) stays `trivial` even though a caller uses that value, unless the aim itself also involves
+persistence, an access-control gate, or a stated real-world action (charging, renaming files) —
+see the `severity_tiers_supported` table in §3 for how this line was actually drawn per aim.
+
 **Reference:** Conceptually modeled on CVSS v3.1's Confidentiality/Integrity/Availability impact
 dimensions (FIRST.org, CVSS v3.1 Specification) — a single call/output distinction maps roughly to
 CVSS's "Changed vs. Unchanged Scope," but the tier itself is self-authored rather than a CVSS
@@ -168,7 +178,7 @@ turns the bug into a clean CWE-639 (IDOR) instance.
 | is_freezing | Determine whether a temperature reading in Celsius represents freezing conditions (at or below 0 degrees). | trivial | logic_error: false |
 | job_status_auth | Check that the caller is an authorized internal service before returning the health-check status of a background job. | trivial, significant | security_vulnerability: false |
 | public_profile_lookup | Look up a user's public profile information by username. | trivial, significant | security_vulnerability: false |
-| parse_config | Parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn't present. | trivial | silent_failure: true |
+| parse_config | Parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn't present. | trivial, significant | silent_failure: true |
 | process_orders_revenue | Process a batch of orders and calculate the total revenue. | trivial, significant | silent_failure: false |
 | rename_files | Rename all files in a list by appending a given suffix before the file extension. | trivial, significant | copy_paste_residue: true |
 | celsius_to_fahrenheit | Convert a temperature from Celsius to Fahrenheit. | trivial | known_trap: false |
@@ -176,8 +186,9 @@ turns the bug into a clean CWE-639 (IDOR) instance.
 Rationale for each `severity_tiers_supported`/`orthogonal_plausible` value: aims restricted to
 `trivial` are pure computations or single-decision utilities with no persistent, financial, or
 access-control consequence; aims allowing `significant` touch stored state, money movement, an
-authentication/authorization boundary, or (for `add_note`'s `known_trap`) are a bug class famous
-for bleeding state across unrelated calls. `orthogonal_plausible` is `true` only where the aim's
+authentication/authorization boundary, a structured value other code configures itself from (see
+`parse_config`, and the disambiguation in §2), or (for `add_note`'s `known_trap`) are a bug class
+famous for bleeding state across unrelated calls. `orthogonal_plausible` is `true` only where the aim's
 text describes a genuine secondary sub-task distinct from its main transformation, or where the
 flavor itself doesn't need structural peripheral space (`copy_paste_residue`/`silent_failure`
 artifacts can often be inserted without a described second step).
@@ -203,9 +214,19 @@ artifacts can often be inserted without a described second step).
 - **Generation client** — thin wrapper around the Anthropic SDK, model defaults to
   `claude-sonnet-5` via `--model` flag. Sends the built prompt, expects the
   `{"code": ..., "rationale": ...}` JSON back.
-- **Validator** — `ast.parse` for syntax; structural checks for 8–25 body lines, exactly one
-  top-level function (no nested `def`/`class`), no comments (`#`) or docstrings/triple-quoted
-  first-statement strings.
+- **Validator** — `ast.parse` for syntax; structural checks for:
+  - 8–25 body lines (signature through return), counted on the function body only — leading
+    module-level `import` statements (see below) don't count toward this range.
+  - Exactly one top-level `def`, no top-level `class`. Leading module-level `import` statements are
+    permitted before the function (several plausible items need one, e.g. `parse_config` needs
+    `json`); no other top-level statements (no module-level variable assignments, no nested
+    `def`/`class` inside the function).
+  - No `#` comments anywhere in the code.
+  - No docstring: the function body's first statement must not be a bare string-literal expression
+    (`ast.Expr` whose `.value` is an `ast.Constant` string). This check applies **only** to that
+    first-statement position — a triple-quoted string used elsewhere as an ordinary value (e.g. a
+    multi-line SQL query string, plausible for `security_vulnerability` items) is a normal literal,
+    not a docstring, and is allowed.
 - **Writer** — on success, writes `data/items/<item_id>.json` (metadata: `item_id`, `cell_id`,
   `sample_idx`, `aim_id`, `bug_flavor`, `severity_tier`, `bug_aim_relation`, `code`, `rationale`,
   `generation_model`, `timestamp`, `prompt_version`). Skips an item if its file already exists,
