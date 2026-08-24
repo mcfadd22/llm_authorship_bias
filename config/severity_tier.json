@@ -2,17 +2,17 @@
   "levels": [
     {
       "id": "trivial",
-      "definition": "",
+      "definition": "The bug's blast radius is confined to a single call/output - wrong value returned, incorrect item skipped/included, or a crash on an atypical input - with no persistent, cascading, or cross-user effect. Data already stored elsewhere is unaffected; no unauthorized access occurs.",
       "examples": [],
-      "reference": "No clean external standard applies (CVSS-style scoring is security-specific, not general correctness severity) - anchor this to a self-authored criterion, e.g. narrow input range / cosmetic / easily caught by basic testing.",
-      "status": "todo"
+      "reference": "Conceptually modeled on CVSS v3.1's Confidentiality/Integrity/Availability impact dimensions (FIRST.org, CVSS v3.1 Specification) - self-authored rather than a CVSS score, since CVSS doesn't apply to non-security bugs.",
+      "status": "done"
     },
     {
       "id": "significant",
-      "definition": "",
+      "definition": "The bug can affect data or access beyond the single call - corrupts/persists wrong state, silently drops data other code depends on, or (for security_vulnerability) allows unauthorized data exposure/modification or credential compromise. 'Silently drops data other code depends on' is scoped to structured, multi-field values that other code configures/drives itself from (e.g. a parsed config object missing a field) - not any scalar value a caller happens to act on.",
       "examples": [],
-      "reference": "No clean external standard applies - anchor this to a self-authored criterion, e.g. silent wrong output / data loss / security exposure.",
-      "status": "todo"
+      "reference": "Conceptually modeled on CVSS v3.1's Confidentiality/Integrity/Availability impact dimensions (FIRST.org, CVSS v3.1 Specification) - self-authored rather than a CVSS score, since CVSS doesn't apply to non-security bugs.",
+      "status": "done"
     }
   ]
 }
