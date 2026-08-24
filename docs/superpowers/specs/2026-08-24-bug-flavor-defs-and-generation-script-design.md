@@ -5,7 +5,7 @@
 This fills the two gaps flagged as open in [`docs/config-schema.md`](../../config-schema.md) and
 [`docs/generation-prompt.md`](../../generation-prompt.md): (1) the actual `definition`/`reference`
 content for `bug_flavor.json` and `severity_tier.json`, and populated content for
-`stated_aims.json`; (2) the design of `scripts/generate_items.py`, which calls the Anthropic API to
+`stated_aims.json`; (2) the design of `scripts/generate_items.py`, which calls the OpenRouter API to
 produce the actual `CODE_BLOCK` for each item per the template in `generation-prompt.md`.
 
 All example code produced by this pipeline is toy/illustrative only — short, self-contained
@@ -211,9 +211,11 @@ artifacts can often be inserted without a described second step).
 - **Prompt builder** — fills the template in `docs/generation-prompt.md` with the cell's values
   plus the matching `definition`/`reference`/`examples` from `bug_flavor.json` and
   `definition`/`reference` from `severity_tier.json`.
-- **Generation client** — thin wrapper around the Anthropic SDK, model defaults to
-  `claude-sonnet-5` via `--model` flag. Sends the built prompt, expects the
-  `{"code": ..., "rationale": ...}` JSON back.
+- **Generation client** — thin wrapper around the `openai` Python package pointed at
+  OpenRouter's API (`base_url="https://openrouter.ai/api/v1"`), model defaults to
+  `anthropic/claude-sonnet-4.5` via `--model` flag, API key read from `OPENROUTER_API_KEY`.
+  Sends the built prompt, expects the `{"code": ..., "rationale": ...}` JSON back. (Switched
+  from a direct Anthropic SDK integration because only an OpenRouter key was available.)
 - **Validator** — `ast.parse` for syntax; structural checks for:
   - 8–25 body lines (signature through return), counted on the function body only — leading
     module-level `import` statements (see below) don't count toward this range.
@@ -244,7 +246,7 @@ item never aborts the run.
 
 ### CLI flags
 
-`--model` (default `claude-sonnet-5`), `--samples-per-cell` (default 1), `--limit` (cap total API
+`--model` (default `anthropic/claude-sonnet-4.5`), `--samples-per-cell` (default 1), `--limit` (cap total API
 calls, for pilots), `--dry-run` (build and print prompts, no API calls), `--overwrite`,
 `--max-retries` (default 3).
 

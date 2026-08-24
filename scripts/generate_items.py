@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 from pathlib import Path
 
 from vignette_gen.client import GenerationClient
@@ -10,9 +11,9 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
-        description="Generate buggy-code vignettes via the Anthropic API."
+        description="Generate buggy-code vignettes via OpenRouter."
     )
-    parser.add_argument("--model", default="claude-sonnet-5")
+    parser.add_argument("--model", default="anthropic/claude-sonnet-4.5")
     parser.add_argument("--samples-per-cell", type=int, default=1)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--dry-run", action="store_true")
@@ -33,7 +34,14 @@ def main(argv=None):
         items_dir=DATA_DIR / "items",
         failures_path=DATA_DIR / "failures.jsonl",
     )
-    client = None if args.dry_run else GenerationClient(model=args.model)
+    client = None
+    if not args.dry_run:
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key:
+            raise SystemExit(
+                "OPENROUTER_API_KEY environment variable is required for a non-dry-run generation run."
+            )
+        client = GenerationClient(model=args.model, api_key=api_key)
     run(client, options)
 
 

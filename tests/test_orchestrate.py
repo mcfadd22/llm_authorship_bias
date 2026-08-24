@@ -1,6 +1,6 @@
 import json
 
-import anthropic
+import openai
 
 from vignette_gen.orchestrate import RunOptions, generate_one, run
 
@@ -176,9 +176,7 @@ def test_run_records_failure_and_continues(tmp_path):
 
 
 def test_generate_one_retries_on_api_error_then_raises_runtime_error():
-    error = anthropic.APIError(
-        message="rate limited", request=None, body=None
-    )
+    error = openai.APIError("rate limited", request=None, body=None)
     client = _RaisingClient(error)
 
     try:
@@ -191,7 +189,7 @@ def test_generate_one_retries_on_api_error_then_raises_runtime_error():
 
 
 def test_run_logs_api_error_as_failure_and_continues(tmp_path):
-    error = anthropic.APIError(message="rate limited", request=None, body=None)
+    error = openai.APIError("rate limited", request=None, body=None)
     client = _RaisingClient(error)
     options = RunOptions(
         model="claude-sonnet-5",

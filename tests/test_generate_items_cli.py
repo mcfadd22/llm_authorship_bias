@@ -8,7 +8,7 @@ from generate_items import parse_args  # noqa: E402
 
 def test_parse_args_defaults():
     args = parse_args([])
-    assert args.model == "claude-sonnet-5"
+    assert args.model == "anthropic/claude-sonnet-4.5"
     assert args.samples_per_cell == 1
     assert args.limit is None
     assert args.dry_run is False
@@ -20,7 +20,7 @@ def test_parse_args_overrides():
     args = parse_args(
         [
             "--model",
-            "claude-opus-5",
+            "some-other-model",
             "--samples-per-cell",
             "5",
             "--limit",
@@ -31,7 +31,7 @@ def test_parse_args_overrides():
             "1",
         ]
     )
-    assert args.model == "claude-opus-5"
+    assert args.model == "some-other-model"
     assert args.samples_per_cell == 5
     assert args.limit == 10
     assert args.dry_run is True
