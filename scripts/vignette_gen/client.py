@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 import openai
@@ -5,6 +6,16 @@ import openai
 
 class GenerationError(Exception):
     pass
+
+
+_CODE_FENCE_RE = re.compile(r"^```(?:json)?\s*\n(.*)\n```$", re.DOTALL)
+
+
+def _strip_markdown_fence(text: str) -> str:
+    match = _CODE_FENCE_RE.match(text.strip())
+    if match:
+        return match.group(1)
+    return text
 
 
 class GenerationClient:
@@ -23,4 +34,4 @@ class GenerationClient:
         if not content:
             detail = getattr(choice, "error", None) or getattr(choice, "finish_reason", "unknown")
             raise GenerationError(f"OpenRouter returned no content (detail: {detail!r})")
-        return content
+        return _strip_markdown_fence(content)
