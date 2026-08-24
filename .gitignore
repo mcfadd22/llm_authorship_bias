@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+venv/
+.venv/
+
+# Data (raw/intermediate outputs — keep out of git; add exceptions as needed)
+data/*
+!data/.gitkeep
+
+# Environment / secrets
+.env
