@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from vignette_gen.writer import append_failure, item_exists, write_item
 
 
@@ -34,3 +36,31 @@ def test_append_failure_writes_one_json_line_per_call(tmp_path):
     assert len(lines) == 2
     assert json.loads(lines[0])["item_id"] == "a"
     assert json.loads(lines[1])["item_id"] == "b"
+
+
+def test_write_item_uses_atomic_rename_not_direct_write(tmp_path, monkeypatch):
+    # Simulate a crash: write_text succeeds but os.replace never runs.
+    import os as os_module
+
+    original_replace = os_module.replace
+    calls = []
+
+    def failing_replace(src, dst):
+        calls.append((src, dst))
+        raise OSError("simulated crash before rename completes")
+
+    monkeypatch.setattr(os_module, "replace", failing_replace)
+
+    try:
+        write_item(tmp_path, "some_item", {"code": "x = 1"})
+    except OSError:
+        pass
+
+    # The final item file must NOT exist - a "crash" before the atomic
+    # rename must never leave a corrupt or partial file at the real path.
+    assert not (tmp_path / "some_item.json").exists()
+
+
+def test_write_item_rejects_path_traversal_in_item_id(tmp_path):
+    with pytest.raises(ValueError, match="unsafe item_id"):
+        write_item(tmp_path, "../../evil", {"code": "x = 1"})
