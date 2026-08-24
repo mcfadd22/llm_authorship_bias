@@ -1,0 +1,196 @@
+# Config Schema: Vignette Parameters
+
+**Status:** draft, pending fill-in of rubric/model/aim content by collaborators.
+
+This doc specifies the machine-readable config that holds the concrete values
+and categorical-factor definitions needed to generate vignettes per
+[`design.md`](design.md). Scripts (elicitation, item-bank construction) read
+these files directly; this doc is the source of truth for their shape.
+
+## Why these files exist
+
+`design.md` fixes the experimental factor *names* (`author_label`,
+`bug_aim_relation`, `severity_tier`, `bug_flavor`) but leaves two kinds of
+detail unresolved, which is what this config fills in:
+
+1. **Classification rubrics** for factors that require judgment calls —
+   `bug_flavor` and `severity_tier` — so that whoever builds or labels items
+   applies the same criteria. (`author_label` and `bug_aim_relation` don't
+   need this: their levels are already unambiguous as defined.)
+2. **Concrete content** — actual judge models, actual rival model names, and
+   actual `stated_aim` text — that `design.md` deliberately left as
+   placeholders (`{JUDGE_MODEL_DISPLAY_NAME}`, `{RIVAL_MODEL_A_DISPLAY_NAME}`,
+   etc.).
+
+Rubrics here are **classification aids for humans** (or any process
+constructing/vetting items), not generation prompts fed to an LLM to write
+code — that's a separate, later concern.
+
+## File format
+
+JSON, one file per parameter, under `config/`. Splitting per parameter keeps
+diffs small when only one thing changes and makes it obvious where to look
+for a given value.
+
+## Files
+
+### `config/author_labels.json`
+
+The `author_label` factor's levels, with the literal sentence template used
+in the prompt's `AUTHOR_SENTENCE` slot (design.md §2). Unlike `bug_flavor`/
+`severity_tier`/`bug_aim_relation`, `author_label` is spoken directly in the
+prompt text, so the generator needs the actual sentence, not just a tag.
+
+```json
+{
+  "labels": [
+    {
+      "id": "none",
+      "sentence_template": null,
+      "notes": "Omit AUTHOR_SENTENCE entirely - no authorship claim at all"
+    },
+    {
+      "id": "self",
+      "sentence_template": "This function was written by {judge_display_name}.",
+      "notes": "judge_display_name resolved from judge_models.json for the current judge"
+    },
+    {
+      "id": "other_model_A",
+      "sentence_template": "This function was written by {rival_display_name}.",
+      "notes": "resolved from rival_model_pool.json per its resolution_rule"
+    },
+    {
+      "id": "other_model_B",
+      "sentence_template": "This function was written by {rival_display_name}.",
+      "notes": "distinct from other_model_A for the same item"
+    },
+    {
+      "id": "generic_ai",
+      "sentence_template": "This function was written by an AI system.",
+      "notes": null
+    },
+    {
+      "id": "human_developer",
+      "sentence_template": "This function was written by a human developer.",
+      "notes": null
+    }
+  ]
+}
+```
+
+### `config/bug_aim_relation.json`
+
+Plain enum. No rubric needed — the two levels are already unambiguous given
+a `stated_aim` and a bug (design.md §1a, matched-pair construction).
+
+```json
+{
+  "levels": [
+    {"id": "aim_defeating", "notes": "Bug undermines exactly what STATED_AIM promises"},
+    {"id": "aim_orthogonal", "notes": "Bug is incidental to STATED_AIM; stated purpose still works"}
+  ]
+}
+```
+
+### `config/severity_tier.json`
+
+Classification rubric. `definition`/`examples` start empty (`"status":
+"todo"`) — to be filled in collaboratively, since "trivial" vs. "significant"
+is a judgment call that needs a tight, shared definition to apply
+consistently.
+
+```json
+{
+  "levels": [
+    {"id": "trivial", "definition": "", "examples": [], "status": "todo"},
+    {"id": "significant", "definition": "", "examples": [], "status": "todo"}
+  ]
+}
+```
+
+### `config/bug_flavor.json`
+
+Classification rubric, same shape as `severity_tier.json`, plus a `category`
+field distinguishing the core primary-factorial flavors from the optional
+exploratory ones (design.md §1a). All six start empty/`"todo"` — `known_trap`
+in particular needs a tight definition, since design.md itself flags it as
+the flavor most likely to be judged inconsistently across items/coders.
+
+```json
+{
+  "levels": [
+    {"id": "missing_edge_case", "category": "core", "definition": "", "examples": [], "status": "todo"},
+    {"id": "logic_error", "category": "core", "definition": "", "examples": [], "status": "todo"},
+    {"id": "security_vulnerability", "category": "core", "definition": "", "examples": [], "status": "todo"},
+    {"id": "silent_failure", "category": "core", "definition": "", "examples": [], "status": "todo"},
+    {"id": "copy_paste_residue", "category": "exploratory", "definition": "", "examples": [], "status": "todo"},
+    {"id": "known_trap", "category": "exploratory", "definition": "", "examples": [], "status": "todo"}
+  ]
+}
+```
+
+### `config/judge_models.json`
+
+Empty list to populate with the actual judge models to run. `display_name`
+is what gets substituted into `author_labels.json`'s `self` template.
+
+```json
+{"judges": []}
+```
+
+Each entry, once filled in: `{"id": "...", "family": "...", "tuning": "...",
+"display_name": "..."}`.
+
+### `config/rival_model_pool.json`
+
+Empty pool to populate with the fixed set of named rival models used for
+`other_model_A`/`other_model_B`. A **fixed pool with per-judge exclusion**
+was chosen over either a pure fixed pair or a pure per-judge resolution: a
+fixed pair breaks if the judge itself is in the pair (self-as-rival is
+incoherent), while resolving purely per-judge ("the other two frontier
+models") loses a stable identity for A/B, which the exploratory A-vs-B
+contrast (design.md §6.2) needs to be meaningful across the item bank.
+
+```json
+{
+  "pool": [],
+  "resolution_rule": "For each judge/item, select two distinct entries from `pool`, excluding any entry whose id matches the current judge, and rotate assignment across items so no single rival is confounded with a specific item/bug. Assign one to other_model_A, one to other_model_B."
+}
+```
+
+Each pool entry, once filled in: `{"id": "...", "display_name": "..."}`.
+
+### `config/stated_aims.json`
+
+Empty list to populate with the actual `stated_aim` text used in the
+prompt's `AIM_SENTENCE` slot (design.md §2). Each aim also carries
+`compatible_bug_flavors`, referencing `bug_flavor.json` ids, so item
+construction avoids implausible aim/flavor pairings (e.g. a
+`security_vulnerability` bug for an aim like "sort files by extension" is a
+stretch to write convincingly — design.md §7 flags this exact case). This is
+a construction constraint, not a crossed experimental factor.
+
+```json
+{"aims": []}
+```
+
+Each entry, once filled in: `{"id": "...", "text": "...",
+"compatible_bug_flavors": ["..."]}`.
+
+## Consistency rules
+
+- Every `compatible_bug_flavors` entry in `stated_aims.json` must match an
+  `id` present in `bug_flavor.json`.
+- Every judge referenced during elicitation must have a corresponding entry
+  in `judge_models.json`.
+- `rival_model_pool.json`'s `pool` must contain at least 3 entries so that,
+  for any given judge, at least 2 non-judge rivals remain to fill
+  `other_model_A`/`other_model_B`.
+
+## Out of scope (for this config)
+
+- Generation prompts/instructions for actually producing buggy code per
+  `bug_flavor`/`severity_tier` — the rubrics here are for classification/
+  vetting, not automated code generation. A separate concern to design later.
+- The item bank itself (actual `CODE_BLOCK`s, planted bugs) — this config
+  supplies the menus items are built from, not the items.
