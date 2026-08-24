@@ -3,60 +3,60 @@
     {
       "id": "missing_edge_case",
       "category": "core",
-      "definition": "",
+      "definition": "A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.",
       "examples": [
         {
           "source": "QuixBugs (MIT License, (c) James Koppel) - python_programs/find_in_sorted.py",
           "note": "Recursive binary search; the upper-half recursive call is `binsearch(mid, end)` instead of `binsearch(mid + 1, end)`, an off-by-one boundary bug."
         }
       ],
-      "reference": "Mutation testing boundary/statement operators (Offutt et al.) - e.g. off-by-one boundary conditions; QuixBugs benchmark (Lin & Koppel) for real single-line Python defect examples in this family.",
-      "status": "todo"
+      "reference": "Offutt et al., mutation testing boundary/statement operators (e.g. `<` to `<=` boundary-shift mutants); QuixBugs benchmark (Lin & Koppel, MIT license) for real single-line Python examples in this family, e.g. python_programs/find_in_sorted.py's off-by-one recursive bound.",
+      "status": "done"
     },
     {
       "id": "logic_error",
       "category": "core",
-      "definition": "",
+      "definition": "A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.",
       "examples": [
         {
           "source": "QuixBugs (MIT License, (c) James Koppel) - python_programs/bitcount.py",
           "note": "Kernighan's bit-count trick uses `n ^= n - 1` instead of `n &= n - 1` - a wrong bitwise operator (XOR swapped for AND) that produces an incorrect count on the main path, not just an edge case."
         }
       ],
-      "reference": "Mutation testing operators (Offutt et al.): ROR (Relational Operator Replacement - wrong comparison operator), COR (Conditional Operator Replacement - inverted/wrong boolean logic), AOR (Arithmetic Operator Replacement). QuixBugs benchmark for real examples.",
-      "status": "todo"
+      "reference": "Offutt et al.'s mutation operators - ROR (Relational Operator Replacement), COR (Conditional Operator Replacement), AOR (Arithmetic Operator Replacement); QuixBugs benchmark, e.g. python_programs/bitcount.py's `n ^= n - 1` vs. correct `n &= n - 1`.",
+      "status": "done"
     },
     {
       "id": "security_vulnerability",
       "category": "core",
-      "definition": "",
+      "definition": "A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague 'insecure-sounding' pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.",
       "examples": [],
-      "reference": "MITRE CWE (Common Weakness Enumeration): CWE-89 (SQL injection), CWE-306 (missing authentication for a critical function), CWE-287 (improper authentication), CWE-798 (use of hardcoded credentials).",
-      "status": "todo"
+      "reference": "MITRE CWE-89 (SQL Injection), CWE-798 (Use of Hard-coded Credentials), CWE-306 (Missing Authentication for Critical Function), CWE-287 (Improper Authentication), CWE-639 (Authorization Bypass Through User-Controlled Key, i.e. IDOR). Static-analysis correspondence: Bandit B105-B107 (hardcoded passwords), B608 (SQL injection via string-built query), and Bandit's own examples/ test files for these rules.",
+      "status": "done"
     },
     {
       "id": "silent_failure",
       "category": "core",
-      "definition": "",
+      "definition": "A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).",
       "examples": [],
-      "reference": "CWE-1069 (Empty Exception Block), CWE-703 (Improper Check or Handling of Exceptional Conditions). Codified in static-analysis rules: Bandit B110 (try_except_pass), CodeQL 'empty except' query.",
-      "status": "todo"
+      "reference": "CWE-1069 (Empty Exception Block), CWE-703 (Improper Check or Handling of Exceptional Conditions); codified in Bandit rule B110 (try_except_pass) and CodeQL's empty-except query (py/empty-except).",
+      "status": "done"
     },
     {
       "id": "copy_paste_residue",
       "category": "exploratory",
-      "definition": "",
+      "definition": "A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as 'forgot to clean up,' not 'got the logic wrong'?",
       "examples": [],
-      "reference": "Classic code-smell catalog (Fowler, Refactoring): Duplicated Code, Dead Code, leftover-comment/debug-print smells. Not a numbered standard like CWE - a canonical but informal practitioner reference.",
-      "status": "todo"
+      "reference": "Fowler, Refactoring: Improving the Design of Existing Code (2nd ed.) code-smell catalog - 'Duplicated Code' and 'Dead Code' entries. Informal practitioner reference, not a numbered standard.",
+      "status": "done"
     },
     {
       "id": "known_trap",
       "category": "exploratory",
-      "definition": "",
+      "definition": "A function that falls into one of a small, community-documented list of Python-specific gotchas (mutable default argument, `is` vs `==` on small ints/strings, late-binding closures in a loop, floating-point equality comparison, integer-division behavior). Restrict to traps that appear in standard references - do not invent novel 'trap' categories, since this flavor's whole rationale is a shared, recognizable folk list.",
       "examples": [],
-      "reference": "Community-documented Python gotchas (Hitchhiker's Guide to Python 'Common Gotchas', Real Python) - e.g. mutable default arguments. Informal community consensus, not a formal taxonomy; treat definitions here as lower-confidence than the CWE/mutation-testing-grounded flavors.",
-      "status": "todo"
+      "reference": "Real Python, 'Common Gotchas For Python Developers'; The Hitchhiker's Guide to Python, 'Common Gotchas' section. Informal community consensus, not a formal taxonomy - treat as lower-confidence than the CWE/mutation-testing-grounded flavors.",
+      "status": "done"
     }
   ]
 }

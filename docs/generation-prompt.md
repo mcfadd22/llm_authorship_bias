@@ -29,12 +29,14 @@ bugs in code are judged.
 
 Requirements:
 - Language: Python only.
-- Exactly one self-contained function (no helper functions, no classes).
+- Exactly one self-contained function (no helper functions, no classes). A
+  leading module-level import statement is allowed if needed (e.g. `import
+  json`); no other top-level statements.
 - No comments and no docstrings in the code.
 - No suggestive variable/function names or coding style that hints at
   whether the bug is intentional, careless, or reflects a competence gap.
   Use names that would be typical and neutral for this task.
-- The function body should be approximately 8-25 lines (signature through
+- The function body should be approximately 5-25 lines (signature through
   return) - long enough for the bug to be clearly present, not padded
   with unrelated logic.
 
@@ -114,7 +116,7 @@ plus an injected bug:
 
 - **HumanEval** (OpenAI, MIT license) — 164 short Python functions, each
   with a natural-language description (a ready-made `stated_aim`
-  candidate) and a canonical correct solution, mostly within our 8-25
+  candidate) and a canonical correct solution, mostly within our 5-25
   line range.
 - **MBPP** (Google Research, CC-BY-4.0 license - requires attribution) —
   ~974 more of the same shape (description + canonical solution + tests).

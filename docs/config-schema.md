@@ -192,25 +192,38 @@ Each pool entry, once filled in: `{"id": "...", "display_name": "..."}`.
 
 ### `config/stated_aims.json`
 
-Empty list to populate with the actual `stated_aim` text used in the
-prompt's `AIM_SENTENCE` slot (design.md §2). Each aim also carries
-`compatible_bug_flavors`, referencing `bug_flavor.json` ids, so item
-construction avoids implausible aim/flavor pairings (e.g. a
-`security_vulnerability` bug for an aim like "sort files by extension" is a
-stretch to write convincingly — design.md §7 flags this exact case). This is
-a construction constraint, not a crossed experimental factor.
+Populated with `stated_aim` text used in the prompt's `AIM_SENTENCE` slot (design.md §2), plus two
+construction-constraint fields:
+
+- `compatible_bug_flavors`: a list of `{flavor_id, orthogonal_plausible}` objects, not a flat list
+  of ids. `flavor_id` references `bug_flavor.json`; `orthogonal_plausible` says whether this
+  specific (aim, flavor) pairing can plausibly support an `aim_orthogonal` placement (see
+  `design.md` §1a and the generation-script design doc for why this is gated per-pairing, not
+  per-aim).
+- `severity_tiers_supported`: a list drawn from `severity_tier.json`'s ids, saying which severity
+  tiers this aim can plausibly support (e.g. a pure computation like "compute an average" can't
+  plausibly support `significant`).
 
 ```json
 {"aims": []}
 ```
 
-Each entry, once filled in: `{"id": "...", "text": "...",
-"compatible_bug_flavors": ["..."]}`.
+Each entry, once filled in:
+```json
+{
+  "id": "...",
+  "text": "...",
+  "severity_tiers_supported": ["trivial"],
+  "compatible_bug_flavors": [{"flavor_id": "...", "orthogonal_plausible": false}]
+}
+```
 
 ## Consistency rules
 
-- Every `compatible_bug_flavors` entry in `stated_aims.json` must match an
-  `id` present in `bug_flavor.json`.
+- Every `compatible_bug_flavors[].flavor_id` entry in `stated_aims.json` must match an `id` present
+  in `bug_flavor.json`.
+- Every `severity_tiers_supported` entry in `stated_aims.json` must match an `id` present in
+  `severity_tier.json`.
 - Every judge referenced during elicitation must have a corresponding entry
   in `judge_models.json`.
 - `rival_model_pool.json`'s `pool` must contain at least 3 entries so that,
