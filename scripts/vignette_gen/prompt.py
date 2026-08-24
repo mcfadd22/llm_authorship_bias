@@ -12,6 +12,11 @@ AIM_ORTHOGONAL_INSTRUCTION = (
 AIM_DEFEATING_VERIFICATION = "does the code fail STATED_AIM specifically because of the bug?"
 AIM_ORTHOGONAL_VERIFICATION = "does the code still fully satisfy STATED_AIM despite the bug?"
 
+_RELATION_CONTENT = {
+    "aim_defeating": (AIM_DEFEATING_INSTRUCTION, AIM_DEFEATING_VERIFICATION),
+    "aim_orthogonal": (AIM_ORTHOGONAL_INSTRUCTION, AIM_ORTHOGONAL_VERIFICATION),
+}
+
 TEMPLATE = """You are generating a single Python function for a research study on how
 bugs in code are judged.
 
@@ -53,6 +58,11 @@ Return JSON with exactly these fields:
 """
 
 
+def _escape_braces(text: str) -> str:
+    """Escape literal braces so they survive str.format()."""
+    return text.replace("{", "{{").replace("}", "}}")
+
+
 def _render_examples(examples: List[Dict]) -> str:
     if not examples:
         return "(none documented)"
@@ -60,27 +70,28 @@ def _render_examples(examples: List[Dict]) -> str:
 
 
 def build_prompt(item: Dict, config: Dict) -> str:
-    aim = next(a for a in config["stated_aims"] if a["id"] == item["aim_id"])
+    aim = next((a for a in config["stated_aims"] if a["id"] == item["aim_id"]), None)
+    if aim is None:
+        raise ValueError(f"unknown aim_id: {item['aim_id']!r}")
+
     flavor = config["bug_flavor"][item["bug_flavor"]]
     severity = config["severity_tier"][item["severity_tier"]]
 
-    if item["bug_aim_relation"] == "aim_defeating":
-        instruction = AIM_DEFEATING_INSTRUCTION
-        verification = AIM_DEFEATING_VERIFICATION
-    else:
-        instruction = AIM_ORTHOGONAL_INSTRUCTION
-        verification = AIM_ORTHOGONAL_VERIFICATION
+    relation = item["bug_aim_relation"]
+    if relation not in _RELATION_CONTENT:
+        raise ValueError(f"unknown bug_aim_relation: {relation!r}")
+    instruction, verification = _RELATION_CONTENT[relation]
 
     return TEMPLATE.format(
-        stated_aim_text=aim["text"],
+        stated_aim_text=_escape_braces(aim["text"]),
         bug_flavor_id=flavor["id"],
-        bug_flavor_definition=flavor["definition"],
-        bug_flavor_reference=flavor["reference"],
-        bug_flavor_examples=_render_examples(flavor["examples"]),
+        bug_flavor_definition=_escape_braces(flavor["definition"]),
+        bug_flavor_reference=_escape_braces(flavor["reference"]),
+        bug_flavor_examples=_escape_braces(_render_examples(flavor["examples"])),
         severity_tier_id=severity["id"],
-        severity_tier_definition=severity["definition"],
-        severity_tier_reference=severity["reference"],
-        bug_aim_relation_id=item["bug_aim_relation"],
+        severity_tier_definition=_escape_braces(severity["definition"]),
+        severity_tier_reference=_escape_braces(severity["reference"]),
+        bug_aim_relation_id=relation,
         bug_aim_relation_instruction=instruction,
         bug_aim_relation_verification=verification,
     )

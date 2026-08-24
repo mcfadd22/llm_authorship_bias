@@ -29,7 +29,9 @@ bugs in code are judged.
 
 Requirements:
 - Language: Python only.
-- Exactly one self-contained function (no helper functions, no classes).
+- Exactly one self-contained function (no helper functions, no classes). A
+  leading module-level import statement is allowed if needed (e.g. `import
+  json`); no other top-level statements.
 - No comments and no docstrings in the code.
 - No suggestive variable/function names or coding style that hints at
   whether the bug is intentional, careless, or reflects a competence gap.

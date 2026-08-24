@@ -1,3 +1,5 @@
+import pytest
+
 from vignette_gen.prompt import build_prompt
 
 CONFIG = {
@@ -62,3 +64,27 @@ def test_prompt_handles_no_examples():
     }
     prompt = build_prompt(_item("aim_defeating"), config)
     assert "(none documented)" in prompt
+
+
+def test_build_prompt_raises_clear_error_for_unknown_aim_id():
+    item = _item("aim_defeating")
+    item["aim_id"] = "does_not_exist"
+    with pytest.raises(ValueError, match="does_not_exist"):
+        build_prompt(item, CONFIG)
+
+
+def test_build_prompt_raises_clear_error_for_unknown_bug_aim_relation():
+    item = _item("not_a_real_relation")
+    with pytest.raises(ValueError, match="not_a_real_relation"):
+        build_prompt(item, CONFIG)
+
+
+def test_build_prompt_escapes_braces_in_config_content():
+    config = {
+        **CONFIG,
+        "stated_aims": [
+            {"id": "aim_a", "text": "Do something with a dict like {'key': 'value'}."}
+        ],
+    }
+    prompt = build_prompt(_item("aim_defeating"), config)
+    assert "{'key': 'value'}" in prompt
