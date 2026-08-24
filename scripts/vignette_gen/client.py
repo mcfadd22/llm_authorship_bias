@@ -3,6 +3,10 @@ from typing import Optional
 import openai
 
 
+class GenerationError(Exception):
+    pass
+
+
 class GenerationClient:
     def __init__(self, model: str, api_key: Optional[str] = None):
         self.model = model
@@ -14,4 +18,9 @@ class GenerationClient:
             max_tokens=2048,
             messages=[{"role": "user", "content": prompt}],
         )
-        return response.choices[0].message.content
+        choice = response.choices[0]
+        content = choice.message.content
+        if not content:
+            detail = getattr(choice, "error", None) or getattr(choice, "finish_reason", "unknown")
+            raise GenerationError(f"OpenRouter returned no content (detail: {detail!r})")
+        return content

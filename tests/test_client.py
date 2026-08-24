@@ -1,4 +1,6 @@
-from vignette_gen.client import GenerationClient
+import pytest
+
+from vignette_gen.client import GenerationClient, GenerationError
 
 
 class _FakeCompletions:
@@ -44,3 +46,33 @@ def test_generate_calls_sdk_with_model_and_prompt(monkeypatch):
         {"role": "user", "content": "hello prompt"}
     ]
     assert client._client.base_url == "https://openrouter.ai/api/v1"
+
+
+def test_generate_raises_generation_error_when_content_is_none(monkeypatch):
+    class _EmptyMessage:
+        content = None
+
+    class _EmptyChoice:
+        message = _EmptyMessage()
+        finish_reason = "error"
+
+    class _EmptyResponse:
+        choices = [_EmptyChoice()]
+
+    class _EmptyCompletions:
+        def create(self, **kwargs):
+            return _EmptyResponse()
+
+    class _EmptyChat:
+        def __init__(self):
+            self.completions = _EmptyCompletions()
+
+    class _FakeOpenAIEmpty:
+        def __init__(self, api_key=None, base_url=None):
+            self.chat = _EmptyChat()
+
+    monkeypatch.setattr("vignette_gen.client.openai.OpenAI", _FakeOpenAIEmpty)
+
+    client = GenerationClient(model="anthropic/claude-sonnet-4.5", api_key="fake-key")
+    with pytest.raises(GenerationError):
+        client.generate("hello prompt")

@@ -2,6 +2,7 @@ import json
 
 import openai
 
+from vignette_gen.client import GenerationError
 from vignette_gen.orchestrate import RunOptions, generate_one, run
 
 CONFIG = {
@@ -97,7 +98,7 @@ def test_run_writes_item_and_reports_counts(tmp_path):
         [json.dumps({"code": GOOD_CODE, "rationale": "off-by-one on empty list"})]
     )
     options = RunOptions(
-        model="claude-sonnet-5",
+        model="anthropic/claude-sonnet-4.5",
         samples_per_cell=1,
         limit=1,
         dry_run=False,
@@ -119,7 +120,7 @@ def test_run_writes_item_and_reports_counts(tmp_path):
     written = json.loads((tmp_path / "items" / f"{ITEM['item_id']}.json").read_text())
     assert written["code"] == GOOD_CODE
     assert written["cell_id"] == ITEM["cell_id"]
-    assert written["generation_model"] == "claude-sonnet-5"
+    assert written["generation_model"] == "anthropic/claude-sonnet-4.5"
 
 
 def test_run_skips_existing_item_without_calling_client(tmp_path):
@@ -129,7 +130,7 @@ def test_run_skips_existing_item_without_calling_client(tmp_path):
 
     client = _ScriptedClient([])  # would raise IndexError if called
     options = RunOptions(
-        model="claude-sonnet-5",
+        model="anthropic/claude-sonnet-4.5",
         samples_per_cell=1,
         limit=1,
         dry_run=False,
@@ -152,7 +153,7 @@ def test_run_skips_existing_item_without_calling_client(tmp_path):
 def test_run_records_failure_and_continues(tmp_path):
     client = _ScriptedClient([json.dumps({"code": "bad(", "rationale": "x"})] * 3)
     options = RunOptions(
-        model="claude-sonnet-5",
+        model="anthropic/claude-sonnet-4.5",
         samples_per_cell=1,
         limit=1,
         dry_run=False,
@@ -192,7 +193,33 @@ def test_run_logs_api_error_as_failure_and_continues(tmp_path):
     error = openai.APIError("rate limited", request=None, body=None)
     client = _RaisingClient(error)
     options = RunOptions(
-        model="claude-sonnet-5",
+        model="anthropic/claude-sonnet-4.5",
+        samples_per_cell=1,
+        limit=1,
+        dry_run=False,
+        overwrite=False,
+        max_retries=3,
+        items_dir=tmp_path / "items",
+        failures_path=tmp_path / "failures.jsonl",
+    )
+
+    counts = run(
+        client,
+        options,
+        load_config_fn=lambda: CONFIG,
+        build_items_fn=lambda config, samples_per_cell, limit: [ITEM],
+    )
+
+    assert counts == {"generated": 0, "skipped": 0, "failed": 1}
+    failures = (tmp_path / "failures.jsonl").read_text().splitlines()
+    assert len(failures) == 1
+
+
+def test_run_logs_generation_error_as_failure_and_continues(tmp_path):
+    error = GenerationError("OpenRouter returned no content (detail: 'error')")
+    client = _RaisingClient(error)
+    options = RunOptions(
+        model="anthropic/claude-sonnet-4.5",
         samples_per_cell=1,
         limit=1,
         dry_run=False,

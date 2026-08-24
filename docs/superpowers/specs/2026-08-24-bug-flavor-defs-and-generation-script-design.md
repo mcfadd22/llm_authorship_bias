@@ -263,7 +263,7 @@ Unit tests with pytest:
   `--samples-per-cell` skips it; re-running with a higher `--samples-per-cell` generates only the
   new indices.
 
-The Anthropic client is mocked in all tests — no real API calls in the test suite. Real-API sanity
+The OpenRouter client is mocked in all tests — no real API calls in the test suite. Real-API sanity
 check happens via `--dry-run` first, then a small `--limit`-capped pilot run before a full batch.
 
 ## 5. Docs to update alongside the config files
