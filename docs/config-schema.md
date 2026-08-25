@@ -10,13 +10,13 @@ these files directly; this doc is the source of truth for their shape.
 ## Why these files exist
 
 `design.md` fixes the experimental factor *names* (`author_label`,
-`bug_aim_relation`, `severity_tier`, `bug_flavor`) but leaves two kinds of
-detail unresolved, which is what this config fills in:
+`severity_tier`, `bug_flavor`) but leaves two kinds of detail unresolved,
+which is what this config fills in:
 
 1. **Classification rubrics** for factors that require judgment calls —
    `bug_flavor` and `severity_tier` — so that whoever builds or labels items
-   applies the same criteria. (`author_label` and `bug_aim_relation` don't
-   need this: their levels are already unambiguous as defined.)
+   applies the same criteria. (`author_label` doesn't need this: its levels
+   are already unambiguous as defined.)
 2. **Concrete content** — actual judge models, actual rival model names, and
    actual `stated_aim` text — that `design.md` deliberately left as
    placeholders (`{JUDGE_MODEL_DISPLAY_NAME}`, `{RIVAL_MODEL_A_DISPLAY_NAME}`,
@@ -38,8 +38,8 @@ for a given value.
 
 The `author_label` factor's levels, with the literal sentence template used
 in the prompt's `AUTHOR_SENTENCE` slot (design.md §2). Unlike `bug_flavor`/
-`severity_tier`/`bug_aim_relation`, `author_label` is spoken directly in the
-prompt text, so the generator needs the actual sentence, not just a tag.
+`severity_tier`, `author_label` is spoken directly in the prompt text, so the
+generator needs the actual sentence, not just a tag.
 
 ```json
 {
@@ -74,20 +74,6 @@ prompt text, so the generator needs the actual sentence, not just a tag.
       "sentence_template": "This function was written by a human developer.",
       "notes": null
     }
-  ]
-}
-```
-
-### `config/bug_aim_relation.json`
-
-Plain enum. No rubric needed — the two levels are already unambiguous given
-a `stated_aim` and a bug (design.md §1a, matched-pair construction).
-
-```json
-{
-  "levels": [
-    {"id": "aim_defeating", "notes": "Bug undermines exactly what STATED_AIM promises"},
-    {"id": "aim_orthogonal", "notes": "Bug is incidental to STATED_AIM; stated purpose still works"}
   ]
 }
 ```
@@ -133,6 +119,10 @@ factual/citable rather than a judgment call:
   arguments) — informal consensus, not a formal taxonomy; treat as
   lower-confidence than the CWE/mutation-testing-grounded flavors, consistent
   with design.md's own flag on this flavor.
+- `wrong_algorithm`: Chillarege et al.'s Orthogonal Defect Classification
+  (ODC) — the 'Function' defect type (clean code that implements the wrong
+  computation entirely), distinct from ODC's 'Algorithm' type which covers
+  logic/efficiency issues within an otherwise-correct approach.
 
 `definition`/`examples` still start empty/`"todo"` — the `reference` gives
 whoever fills them in a concrete anchor rather than a blank page. This same
@@ -151,7 +141,8 @@ items/coders.
     {"id": "security_vulnerability", "category": "core", "definition": "", "examples": [], "reference": "...", "status": "todo"},
     {"id": "silent_failure", "category": "core", "definition": "", "examples": [], "reference": "...", "status": "todo"},
     {"id": "copy_paste_residue", "category": "exploratory", "definition": "", "examples": [], "reference": "...", "status": "todo"},
-    {"id": "known_trap", "category": "exploratory", "definition": "", "examples": [], "reference": "...", "status": "todo"}
+    {"id": "known_trap", "category": "exploratory", "definition": "", "examples": [], "reference": "...", "status": "todo"},
+    {"id": "wrong_algorithm", "category": "exploratory", "definition": "", "examples": [], "reference": "...", "status": "todo"}
   ]
 }
 ```
@@ -195,11 +186,7 @@ Each pool entry, once filled in: `{"id": "...", "display_name": "..."}`.
 Populated with `stated_aim` text used in the prompt's `AIM_SENTENCE` slot (design.md §2), plus two
 construction-constraint fields:
 
-- `compatible_bug_flavors`: a list of `{flavor_id, orthogonal_plausible}` objects, not a flat list
-  of ids. `flavor_id` references `bug_flavor.json`; `orthogonal_plausible` says whether this
-  specific (aim, flavor) pairing can plausibly support an `aim_orthogonal` placement (see
-  `design.md` §1a and the generation-script design doc for why this is gated per-pairing, not
-  per-aim).
+- `compatible_bug_flavors`: a flat list of `bug_flavor.json` ids this aim can plausibly support.
 - `severity_tiers_supported`: a list drawn from `severity_tier.json`'s ids, saying which severity
   tiers this aim can plausibly support (e.g. a pure computation like "compute an average" can't
   plausibly support `significant`).
@@ -214,14 +201,14 @@ Each entry, once filled in:
   "id": "...",
   "text": "...",
   "severity_tiers_supported": ["trivial"],
-  "compatible_bug_flavors": [{"flavor_id": "...", "orthogonal_plausible": false}]
+  "compatible_bug_flavors": ["..."]
 }
 ```
 
 ## Consistency rules
 
-- Every `compatible_bug_flavors[].flavor_id` entry in `stated_aims.json` must match an `id` present
-  in `bug_flavor.json`.
+- Every `compatible_bug_flavors` entry in `stated_aims.json` must match an `id` present in
+  `bug_flavor.json`.
 - Every `severity_tiers_supported` entry in `stated_aims.json` must match an `id` present in
   `severity_tier.json`.
 - Every judge referenced during elicitation must have a corresponding entry
