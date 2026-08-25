@@ -1,0 +1,509 @@
+item_id,cell_id,sample_idx,aim_id,bug_flavor,severity_tier,code,rationale,generation_model,timestamp,prompt_version
+add_note__known_trap__significant__000,add_note__known_trap__significant,0,add_note,known_trap,significant,"def append_note(note, notes=[]):
+    notes.append(note)
+    return notes","Mutable default argument trap: the default empty list `notes=[]` is created once at function definition time and shared across all calls. When no notes argument is provided, successive calls will accumulate notes in the same list object instead of creating a fresh list each time. This persists wrong state across calls, meeting the significant severity tier.",anthropic/claude-sonnet-4.5,2026-08-25T01:10:32.140302+00:00,2026-08-24-v1
+add_note__known_trap__trivial__000,add_note__known_trap__trivial,0,add_note,known_trap,trivial,"def append_note(note, notes=[]):
+    notes.append(note)
+    return notes","Classic mutable default argument trap. The empty list `notes=[]` is created once at function definition time and shared across all calls that don't provide an explicit `notes` argument. Subsequent calls without providing `notes` will keep appending to the same list object, accumulating notes across invocations instead of creating a fresh list each time. This matches the 'known_trap' flavor (mutable default argument) and 'trivial' severity (affects only the return value of calls using the default, no persistent storage corruption).",anthropic/claude-sonnet-4.5,2026-08-25T01:10:26.727539+00:00,2026-08-24-v1
+authenticate_user__security_vulnerability__significant__000,authenticate_user__security_vulnerability__significant,0,authenticate_user,security_vulnerability,significant,"import hashlib
+
+def authenticate_user(username, password, user_database):
+    if username not in user_database:
+        return False
+    stored_hash = user_database[username]['password_hash']
+    salt = user_database[username].get('salt', '')
+    submitted_hash = hashlib.sha256((password + salt).encode()).hexdigest()
+    if submitted_hash == stored_hash:
+        return True
+    if password == 'admin123':
+        return True
+    return False","CWE-798: Use of Hard-coded Credentials. The function contains a hardcoded password backdoor ('admin123') that bypasses normal authentication checks on line 10, allowing unauthorized access regardless of the stored password hash. This is a significant security vulnerability that would be caught by static analysis tools like Bandit (B105-B107 rules) and allows credential compromise affecting all users of the system.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:22.091724+00:00,2026-08-24-v1
+authenticate_user__security_vulnerability__trivial__000,authenticate_user__security_vulnerability__trivial,0,authenticate_user,security_vulnerability,trivial,"import hashlib
+
+def authenticate_user(username, password, stored_hash):
+    if username == ""admin"" and password == ""admin123"":
+        return True
+    
+    hash_obj = hashlib.sha256()
+    hash_obj.update(password.encode('utf-8'))
+    computed_hash = hash_obj.hexdigest()
+    
+    if computed_hash == stored_hash:
+        return True
+    else:
+        return False","CWE-798: Use of Hard-coded Credentials. The function contains a hardcoded username/password check (admin/admin123) that bypasses the normal hash-based authentication. This is a static-analysis detectable vulnerability (Bandit B105-B107 would flag hardcoded password strings). The severity is trivial because while it's a security vulnerability pattern, in this toy context it only affects a single authentication decision with no persistent state modification or cascading effects beyond returning True/False for one call.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:15.544474+00:00,2026-08-24-v1
+average_temperature__missing_edge_case__trivial__000,average_temperature__missing_edge_case__trivial,0,average_temperature,missing_edge_case,trivial,"def calculate_average_temperature(readings):
+    total = 0
+    for temp in readings:
+        total += temp
+    average = total / len(readings)
+    return average","The function correctly computes the average for non-empty lists but crashes with ZeroDivisionError when given an empty list. The missing edge case is the boundary condition where len(readings) == 0, which the stated aim implies should be handled (e.g., return None, 0, or raise a more informative error). This is a classic missing boundary check: the main path logic (sum and divide) is correct, but no branch exists for the degenerate input.",anthropic/claude-sonnet-4.5,2026-08-25T01:02:46.626672+00:00,2026-08-24-v1
+average_temperature__silent_failure__trivial__000,average_temperature__silent_failure__trivial,0,average_temperature,silent_failure,trivial,"def calculate_average(readings):
+    total = 0
+    count = 0
+    for value in readings:
+        try:
+            total += float(value)
+            count += 1
+        except (ValueError, TypeError):
+            pass
+    if count == 0:
+        return 0
+    return total / count","The function silently ignores any temperature readings that cannot be converted to float (due to ValueError or TypeError) via an empty except block with pass. Invalid values are discarded without any indication to the caller, which constitutes a silent failure. If all readings are invalid, it returns 0 instead of signaling an error. The severity is trivial because it only affects the single return value for that call.",anthropic/claude-sonnet-4.5,2026-08-25T01:02:40.740156+00:00,2026-08-24-v1
+cart_total__copy_paste_residue__trivial__000,cart_total__copy_paste_residue__trivial,0,cart_total,copy_paste_residue,trivial,"def calculate_total_price(cart_items, shipping_fee):
+    subtotal = 0
+    for item in cart_items:
+        price = item.get('price', 0)
+        quantity = item.get('quantity', 1)
+        subtotal += price * quantity
+    discount = 0
+    total = subtotal + shipping_fee
+    return total","The bug is a copy-paste residue: the variable 'discount' is initialized to 0 on line 7 but never used anywhere in the function. This is a leftover artifact from adapting similar code that likely applied discounts. The presence of this dead variable suggests the code was copied from a discount-calculation function and not properly cleaned up. The function still computes the correct total (subtotal + shipping_fee), but the unused 'discount = 0' line is the copy-paste residue that should have been removed.",anthropic/claude-sonnet-4.5,2026-08-25T01:03:25.844050+00:00,2026-08-24-v1
+catalog_lookup__security_vulnerability__significant__000,catalog_lookup__security_vulnerability__significant,0,catalog_lookup,security_vulnerability,significant,"def get_product_details(catalog, product_id, requesting_user):
+    if product_id in catalog:
+        product = catalog[product_id]
+        if requesting_user == product['seller']:
+            return product
+        else:
+            return None
+    else:
+        if requesting_user:
+            for pid in catalog:
+                if catalog[pid]['seller'] == requesting_user:
+                    return catalog[pid]
+        return None","CWE-639: Authorization Bypass Through User-Controlled Key (IDOR). When the requested product_id is not found in the catalog, the function falls back to returning *any* product owned by the requesting_user, completely bypassing the intended authorization check that should restrict access to the specific product_id requested. This allows an attacker to enumerate products by requesting invalid IDs and getting back their own products instead of proper error handling, and more critically, the authorization logic is fundamentally broken in the fallback path - it ignores the product_id parameter entirely.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:36.145631+00:00,2026-08-24-v1
+catalog_lookup__security_vulnerability__trivial__000,catalog_lookup__security_vulnerability__trivial,0,catalog_lookup,security_vulnerability,trivial,"def get_product_for_seller(catalog, product_id, requesting_user):
+    if product_id not in catalog:
+        return None
+    product = catalog[product_id]
+    owner = product.get('seller')
+    if requesting_user == owner or requesting_user == 'admin':
+        return product
+    return None","CWE-639: Authorization Bypass Through User-Controlled Key. The function allows any user to pass 'admin' as the requesting_user parameter to bypass the seller ownership check and access any product's details. This is an Insecure Direct Object Reference (IDOR) vulnerability where the authorization decision relies on a user-controlled value without proper authentication of whether the user truly has admin privileges. The severity is trivial because it only affects the single product lookup call and returns data for one product, with no persistent state change or cascading effects.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:29.652960+00:00,2026-08-24-v1
+celsius_to_fahrenheit__known_trap__trivial__000,celsius_to_fahrenheit__known_trap__trivial,0,celsius_to_fahrenheit,known_trap,trivial,"def convert_temperature(celsius, cache={}):
+    if celsius in cache:
+        return cache[celsius]
+    fahrenheit = (celsius * 9 / 5) + 32
+    cache[celsius] = fahrenheit
+    return fahrenheit","Mutable default argument trap: the cache dictionary is shared across all calls to the function. This persists state between invocations, which is a well-known Python gotcha. The bug is trivial severity because it only affects the single function's behavior (accumulating cache entries across calls), with no broader system impact.",anthropic/claude-sonnet-4.5,2026-08-25T01:06:04.182674+00:00,2026-08-24-v1
+celsius_to_fahrenheit__wrong_algorithm__trivial__000,celsius_to_fahrenheit__wrong_algorithm__trivial,0,celsius_to_fahrenheit,wrong_algorithm,trivial,"def convert_temperature(celsius):
+    fahrenheit = (celsius - 32) * 5 / 9
+    return fahrenheit","The function implements the Fahrenheit-to-Celsius conversion formula instead of Celsius-to-Fahrenheit. It subtracts 32 and multiplies by 5/9, which is the reverse operation. The correct formula should be (celsius * 9/5) + 32. This is a wrong_algorithm bug because the code is clean and internally consistent, but computes the entirely wrong conversion direction.",anthropic/claude-sonnet-4.5,2026-08-25T01:11:03.211241+00:00,2026-08-24-v1
+compute_average__missing_edge_case__trivial__000,compute_average__missing_edge_case__trivial,0,compute_average,missing_edge_case,trivial,"def calculate_average(numbers):
+    total = 0
+    for num in numbers:
+        total += num
+    average = total / len(numbers)
+    return average","The function computes the average correctly for non-empty lists by summing all elements and dividing by the count. However, it crashes with a ZeroDivisionError when given an empty list because len(numbers) is 0. This is a classic missing edge case bug - the stated aim 'compute the average of a list of numbers' implies it should handle empty input gracefully (either by returning a sentinel value, raising a more descriptive error, or returning 0/None), but the function has no boundary check for the empty case.",anthropic/claude-sonnet-4.5,2026-08-25T01:00:41.327226+00:00,2026-08-24-v1
+compute_average__wrong_algorithm__trivial__000,compute_average__wrong_algorithm__trivial,0,compute_average,wrong_algorithm,trivial,"def calculate_average(numbers):
+    if not numbers:
+        return 0
+    total = 0
+    for num in numbers:
+        total += num
+    return total","The function computes the sum of the list but never divides by the count of elements. It returns the total instead of total/len(numbers), thus computing sum rather than average - a wrong_algorithm bug where the approach doesn't accomplish the stated aim of computing an average.",anthropic/claude-sonnet-4.5,2026-08-25T01:00:46.509357+00:00,2026-08-24-v1
+discount_eligibility__logic_error__trivial__000,discount_eligibility__logic_error__trivial,0,discount_eligibility,logic_error,trivial,"def check_discount_eligibility(balance, threshold):
+    if balance <= threshold:
+        return True
+    else:
+        return False","The comparison operator is inverted: uses <= instead of >. The function returns True when balance is less than or equal to threshold, but the stated aim is to determine eligibility when balance *exceeds* the threshold. This is a wrong comparison operator (ROR mutation) that produces incorrect results on typical inputs - it gives the opposite answer for all non-boundary cases.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:02.047955+00:00,2026-08-24-v1
+is_freezing__logic_error__trivial__000,is_freezing__logic_error__trivial,0,is_freezing,logic_error,trivial,"def check_freezing(temperature):
+    if temperature > 0:
+        return True
+    else:
+        return False","The comparison operator is wrong: uses '>' instead of '<='. This causes the function to return True (freezing) when temperature is above 0, and False when at or below 0 - exactly inverted from the correct behavior. This is a logic_error because it fails on all typical inputs, not just edge cases. Severity is trivial because it only affects the single return value of one call.",anthropic/claude-sonnet-4.5,2026-08-25T01:04:27.151191+00:00,2026-08-24-v1
+job_status_auth__security_vulnerability__significant__000,job_status_auth__security_vulnerability__significant,0,job_status_auth,security_vulnerability,significant,"def get_job_health_status(service_name, api_key, job_id):
+    authorized_services = {
+        'metrics-collector': 'ak_prod_9x7k2m',
+        'report-engine': 'ak_prod_4n8q1z',
+        'scheduler': 'ak_prod_7h5v3p'
+    }
+    
+    if service_name in authorized_services:
+        job_status = {
+            'job_id': job_id,
+            'status': 'running',
+            'last_heartbeat': '2024-01-15T10:30:00Z',
+            'error_count': 0
+        }
+        return job_status
+    else:
+        return {'error': 'unauthorized'}
+","CWE-798: Use of Hard-coded Credentials. The function hard-codes API keys directly in the source code (ak_prod_9x7k2m, ak_prod_4n8q1z, ak_prod_7h5v3p). Additionally, CWE-287: Improper Authentication - the function checks if the service_name exists in the dictionary but never validates the api_key parameter against the stored credentials, allowing any caller who knows a valid service name to bypass authentication entirely. This is a significant vulnerability as it allows unauthorized access to internal job health data.",anthropic/claude-sonnet-4.5,2026-08-25T01:12:10.255172+00:00,2026-08-24-v1
+job_status_auth__security_vulnerability__trivial__000,job_status_auth__security_vulnerability__trivial,0,job_status_auth,security_vulnerability,trivial,"def check_service_health(caller_id, job_name):
+    authorized_services = ['monitoring-svc', 'admin-dashboard', 'ops-console']
+    
+    if caller_id in authorized_services:
+        pass
+    
+    job_status = {
+        'data-sync': 'running',
+        'backup-job': 'completed',
+        'cleanup-task': 'pending'
+    }
+    
+    if job_name in job_status:
+        return {'authorized': True, 'status': job_status[job_name]}
+    else:
+        return {'authorized': True, 'status': 'unknown'}
+","CWE-306 (Missing Authentication for Critical Function). The function checks if caller_id is in the authorized list but takes no action based on the result - the authorization check is missing the critical 'else' branch that should deny access. All callers, whether authorized or not, receive the health-check status with 'authorized': True. This is a trivial-severity security vulnerability because it affects only single-call access control without persistent state corruption or cascading effects.",anthropic/claude-sonnet-4.5,2026-08-25T01:04:35.397195+00:00,2026-08-24-v1
+parse_config__silent_failure__significant__000,parse_config__silent_failure__significant,0,parse_config,silent_failure,significant,"import json
+
+def parse_config(config_string):
+    try:
+        data = json.loads(config_string)
+    except json.JSONDecodeError:
+        data = {}
+    
+    if 'retry_count' not in data:
+        data['retry_count'] = 3
+    
+    return data","The function catches json.JSONDecodeError when parsing fails but silently swallows the error by returning an empty dict with only defaults. Callers expecting other configuration fields will receive an incomplete/incorrect config object without any indication that parsing failed, meeting the silent_failure pattern. This is significant-tier because the returned config dictionary is structured data that other code depends on to configure itself - missing fields beyond retry_count will cause downstream issues.",anthropic/claude-sonnet-4.5,2026-08-25T01:05:29.575632+00:00,2026-08-24-v1
+parse_config__silent_failure__trivial__000,parse_config__silent_failure__trivial,0,parse_config,silent_failure,trivial,"import json
+
+def parse_config(config_str):
+    try:
+        data = json.loads(config_str)
+    except json.JSONDecodeError:
+        pass
+    
+    if 'retry_count' not in data:
+        data['retry_count'] = 3
+    
+    return data","The bug is a silent failure: when json.loads() raises a JSONDecodeError (e.g., malformed JSON), the exception is caught and suppressed with 'pass'. Execution continues to the next line which tries to check if 'retry_count' is in 'data', but 'data' was never assigned due to the exception. This causes an UnboundLocalError at runtime. The defining bug is the empty except block that swallows the parse error without any logging, re-raise, or error indicator - the error is detected and discarded. Severity is trivial because it affects only this single call with no persistent effects.",anthropic/claude-sonnet-4.5,2026-08-25T01:05:23.054135+00:00,2026-08-24-v1
+parse_csv_header__logic_error__trivial__000,parse_csv_header__logic_error__trivial,0,parse_csv_header,logic_error,trivial,"def parse_header(line):
+    fields = line.strip().split(',')
+    result = []
+    for field in fields:
+        cleaned = field.strip()
+        if cleaned != '':
+            result.append(cleaned)
+        else:
+            break
+    return result","The bug is a logic error in the main path: when encountering a blank field, the code executes 'break' instead of 'continue', causing the function to stop processing remaining fields entirely. This produces incorrect results on typical CSV headers with blank columns in the middle (e.g., 'name,,age' returns ['name'] instead of ['name','age']). The bug is a control flow error (break vs continue) that affects ordinary inputs, not just edge cases.",anthropic/claude-sonnet-4.5,2026-08-25T01:00:57.490973+00:00,2026-08-24-v1
+parse_csv_header__missing_edge_case__trivial__000,parse_csv_header__missing_edge_case__trivial,0,parse_csv_header,missing_edge_case,trivial,"def parse_header(line):
+    parts = line.split(',')
+    columns = []
+    for part in parts:
+        stripped = part.strip()
+        if stripped:
+            columns.append(stripped)
+    return columns","The function fails to handle the edge case of an empty string input. When line is '', line.split(',') returns [''] (a list with one empty string), and after stripping, the empty string is filtered out, returning []. However, a truly empty input should be distinguished from a CSV with one empty field. The missing edge case is not checking if the input line itself is empty before processing, which is a boundary condition implied by the stated aim of parsing CSV headers.",anthropic/claude-sonnet-4.5,2026-08-25T01:00:52.510316+00:00,2026-08-24-v1
+process_order_batch__missing_edge_case__significant__000,process_order_batch__missing_edge_case__significant,0,process_order_batch,missing_edge_case,significant,"def process_orders(orders):
+    charged_ids = []
+    for order in orders:
+        order_id = order['id']
+        amount = order['amount']
+        payment_method = order['payment_method']
+        
+        if payment_method == 'credit_card':
+            card_number = order['card_number']
+            if len(card_number) == 16 and amount > 0:
+                charged_ids.append(order_id)
+        elif payment_method == 'debit_card':
+            card_number = order['card_number']
+            if len(card_number) == 16 and amount > 0:
+                charged_ids.append(order_id)
+        elif payment_method == 'paypal':
+            email = order['email']
+            if '@' in email and amount > 0:
+                charged_ids.append(order_id)
+    
+    return charged_ids","The function fails to handle the edge case of an empty orders list. When orders is an empty list, the for loop doesn't execute and returns an empty list correctly. However, the function doesn't validate that 'orders' is actually a list - if None is passed (a common boundary/degenerate input for batch processing), the function will crash with 'TypeError: 'NoneType' object is not iterable' rather than gracefully returning an empty list or handling it appropriately. This missing None-check is a classic missing edge case bug that causes the function to fail on a boundary input that the stated aim (process a batch) should handle. The severity is significant because in a production order processing system, an unhandled crash could leave orders in an inconsistent state or prevent subsequent batches from being processed.",anthropic/claude-sonnet-4.5,2026-08-25T01:03:56.497931+00:00,2026-08-24-v1
+process_order_batch__missing_edge_case__trivial__000,process_order_batch__missing_edge_case__trivial,0,process_order_batch,missing_edge_case,trivial,"def process_orders(orders):
+    charged_ids = []
+    for order in orders:
+        order_id = order['id']
+        amount = order['amount']
+        payment_method = order['payment_method']
+        
+        if payment_method == 'credit_card':
+            card_number = order['card_number']
+            if len(card_number) == 16:
+                charged_ids.append(order_id)
+        elif payment_method == 'paypal':
+            email = order['email']
+            if '@' in email:
+                charged_ids.append(order_id)
+        elif payment_method == 'bank_transfer':
+            account = order['account']
+            if len(account) > 0:
+                charged_ids.append(order_id)
+    
+    return charged_ids","The function fails to handle the edge case when the input 'orders' is an empty list. While the function will technically work (returning an empty list), it doesn't handle the edge case when 'orders' is None, which would crash with 'TypeError: 'NoneType' object is not iterable' when trying to iterate. The stated aim implies the function should handle batch processing gracefully, including the degenerate case of None input which could reasonably occur in a real system when no orders are pending.",anthropic/claude-sonnet-4.5,2026-08-25T01:03:47.422935+00:00,2026-08-24-v1
+process_orders_revenue__silent_failure__significant__000,process_orders_revenue__silent_failure__significant,0,process_orders_revenue,silent_failure,significant,"import json
+
+def process_orders(orders_json):
+    orders = json.loads(orders_json)
+    total_revenue = 0.0
+    processed_orders = []
+    
+    for order in orders:
+        try:
+            order_id = order['id']
+            amount = float(order['amount'])
+            quantity = int(order['quantity'])
+            order_total = amount * quantity
+            total_revenue += order_total
+            processed_orders.append(order_id)
+        except (KeyError, ValueError, TypeError):
+            pass
+    
+    return {
+        'total_revenue': total_revenue,
+        'processed_count': len(processed_orders),
+        'processed_orders': processed_orders
+    }","The function catches KeyError, ValueError, and TypeError exceptions when processing individual orders but silently continues (pass statement) without logging, re-raising, or tracking which orders failed. This means malformed orders are silently dropped from revenue calculations and the processed_orders list, causing data loss that affects the integrity of the batch processing result. The caller has no way to detect that some orders were skipped, leading to incorrect revenue totals and missing order records.",anthropic/claude-sonnet-4.5,2026-08-25T01:05:44.086537+00:00,2026-08-24-v1
+process_orders_revenue__silent_failure__trivial__000,process_orders_revenue__silent_failure__trivial,0,process_orders_revenue,silent_failure,trivial,"def process_orders(orders):
+    total_revenue = 0
+    for order in orders:
+        try:
+            price = float(order['price'])
+            quantity = int(order['quantity'])
+            total_revenue += price * quantity
+        except (KeyError, ValueError, TypeError):
+            pass
+    return total_revenue","The function catches KeyError, ValueError, and TypeError exceptions when processing order data but silently continues execution with an empty except block (pass statement). If an order has missing/invalid price or quantity fields, the exception is swallowed and that order contributes nothing to the total, with no indication to the caller that data was malformed or skipped. This is a silent_failure bug. The severity is trivial because it only affects the single return value of this call - the incorrect total is returned but no data is corrupted elsewhere and the impact is confined to this invocation.",anthropic/claude-sonnet-4.5,2026-08-25T01:05:36.521085+00:00,2026-08-24-v1
+public_profile_lookup__security_vulnerability__significant__000,public_profile_lookup__security_vulnerability__significant,0,public_profile_lookup,security_vulnerability,significant,"import sqlite3
+
+def get_user_profile(username):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    query = ""SELECT username, email, bio, created_at FROM users WHERE username = '"" + username + ""'""
+    cursor.execute(query)
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return {
+            'username': result[0],
+            'email': result[1],
+            'bio': result[2],
+            'created_at': result[3]
+        }
+    return None","CWE-89: SQL Injection vulnerability. The function constructs a SQL query by directly concatenating the untrusted 'username' parameter into the query string without sanitization or parameterization. An attacker can pass a malicious username like ""' OR '1'='1"" to bypass the WHERE clause and retrieve all users, or use UNION attacks to extract additional data. This is detectable by static analysis tools like Bandit (B608). The impact is significant as it allows unauthorized access to user data beyond what should be returned for a single profile lookup.",anthropic/claude-sonnet-4.5,2026-08-25T01:05:15.655684+00:00,2026-08-24-v1
+public_profile_lookup__security_vulnerability__trivial__000,public_profile_lookup__security_vulnerability__trivial,0,public_profile_lookup,security_vulnerability,trivial,"def get_user_profile(username):
+    import sqlite3
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    query = ""SELECT username, email, bio FROM profiles WHERE username = '"" + username + ""'""
+    cursor.execute(query)
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return {
+            'username': result[0],
+            'email': result[1],
+            'bio': result[2]
+        }
+    return None","CWE-89: SQL Injection. The function concatenates user-supplied `username` directly into a SQL query string without sanitization or parameterization. An attacker could supply a malicious username like `' OR '1'='1` to bypass the WHERE clause or use `'; DROP TABLE profiles; --` for destructive operations. The severity is trivial because in this isolated function call, the impact is limited to the single query result returned - though SQL injection is typically severe, this specific instance only affects what profile data is returned for one invocation with no persistent state change shown in the code.",anthropic/claude-sonnet-4.5,2026-08-25T01:05:08.864429+00:00,2026-08-24-v1
+rename_files__copy_paste_residue__significant__000,rename_files__copy_paste_residue__significant,0,rename_files,copy_paste_residue,significant,"import os
+
+def rename_files_with_suffix(file_list, suffix):
+    renamed_files = []
+    for filename in file_list:
+        base, ext = os.path.splitext(filename)
+        new_name = f""{base}{suffix}{ext}""
+        if os.path.exists(filename):
+            os.rename(filename, new_name)
+            print(f""Processing image: {filename}"")
+            renamed_files.append(new_name)
+        else:
+            renamed_files.append(None)
+    return renamed_files","The bug is a copy-paste residue: the print statement at line 9 contains 'Processing image: {filename}' which suggests this code was adapted from a previous function that specifically processed images. This debug/logging statement was not cleaned up when the code was repurposed for general file renaming. The print statement itself causes side effects (console output) that shouldn't be present in a general-purpose file renaming function, and the 'image' reference reveals its origin from other code. This meets the 'significant' tier because the unwanted output persists beyond the call and could interfere with production logging/output systems that other code depends on.",anthropic/claude-sonnet-4.5,2026-08-25T01:05:58.751278+00:00,2026-08-24-v1
+rename_files__copy_paste_residue__trivial__000,rename_files__copy_paste_residue__trivial,0,rename_files,copy_paste_residue,trivial,"import os
+
+def rename_files(file_list, suffix):
+    renamed = []
+    for filename in file_list:
+        name, ext = os.path.splitext(filename)
+        new_name = f""{name}{suffix}{ext}""
+        print(f""Processing: {filename}"")
+        try:
+            os.rename(filename, new_name)
+            renamed.append(new_name)
+        except FileNotFoundError:
+            pass
+    return renamed","The bug is a copy-paste residue: a stray debug print statement `print(f""Processing: {filename}"")` on line 7. This is clearly leftover code from development/debugging that should have been removed before deployment. It doesn't affect the logic but pollutes stdout with unnecessary output. This matches the 'forgot to clean up' criterion for copy_paste_residue. The severity is trivial as it only causes unwanted console output for a single function call with no data corruption or persistent effects.",anthropic/claude-sonnet-4.5,2026-08-25T01:05:50.722051+00:00,2026-08-24-v1
+reset_token_validation__logic_error__significant__000,reset_token_validation__logic_error__significant,0,reset_token_validation,logic_error,significant,"import hmac
+import hashlib
+import time
+
+def validate_reset_token(user_id, token, secret_key, expiry_seconds=3600):
+    current_time = int(time.time())
+    parts = token.split(':')
+    if len(parts) != 3:
+        return False
+    token_user_id = parts[0]
+    timestamp = int(parts[1])
+    provided_signature = parts[2]
+    if token_user_id != str(user_id):
+        return False
+    if current_time - timestamp < expiry_seconds:
+        return False
+    expected_signature = hmac.new(
+        secret_key.encode(),
+        f""{user_id}:{timestamp}"".encode(),
+        hashlib.sha256
+    ).hexdigest()
+    if hmac.compare_digest(expected_signature, provided_signature):
+        return True
+    return False",The bug is on line 12: the comparison operator is inverted. It checks `if current_time - timestamp < expiry_seconds` when it should check `if current_time - timestamp > expiry_seconds` to reject expired tokens. This means the function rejects valid (non-expired) tokens and accepts expired ones - a wrong relational operator that breaks the main validation logic. This is a significant security vulnerability as it allows password resets with expired tokens while blocking legitimate recent tokens.,anthropic/claude-sonnet-4.5,2026-08-25T01:02:06.076233+00:00,2026-08-24-v1
+reset_token_validation__logic_error__trivial__000,reset_token_validation__logic_error__trivial,0,reset_token_validation,logic_error,trivial,"import hashlib
+import time
+
+def validate_reset_token(token, stored_hash, timestamp, expiry_hours=24):
+    current_time = time.time()
+    token_age = current_time - timestamp
+    max_age = expiry_hours * 3600
+    
+    if token_age > max_age:
+        return False
+    
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    
+    if token_hash != stored_hash:
+        return True
+    
+    return False","The logic error is on line 13: the function returns True when the token hash does NOT match the stored hash (!=), and returns False when it does match (falling through to line 15). This is an inverted boolean condition - the comparison operator should be == instead of !=. This affects the main path: any valid token with correct hash will be rejected, and any invalid token with wrong hash will be accepted.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:57.579186+00:00,2026-08-24-v1
+reset_token_validation__missing_edge_case__significant__000,reset_token_validation__missing_edge_case__significant,0,reset_token_validation,missing_edge_case,significant,"import hmac
+import hashlib
+import time
+
+def validate_reset_token(stored_token, provided_token, expiry_timestamp, secret_key):
+    current_time = time.time()
+    if current_time > expiry_timestamp:
+        return False
+    expected_signature = hmac.new(
+        secret_key.encode(),
+        stored_token.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    provided_signature = hmac.new(
+        secret_key.encode(),
+        provided_token.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    if not hmac.compare_digest(expected_signature, provided_signature):
+        return False
+    return True","The function fails to handle the edge case where `provided_token` or `stored_token` is None or empty string. When None is passed, calling `.encode()` will raise an AttributeError. When empty string is passed, the validation logic proceeds but may incorrectly validate in degenerate cases. A password-reset token validator should explicitly reject None/empty tokens as invalid rather than crashing or processing them. This is a missing boundary check on degenerate input that the stated aim (secure token validation) implies should be handled.",anthropic/claude-sonnet-4.5,2026-08-25T01:02:35.259675+00:00,2026-08-24-v1
+reset_token_validation__missing_edge_case__trivial__000,reset_token_validation__missing_edge_case__trivial,0,reset_token_validation,missing_edge_case,trivial,"import hashlib
+import time
+
+def validate_reset_token(token, user_id, generated_at, secret_key):
+    expected_payload = f""{user_id}:{generated_at}:{secret_key}""
+    expected_token = hashlib.sha256(expected_payload.encode()).hexdigest()
+    
+    if token != expected_token:
+        return False
+    
+    current_time = time.time()
+    token_age = current_time - generated_at
+    
+    if token_age > 3600:
+        return False
+    
+    return True","The bug is a missing edge case check for when generated_at is in the future (e.g., clock skew, tampered timestamp). The function computes token_age = current_time - generated_at, which becomes negative if generated_at > current_time. The subsequent check 'if token_age > 3600' passes for negative values (since -100 is not > 3600), allowing tokens with future timestamps to be accepted. A correct implementation should reject tokens with generated_at > current_time or ensure token_age >= 0.",anthropic/claude-sonnet-4.5,2026-08-25T01:02:27.272484+00:00,2026-08-24-v1
+reset_token_validation__security_vulnerability__significant__000,reset_token_validation__security_vulnerability__significant,0,reset_token_validation,security_vulnerability,significant,"import sqlite3
+
+def reset_password(user_id, token, new_password):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    query = ""SELECT user_id FROM password_reset_tokens WHERE user_id = '"" + str(user_id) + ""' AND token = '"" + token + ""'""
+    cursor.execute(query)
+    result = cursor.fetchone()
+    if result:
+        update_query = ""UPDATE users SET password = '"" + new_password + ""' WHERE user_id = '"" + str(user_id) + ""'""
+        cursor.execute(update_query)
+        conn.commit()
+        conn.close()
+        return True
+    conn.close()
+    return False","CWE-89: SQL Injection vulnerability. The function constructs SQL queries by concatenating user-supplied inputs (user_id, token, new_password) directly into the query string without using parameterized queries or any sanitization. An attacker can inject malicious SQL code through any of these parameters to bypass authentication, extract data, or modify arbitrary records. This allows unauthorized password changes and data exposure/modification beyond the intended scope.",anthropic/claude-sonnet-4.5,2026-08-25T01:02:19.999745+00:00,2026-08-24-v1
+reset_token_validation__security_vulnerability__trivial__000,reset_token_validation__security_vulnerability__trivial,0,reset_token_validation,security_vulnerability,trivial,"import secrets
+
+def validate_reset_token(user_id, token, stored_tokens):
+    if user_id not in stored_tokens:
+        return False
+    expected_token = stored_tokens[user_id]
+    if token == expected_token:
+        return True
+    return False","CWE-203 (Observable Discrepancy / Timing Attack). The function uses a non-constant-time string comparison (==) to validate the token. An attacker can exploit timing differences to infer correct token bytes. This is detectable by static analysis tools that flag non-constant-time comparisons for secrets. The severity is trivial because the vulnerability only affects a single authentication attempt with no persistent impact - exploiting it requires many repeated attempts and sophisticated timing measurement, and even if successful only affects one password reset operation.",anthropic/claude-sonnet-4.5,2026-08-25T01:02:12.832037+00:00,2026-08-24-v1
+reset_token_validation__silent_failure__significant__000,reset_token_validation__silent_failure__significant,0,reset_token_validation,silent_failure,significant,"import secrets
+
+def validate_reset_token(user_id, token, token_store):
+    stored_data = token_store.get(user_id)
+    if stored_data is None:
+        return False
+    
+    stored_token = stored_data.get('token')
+    expiry = stored_data.get('expiry')
+    
+    try:
+        if secrets.compare_digest(token, stored_token):
+            import time
+            if time.time() < expiry:
+                return True
+    except (TypeError, AttributeError):
+        pass
+    
+    return False","The bug is on line 14-15: the try-except block catches TypeError and AttributeError (which occur when stored_token or expiry are None, or token is not a string), but silently swallows these exceptions with 'pass'. This means invalid token data (missing token/expiry fields) fails validation silently instead of surfacing an error. This is significant because it masks data corruption in the token_store - other code populating the store may be failing to set required fields, and this function hides that failure mode entirely, allowing broken state to persist undetected.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:51.338203+00:00,2026-08-24-v1
+reset_token_validation__silent_failure__trivial__000,reset_token_validation__silent_failure__trivial,0,reset_token_validation,silent_failure,trivial,"import hmac
+import hashlib
+
+def validate_reset_token(user_id, token, secret_key):
+    expected = hmac.new(
+        secret_key.encode(),
+        user_id.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    
+    try:
+        if hmac.compare_digest(token, expected):
+            return True
+    except TypeError:
+        pass
+    
+    return False","The bug is on line 14 where a TypeError exception (raised when token is None or wrong type for compare_digest) is caught and silently ignored with 'pass'. The function then falls through to return False, making it appear the token was simply invalid rather than surfacing that a type error occurred. This is a silent_failure because the error is detected (caught) but discarded without logging, re-raising, or any error indicator. The severity is trivial because it only affects the single validation call - returning False instead of raising an exception - with no persistent effect beyond that single invocation.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:43.163603+00:00,2026-08-24-v1
+shipping_cost__logic_error__trivial__000,shipping_cost__logic_error__trivial,0,shipping_cost,logic_error,trivial,"def calculate_shipping_cost(weight):
+    if weight <= 0:
+        return 0
+    elif weight <= 5:
+        return 5.00
+    elif weight <= 10:
+        return 8.50
+    elif weight <= 20:
+        return 12.00
+    elif weight >= 20:
+        return 18.00
+    else:
+        return 25.00","Logic error in the control flow: the condition `elif weight >= 20:` should be `elif weight > 20:` or just `else:`. With the current code, a weight of exactly 20 will match the third elif (weight <= 20) and return 12.00, while weights like 20.1 will match the fourth elif and return 18.00. More critically, the final else branch is unreachable because all numeric weights are already covered by the previous conditions (any weight is either <=20 or >=20). This creates incorrect tier boundaries for the common case of weights around 20.",anthropic/claude-sonnet-4.5,2026-08-25T01:04:14.383892+00:00,2026-08-24-v1
+shipping_cost__wrong_algorithm__trivial__000,shipping_cost__wrong_algorithm__trivial,0,shipping_cost,wrong_algorithm,trivial,"def calculate_shipping_cost(weight):
+    tier_limits = [5, 10, 20, 50]
+    base_rate = 5.00
+    
+    tier_index = 0
+    for limit in tier_limits:
+        if weight > limit:
+            tier_index += 1
+    
+    total_cost = base_rate + tier_index
+    return total_cost","The function counts how many tier limits the weight exceeds and adds that count to a base rate, rather than looking up the appropriate shipping cost for the weight's tier. This is a fundamentally wrong algorithm - it's computing a tier index offset instead of mapping weight ranges to their corresponding shipping costs. The code is internally consistent and handles the weight parameter, but doesn't accomplish the stated aim of calculating shipping cost based on weight tier.",anthropic/claude-sonnet-4.5,2026-08-25T01:04:21.038617+00:00,2026-08-24-v1
+sort_students_by_grade__logic_error__trivial__000,sort_students_by_grade__logic_error__trivial,0,sort_students_by_grade,logic_error,trivial,"def process_student_records(records):
+    sorted_records = sorted(records, key=lambda x: x['grade'], reverse=True)
+    grade_counts = {}
+    for record in sorted_records:
+        grade = record['grade']
+        grade_counts[grade] = grade_counts.get(grade, 0) + 1
+    tied_count = 0
+    for count in grade_counts.values():
+        if count >= 2:
+            tied_count += count
+    stats = {'tied_grades': tied_count}
+    return {'sorted': sorted_records, 'stats': stats}","The bug is in the tied_count calculation. When counting the number of tied grades, the code adds the count of students with each tied grade (tied_count += count) instead of counting how many distinct grades have ties (tied_count += 1). For example, if 3 students have grade A and 2 have grade B, it returns 5 instead of 2. This is a logic error in the main computation path - wrong accumulation logic using += count instead of += 1.",anthropic/claude-sonnet-4.5,2026-08-25T01:01:09.008219+00:00,2026-08-24-v1
+validate_username_length__missing_edge_case__trivial__000,validate_username_length__missing_edge_case__trivial,0,validate_username_length,missing_edge_case,trivial,"def validate_username(username, abuse_log):
+    if len(username) == 1:
+        abuse_log.append(username)
+        return False
+    if len(username) >= 3:
+        return True
+    return False","Missing edge case for empty string and length-2 usernames. When username is empty, len(username) == 0, which fails the first check (not 1), fails the second check (not >= 3), and returns False - correct rejection but empty strings are not logged for abuse monitoring even though they're arguably suspicious single-character-like attempts. More critically, length-2 usernames (e.g. 'ab') also fall through all checks and return False, but the stated aim says 'at least 3 characters' so rejection is correct; however, the abuse logging specifically targets 'single-character attempts' and length-2 is not single-character, so no logging is also correct. The actual bug is the empty string case: it should either be logged as an abuse attempt (being even more degenerate than single-character) or explicitly handled as a boundary case, but instead it silently falls through. The function is correct for the typical input space (lengths 1, 3+) but misses the len==0 and arguably len==2 boundary.",anthropic/claude-sonnet-4.5,2026-08-25T01:04:06.400965+00:00,2026-08-24-v1

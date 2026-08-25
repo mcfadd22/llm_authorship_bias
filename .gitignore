@@ -13,6 +13,7 @@ data/*
 !data/.gitkeep
 !data/items/
 !data/items/**
+!data/items.csv
 
 # Environment / secrets
 .env
