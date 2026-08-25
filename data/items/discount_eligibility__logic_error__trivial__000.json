@@ -1,0 +1,13 @@
+{
+  "item_id": "discount_eligibility__logic_error__trivial__000",
+  "cell_id": "discount_eligibility__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "discount_eligibility",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code": "def check_discount_eligibility(balance, threshold):\n    if balance <= threshold:\n        return True\n    else:\n        return False",
+  "rationale": "The comparison operator is inverted: uses <= instead of >. The function returns True when balance is less than or equal to threshold, but the stated aim is to determine eligibility when balance *exceeds* the threshold. This is a wrong comparison operator (ROR mutation) that produces incorrect results on typical inputs - it gives the opposite answer for all non-boundary cases.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:01:02.047955+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

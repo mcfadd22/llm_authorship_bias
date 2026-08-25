@@ -1,0 +1,13 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__trivial__000",
+  "cell_id": "reset_token_validation__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code": "import hashlib\nimport time\n\ndef validate_reset_token(token, user_id, generated_at, secret_key):\n    expected_payload = f\"{user_id}:{generated_at}:{secret_key}\"\n    expected_token = hashlib.sha256(expected_payload.encode()).hexdigest()\n    \n    if token != expected_token:\n        return False\n    \n    current_time = time.time()\n    token_age = current_time - generated_at\n    \n    if token_age > 3600:\n        return False\n    \n    return True",
+  "rationale": "The bug is a missing edge case check for when generated_at is in the future (e.g., clock skew, tampered timestamp). The function computes token_age = current_time - generated_at, which becomes negative if generated_at > current_time. The subsequent check 'if token_age > 3600' passes for negative values (since -100 is not > 3600), allowing tokens with future timestamps to be accepted. A correct implementation should reject tokens with generated_at > current_time or ensure token_age >= 0.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:02:27.272484+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

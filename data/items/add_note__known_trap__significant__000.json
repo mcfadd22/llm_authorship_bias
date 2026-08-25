@@ -1,0 +1,13 @@
+{
+  "item_id": "add_note__known_trap__significant__000",
+  "cell_id": "add_note__known_trap__significant",
+  "sample_idx": 0,
+  "aim_id": "add_note",
+  "bug_flavor": "known_trap",
+  "severity_tier": "significant",
+  "code": "def append_note(note, notes=[]):\n    notes.append(note)\n    return notes",
+  "rationale": "Mutable default argument trap: the default empty list `notes=[]` is created once at function definition time and shared across all calls. When no notes argument is provided, successive calls will accumulate notes in the same list object instead of creating a fresh list each time. This persists wrong state across calls, meeting the significant severity tier.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:10:32.140302+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

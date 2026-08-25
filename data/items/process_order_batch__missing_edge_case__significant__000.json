@@ -1,0 +1,13 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__significant__000",
+  "cell_id": "process_order_batch__missing_edge_case__significant",
+  "sample_idx": 0,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "significant",
+  "code": "def process_orders(orders):\n    charged_ids = []\n    for order in orders:\n        order_id = order['id']\n        amount = order['amount']\n        payment_method = order['payment_method']\n        \n        if payment_method == 'credit_card':\n            card_number = order['card_number']\n            if len(card_number) == 16 and amount > 0:\n                charged_ids.append(order_id)\n        elif payment_method == 'debit_card':\n            card_number = order['card_number']\n            if len(card_number) == 16 and amount > 0:\n                charged_ids.append(order_id)\n        elif payment_method == 'paypal':\n            email = order['email']\n            if '@' in email and amount > 0:\n                charged_ids.append(order_id)\n    \n    return charged_ids",
+  "rationale": "The function fails to handle the edge case of an empty orders list. When orders is an empty list, the for loop doesn't execute and returns an empty list correctly. However, the function doesn't validate that 'orders' is actually a list - if None is passed (a common boundary/degenerate input for batch processing), the function will crash with 'TypeError: 'NoneType' object is not iterable' rather than gracefully returning an empty list or handling it appropriately. This missing None-check is a classic missing edge case bug that causes the function to fail on a boundary input that the stated aim (process a batch) should handle. The severity is significant because in a production order processing system, an unhandled crash could leave orders in an inconsistent state or prevent subsequent batches from being processed.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:03:56.497931+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

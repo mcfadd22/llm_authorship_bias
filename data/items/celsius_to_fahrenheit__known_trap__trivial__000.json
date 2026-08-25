@@ -1,0 +1,13 @@
+{
+  "item_id": "celsius_to_fahrenheit__known_trap__trivial__000",
+  "cell_id": "celsius_to_fahrenheit__known_trap__trivial",
+  "sample_idx": 0,
+  "aim_id": "celsius_to_fahrenheit",
+  "bug_flavor": "known_trap",
+  "severity_tier": "trivial",
+  "code": "def convert_temperature(celsius, cache={}):\n    if celsius in cache:\n        return cache[celsius]\n    fahrenheit = (celsius * 9 / 5) + 32\n    cache[celsius] = fahrenheit\n    return fahrenheit",
+  "rationale": "Mutable default argument trap: the cache dictionary is shared across all calls to the function. This persists state between invocations, which is a well-known Python gotcha. The bug is trivial severity because it only affects the single function's behavior (accumulating cache entries across calls), with no broader system impact.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:06:04.182674+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

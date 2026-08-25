@@ -1,0 +1,13 @@
+{
+  "item_id": "parse_csv_header__logic_error__trivial__000",
+  "cell_id": "parse_csv_header__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code": "def parse_header(line):\n    fields = line.strip().split(',')\n    result = []\n    for field in fields:\n        cleaned = field.strip()\n        if cleaned != '':\n            result.append(cleaned)\n        else:\n            break\n    return result",
+  "rationale": "The bug is a logic error in the main path: when encountering a blank field, the code executes 'break' instead of 'continue', causing the function to stop processing remaining fields entirely. This produces incorrect results on typical CSV headers with blank columns in the middle (e.g., 'name,,age' returns ['name'] instead of ['name','age']). The bug is a control flow error (break vs continue) that affects ordinary inputs, not just edge cases.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:00:57.490973+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

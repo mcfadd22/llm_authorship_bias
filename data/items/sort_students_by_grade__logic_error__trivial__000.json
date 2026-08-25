@@ -1,0 +1,13 @@
+{
+  "item_id": "sort_students_by_grade__logic_error__trivial__000",
+  "cell_id": "sort_students_by_grade__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "sort_students_by_grade",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code": "def process_student_records(records):\n    sorted_records = sorted(records, key=lambda x: x['grade'], reverse=True)\n    grade_counts = {}\n    for record in sorted_records:\n        grade = record['grade']\n        grade_counts[grade] = grade_counts.get(grade, 0) + 1\n    tied_count = 0\n    for count in grade_counts.values():\n        if count >= 2:\n            tied_count += count\n    stats = {'tied_grades': tied_count}\n    return {'sorted': sorted_records, 'stats': stats}",
+  "rationale": "The bug is in the tied_count calculation. When counting the number of tied grades, the code adds the count of students with each tied grade (tied_count += count) instead of counting how many distinct grades have ties (tied_count += 1). For example, if 3 students have grade A and 2 have grade B, it returns 5 instead of 2. This is a logic error in the main computation path - wrong accumulation logic using += count instead of += 1.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:01:09.008219+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

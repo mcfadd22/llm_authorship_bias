@@ -1,0 +1,13 @@
+{
+  "item_id": "reset_token_validation__logic_error__significant__000",
+  "cell_id": "reset_token_validation__logic_error__significant",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "severity_tier": "significant",
+  "code": "import hmac\nimport hashlib\nimport time\n\ndef validate_reset_token(user_id, token, secret_key, expiry_seconds=3600):\n    current_time = int(time.time())\n    parts = token.split(':')\n    if len(parts) != 3:\n        return False\n    token_user_id = parts[0]\n    timestamp = int(parts[1])\n    provided_signature = parts[2]\n    if token_user_id != str(user_id):\n        return False\n    if current_time - timestamp < expiry_seconds:\n        return False\n    expected_signature = hmac.new(\n        secret_key.encode(),\n        f\"{user_id}:{timestamp}\".encode(),\n        hashlib.sha256\n    ).hexdigest()\n    if hmac.compare_digest(expected_signature, provided_signature):\n        return True\n    return False",
+  "rationale": "The bug is on line 12: the comparison operator is inverted. It checks `if current_time - timestamp < expiry_seconds` when it should check `if current_time - timestamp > expiry_seconds` to reject expired tokens. This means the function rejects valid (non-expired) tokens and accepts expired ones - a wrong relational operator that breaks the main validation logic. This is a significant security vulnerability as it allows password resets with expired tokens while blocking legitimate recent tokens.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:02:06.076233+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

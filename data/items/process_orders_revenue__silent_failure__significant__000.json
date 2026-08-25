@@ -1,0 +1,13 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__significant__000",
+  "cell_id": "process_orders_revenue__silent_failure__significant",
+  "sample_idx": 0,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "significant",
+  "code": "import json\n\ndef process_orders(orders_json):\n    orders = json.loads(orders_json)\n    total_revenue = 0.0\n    processed_orders = []\n    \n    for order in orders:\n        try:\n            order_id = order['id']\n            amount = float(order['amount'])\n            quantity = int(order['quantity'])\n            order_total = amount * quantity\n            total_revenue += order_total\n            processed_orders.append(order_id)\n        except (KeyError, ValueError, TypeError):\n            pass\n    \n    return {\n        'total_revenue': total_revenue,\n        'processed_count': len(processed_orders),\n        'processed_orders': processed_orders\n    }",
+  "rationale": "The function catches KeyError, ValueError, and TypeError exceptions when processing individual orders but silently continues (pass statement) without logging, re-raising, or tracking which orders failed. This means malformed orders are silently dropped from revenue calculations and the processed_orders list, causing data loss that affects the integrity of the batch processing result. The caller has no way to detect that some orders were skipped, leading to incorrect revenue totals and missing order records.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:05:44.086537+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

@@ -1,0 +1,13 @@
+{
+  "item_id": "reset_token_validation__logic_error__trivial__000",
+  "cell_id": "reset_token_validation__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code": "import hashlib\nimport time\n\ndef validate_reset_token(token, stored_hash, timestamp, expiry_hours=24):\n    current_time = time.time()\n    token_age = current_time - timestamp\n    max_age = expiry_hours * 3600\n    \n    if token_age > max_age:\n        return False\n    \n    token_hash = hashlib.sha256(token.encode()).hexdigest()\n    \n    if token_hash != stored_hash:\n        return True\n    \n    return False",
+  "rationale": "The logic error is on line 13: the function returns True when the token hash does NOT match the stored hash (!=), and returns False when it does match (falling through to line 15). This is an inverted boolean condition - the comparison operator should be == instead of !=. This affects the main path: any valid token with correct hash will be rejected, and any invalid token with wrong hash will be accepted.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:01:57.579186+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

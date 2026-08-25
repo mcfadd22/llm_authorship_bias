@@ -1,0 +1,13 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__trivial__000",
+  "cell_id": "process_orders_revenue__silent_failure__trivial",
+  "sample_idx": 0,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "trivial",
+  "code": "def process_orders(orders):\n    total_revenue = 0\n    for order in orders:\n        try:\n            price = float(order['price'])\n            quantity = int(order['quantity'])\n            total_revenue += price * quantity\n        except (KeyError, ValueError, TypeError):\n            pass\n    return total_revenue",
+  "rationale": "The function catches KeyError, ValueError, and TypeError exceptions when processing order data but silently continues execution with an empty except block (pass statement). If an order has missing/invalid price or quantity fields, the exception is swallowed and that order contributes nothing to the total, with no indication to the caller that data was malformed or skipped. This is a silent_failure bug. The severity is trivial because it only affects the single return value of this call - the incorrect total is returned but no data is corrupted elsewhere and the impact is confined to this invocation.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:05:36.521085+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

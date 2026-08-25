@@ -1,0 +1,13 @@
+{
+  "item_id": "reset_token_validation__silent_failure__trivial__000",
+  "cell_id": "reset_token_validation__silent_failure__trivial",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "trivial",
+  "code": "import hmac\nimport hashlib\n\ndef validate_reset_token(user_id, token, secret_key):\n    expected = hmac.new(\n        secret_key.encode(),\n        user_id.encode(),\n        hashlib.sha256\n    ).hexdigest()\n    \n    try:\n        if hmac.compare_digest(token, expected):\n            return True\n    except TypeError:\n        pass\n    \n    return False",
+  "rationale": "The bug is on line 14 where a TypeError exception (raised when token is None or wrong type for compare_digest) is caught and silently ignored with 'pass'. The function then falls through to return False, making it appear the token was simply invalid rather than surfacing that a type error occurred. This is a silent_failure because the error is detected (caught) but discarded without logging, re-raising, or any error indicator. The severity is trivial because it only affects the single validation call - returning False instead of raising an exception - with no persistent effect beyond that single invocation.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:01:43.163603+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

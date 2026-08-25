@@ -1,0 +1,13 @@
+{
+  "item_id": "shipping_cost__wrong_algorithm__trivial__000",
+  "cell_id": "shipping_cost__wrong_algorithm__trivial",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "wrong_algorithm",
+  "severity_tier": "trivial",
+  "code": "def calculate_shipping_cost(weight):\n    tier_limits = [5, 10, 20, 50]\n    base_rate = 5.00\n    \n    tier_index = 0\n    for limit in tier_limits:\n        if weight > limit:\n            tier_index += 1\n    \n    total_cost = base_rate + tier_index\n    return total_cost",
+  "rationale": "The function counts how many tier limits the weight exceeds and adds that count to a base rate, rather than looking up the appropriate shipping cost for the weight's tier. This is a fundamentally wrong algorithm - it's computing a tier index offset instead of mapping weight ranges to their corresponding shipping costs. The code is internally consistent and handles the weight parameter, but doesn't accomplish the stated aim of calculating shipping cost based on weight tier.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:04:21.038617+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

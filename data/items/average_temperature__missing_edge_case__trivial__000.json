@@ -1,0 +1,13 @@
+{
+  "item_id": "average_temperature__missing_edge_case__trivial__000",
+  "cell_id": "average_temperature__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code": "def calculate_average_temperature(readings):\n    total = 0\n    for temp in readings:\n        total += temp\n    average = total / len(readings)\n    return average",
+  "rationale": "The function correctly computes the average for non-empty lists but crashes with ZeroDivisionError when given an empty list. The missing edge case is the boundary condition where len(readings) == 0, which the stated aim implies should be handled (e.g., return None, 0, or raise a more informative error). This is a classic missing boundary check: the main path logic (sum and divide) is correct, but no branch exists for the degenerate input.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:02:46.626672+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

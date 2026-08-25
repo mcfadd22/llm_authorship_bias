@@ -1,0 +1,13 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__trivial__000",
+  "cell_id": "process_order_batch__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code": "def process_orders(orders):\n    charged_ids = []\n    for order in orders:\n        order_id = order['id']\n        amount = order['amount']\n        payment_method = order['payment_method']\n        \n        if payment_method == 'credit_card':\n            card_number = order['card_number']\n            if len(card_number) == 16:\n                charged_ids.append(order_id)\n        elif payment_method == 'paypal':\n            email = order['email']\n            if '@' in email:\n                charged_ids.append(order_id)\n        elif payment_method == 'bank_transfer':\n            account = order['account']\n            if len(account) > 0:\n                charged_ids.append(order_id)\n    \n    return charged_ids",
+  "rationale": "The function fails to handle the edge case when the input 'orders' is an empty list. While the function will technically work (returning an empty list), it doesn't handle the edge case when 'orders' is None, which would crash with 'TypeError: 'NoneType' object is not iterable' when trying to iterate. The stated aim implies the function should handle batch processing gracefully, including the degenerate case of None input which could reasonably occur in a real system when no orders are pending.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:03:47.422935+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

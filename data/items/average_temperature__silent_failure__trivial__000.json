@@ -1,0 +1,13 @@
+{
+  "item_id": "average_temperature__silent_failure__trivial__000",
+  "cell_id": "average_temperature__silent_failure__trivial",
+  "sample_idx": 0,
+  "aim_id": "average_temperature",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "trivial",
+  "code": "def calculate_average(readings):\n    total = 0\n    count = 0\n    for value in readings:\n        try:\n            total += float(value)\n            count += 1\n        except (ValueError, TypeError):\n            pass\n    if count == 0:\n        return 0\n    return total / count",
+  "rationale": "The function silently ignores any temperature readings that cannot be converted to float (due to ValueError or TypeError) via an empty except block with pass. Invalid values are discarded without any indication to the caller, which constitutes a silent failure. If all readings are invalid, it returns 0 instead of signaling an error. The severity is trivial because it only affects the single return value for that call.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:02:40.740156+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

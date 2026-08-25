@@ -1,0 +1,13 @@
+{
+  "item_id": "celsius_to_fahrenheit__wrong_algorithm__trivial__000",
+  "cell_id": "celsius_to_fahrenheit__wrong_algorithm__trivial",
+  "sample_idx": 0,
+  "aim_id": "celsius_to_fahrenheit",
+  "bug_flavor": "wrong_algorithm",
+  "severity_tier": "trivial",
+  "code": "def convert_temperature(celsius):\n    fahrenheit = (celsius - 32) * 5 / 9\n    return fahrenheit",
+  "rationale": "The function implements the Fahrenheit-to-Celsius conversion formula instead of Celsius-to-Fahrenheit. It subtracts 32 and multiplies by 5/9, which is the reverse operation. The correct formula should be (celsius * 9/5) + 32. This is a wrong_algorithm bug because the code is clean and internally consistent, but computes the entirely wrong conversion direction.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:11:03.211241+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

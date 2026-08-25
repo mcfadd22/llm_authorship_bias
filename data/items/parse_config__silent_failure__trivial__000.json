@@ -1,0 +1,13 @@
+{
+  "item_id": "parse_config__silent_failure__trivial__000",
+  "cell_id": "parse_config__silent_failure__trivial",
+  "sample_idx": 0,
+  "aim_id": "parse_config",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "trivial",
+  "code": "import json\n\ndef parse_config(config_str):\n    try:\n        data = json.loads(config_str)\n    except json.JSONDecodeError:\n        pass\n    \n    if 'retry_count' not in data:\n        data['retry_count'] = 3\n    \n    return data",
+  "rationale": "The bug is a silent failure: when json.loads() raises a JSONDecodeError (e.g., malformed JSON), the exception is caught and suppressed with 'pass'. Execution continues to the next line which tries to check if 'retry_count' is in 'data', but 'data' was never assigned due to the exception. This causes an UnboundLocalError at runtime. The defining bug is the empty except block that swallows the parse error without any logging, re-raise, or error indicator - the error is detected and discarded. Severity is trivial because it affects only this single call with no persistent effects.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:05:23.054135+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

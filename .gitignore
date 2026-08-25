@@ -11,6 +11,8 @@ venv/
 # Data (raw/intermediate outputs — keep out of git; add exceptions as needed)
 data/*
 !data/.gitkeep
+!data/items/
+!data/items/**
 
 # Environment / secrets
 .env

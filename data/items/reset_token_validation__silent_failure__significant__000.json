@@ -1,0 +1,13 @@
+{
+  "item_id": "reset_token_validation__silent_failure__significant__000",
+  "cell_id": "reset_token_validation__silent_failure__significant",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "significant",
+  "code": "import secrets\n\ndef validate_reset_token(user_id, token, token_store):\n    stored_data = token_store.get(user_id)\n    if stored_data is None:\n        return False\n    \n    stored_token = stored_data.get('token')\n    expiry = stored_data.get('expiry')\n    \n    try:\n        if secrets.compare_digest(token, stored_token):\n            import time\n            if time.time() < expiry:\n                return True\n    except (TypeError, AttributeError):\n        pass\n    \n    return False",
+  "rationale": "The bug is on line 14-15: the try-except block catches TypeError and AttributeError (which occur when stored_token or expiry are None, or token is not a string), but silently swallows these exceptions with 'pass'. This means invalid token data (missing token/expiry fields) fails validation silently instead of surfacing an error. This is significant because it masks data corruption in the token_store - other code populating the store may be failing to set required fields, and this function hides that failure mode entirely, allowing broken state to persist undetected.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:01:51.338203+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

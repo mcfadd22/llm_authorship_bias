@@ -1,0 +1,13 @@
+{
+  "item_id": "compute_average__missing_edge_case__trivial__000",
+  "cell_id": "compute_average__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "compute_average",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code": "def calculate_average(numbers):\n    total = 0\n    for num in numbers:\n        total += num\n    average = total / len(numbers)\n    return average",
+  "rationale": "The function computes the average correctly for non-empty lists by summing all elements and dividing by the count. However, it crashes with a ZeroDivisionError when given an empty list because len(numbers) is 0. This is a classic missing edge case bug - the stated aim 'compute the average of a list of numbers' implies it should handle empty input gracefully (either by returning a sentinel value, raising a more descriptive error, or returning 0/None), but the function has no boundary check for the empty case.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:00:41.327226+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

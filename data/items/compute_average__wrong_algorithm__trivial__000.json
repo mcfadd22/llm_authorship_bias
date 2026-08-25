@@ -1,0 +1,13 @@
+{
+  "item_id": "compute_average__wrong_algorithm__trivial__000",
+  "cell_id": "compute_average__wrong_algorithm__trivial",
+  "sample_idx": 0,
+  "aim_id": "compute_average",
+  "bug_flavor": "wrong_algorithm",
+  "severity_tier": "trivial",
+  "code": "def calculate_average(numbers):\n    if not numbers:\n        return 0\n    total = 0\n    for num in numbers:\n        total += num\n    return total",
+  "rationale": "The function computes the sum of the list but never divides by the count of elements. It returns the total instead of total/len(numbers), thus computing sum rather than average - a wrong_algorithm bug where the approach doesn't accomplish the stated aim of computing an average.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:00:46.509357+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

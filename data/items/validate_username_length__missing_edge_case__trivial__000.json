@@ -1,0 +1,13 @@
+{
+  "item_id": "validate_username_length__missing_edge_case__trivial__000",
+  "cell_id": "validate_username_length__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "validate_username_length",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code": "def validate_username(username, abuse_log):\n    if len(username) == 1:\n        abuse_log.append(username)\n        return False\n    if len(username) >= 3:\n        return True\n    return False",
+  "rationale": "Missing edge case for empty string and length-2 usernames. When username is empty, len(username) == 0, which fails the first check (not 1), fails the second check (not >= 3), and returns False - correct rejection but empty strings are not logged for abuse monitoring even though they're arguably suspicious single-character-like attempts. More critically, length-2 usernames (e.g. 'ab') also fall through all checks and return False, but the stated aim says 'at least 3 characters' so rejection is correct; however, the abuse logging specifically targets 'single-character attempts' and length-2 is not single-character, so no logging is also correct. The actual bug is the empty string case: it should either be logged as an abuse attempt (being even more degenerate than single-character) or explicitly handled as a boundary case, but instead it silently falls through. The function is correct for the typical input space (lengths 1, 3+) but misses the len==0 and arguably len==2 boundary.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:04:06.400965+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

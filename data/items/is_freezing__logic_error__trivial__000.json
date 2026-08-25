@@ -1,0 +1,13 @@
+{
+  "item_id": "is_freezing__logic_error__trivial__000",
+  "cell_id": "is_freezing__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "is_freezing",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code": "def check_freezing(temperature):\n    if temperature > 0:\n        return True\n    else:\n        return False",
+  "rationale": "The comparison operator is wrong: uses '>' instead of '<='. This causes the function to return True (freezing) when temperature is above 0, and False when at or below 0 - exactly inverted from the correct behavior. This is a logic_error because it fails on all typical inputs, not just edge cases. Severity is trivial because it only affects the single return value of one call.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:04:27.151191+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

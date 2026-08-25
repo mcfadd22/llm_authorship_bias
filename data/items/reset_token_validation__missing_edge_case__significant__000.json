@@ -1,0 +1,13 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__significant__000",
+  "cell_id": "reset_token_validation__missing_edge_case__significant",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "significant",
+  "code": "import hmac\nimport hashlib\nimport time\n\ndef validate_reset_token(stored_token, provided_token, expiry_timestamp, secret_key):\n    current_time = time.time()\n    if current_time > expiry_timestamp:\n        return False\n    expected_signature = hmac.new(\n        secret_key.encode(),\n        stored_token.encode(),\n        hashlib.sha256\n    ).hexdigest()\n    provided_signature = hmac.new(\n        secret_key.encode(),\n        provided_token.encode(),\n        hashlib.sha256\n    ).hexdigest()\n    if not hmac.compare_digest(expected_signature, provided_signature):\n        return False\n    return True",
+  "rationale": "The function fails to handle the edge case where `provided_token` or `stored_token` is None or empty string. When None is passed, calling `.encode()` will raise an AttributeError. When empty string is passed, the validation logic proceeds but may incorrectly validate in degenerate cases. A password-reset token validator should explicitly reject None/empty tokens as invalid rather than crashing or processing them. This is a missing boundary check on degenerate input that the stated aim (secure token validation) implies should be handled.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:02:35.259675+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

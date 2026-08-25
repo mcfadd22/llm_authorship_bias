@@ -1,0 +1,13 @@
+{
+  "item_id": "parse_csv_header__missing_edge_case__trivial__000",
+  "cell_id": "parse_csv_header__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code": "def parse_header(line):\n    parts = line.split(',')\n    columns = []\n    for part in parts:\n        stripped = part.strip()\n        if stripped:\n            columns.append(stripped)\n    return columns",
+  "rationale": "The function fails to handle the edge case of an empty string input. When line is '', line.split(',') returns [''] (a list with one empty string), and after stripping, the empty string is filtered out, returning []. However, a truly empty input should be distinguished from a CSV with one empty field. The missing edge case is not checking if the input line itself is empty before processing, which is a boundary condition implied by the stated aim of parsing CSV headers.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:00:52.510316+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

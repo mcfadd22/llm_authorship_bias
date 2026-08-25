@@ -1,0 +1,13 @@
+{
+  "item_id": "cart_total__copy_paste_residue__trivial__000",
+  "cell_id": "cart_total__copy_paste_residue__trivial",
+  "sample_idx": 0,
+  "aim_id": "cart_total",
+  "bug_flavor": "copy_paste_residue",
+  "severity_tier": "trivial",
+  "code": "def calculate_total_price(cart_items, shipping_fee):\n    subtotal = 0\n    for item in cart_items:\n        price = item.get('price', 0)\n        quantity = item.get('quantity', 1)\n        subtotal += price * quantity\n    discount = 0\n    total = subtotal + shipping_fee\n    return total",
+  "rationale": "The bug is a copy-paste residue: the variable 'discount' is initialized to 0 on line 7 but never used anywhere in the function. This is a leftover artifact from adapting similar code that likely applied discounts. The presence of this dead variable suggests the code was copied from a discount-calculation function and not properly cleaned up. The function still computes the correct total (subtotal + shipping_fee), but the unused 'discount = 0' line is the copy-paste residue that should have been removed.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:03:25.844050+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

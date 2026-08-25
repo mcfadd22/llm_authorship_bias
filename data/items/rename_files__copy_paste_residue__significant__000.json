@@ -1,0 +1,13 @@
+{
+  "item_id": "rename_files__copy_paste_residue__significant__000",
+  "cell_id": "rename_files__copy_paste_residue__significant",
+  "sample_idx": 0,
+  "aim_id": "rename_files",
+  "bug_flavor": "copy_paste_residue",
+  "severity_tier": "significant",
+  "code": "import os\n\ndef rename_files_with_suffix(file_list, suffix):\n    renamed_files = []\n    for filename in file_list:\n        base, ext = os.path.splitext(filename)\n        new_name = f\"{base}{suffix}{ext}\"\n        if os.path.exists(filename):\n            os.rename(filename, new_name)\n            print(f\"Processing image: {filename}\")\n            renamed_files.append(new_name)\n        else:\n            renamed_files.append(None)\n    return renamed_files",
+  "rationale": "The bug is a copy-paste residue: the print statement at line 9 contains 'Processing image: {filename}' which suggests this code was adapted from a previous function that specifically processed images. This debug/logging statement was not cleaned up when the code was repurposed for general file renaming. The print statement itself causes side effects (console output) that shouldn't be present in a general-purpose file renaming function, and the 'image' reference reveals its origin from other code. This meets the 'significant' tier because the unwanted output persists beyond the call and could interfere with production logging/output systems that other code depends on.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:05:58.751278+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

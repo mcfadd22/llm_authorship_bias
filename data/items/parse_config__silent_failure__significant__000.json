@@ -1,0 +1,13 @@
+{
+  "item_id": "parse_config__silent_failure__significant__000",
+  "cell_id": "parse_config__silent_failure__significant",
+  "sample_idx": 0,
+  "aim_id": "parse_config",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "significant",
+  "code": "import json\n\ndef parse_config(config_string):\n    try:\n        data = json.loads(config_string)\n    except json.JSONDecodeError:\n        data = {}\n    \n    if 'retry_count' not in data:\n        data['retry_count'] = 3\n    \n    return data",
+  "rationale": "The function catches json.JSONDecodeError when parsing fails but silently swallows the error by returning an empty dict with only defaults. Callers expecting other configuration fields will receive an incomplete/incorrect config object without any indication that parsing failed, meeting the silent_failure pattern. This is significant-tier because the returned config dictionary is structured data that other code depends on to configure itself - missing fields beyond retry_count will cause downstream issues.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:05:29.575632+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

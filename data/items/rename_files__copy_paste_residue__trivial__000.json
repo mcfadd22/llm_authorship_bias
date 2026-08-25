@@ -1,0 +1,13 @@
+{
+  "item_id": "rename_files__copy_paste_residue__trivial__000",
+  "cell_id": "rename_files__copy_paste_residue__trivial",
+  "sample_idx": 0,
+  "aim_id": "rename_files",
+  "bug_flavor": "copy_paste_residue",
+  "severity_tier": "trivial",
+  "code": "import os\n\ndef rename_files(file_list, suffix):\n    renamed = []\n    for filename in file_list:\n        name, ext = os.path.splitext(filename)\n        new_name = f\"{name}{suffix}{ext}\"\n        print(f\"Processing: {filename}\")\n        try:\n            os.rename(filename, new_name)\n            renamed.append(new_name)\n        except FileNotFoundError:\n            pass\n    return renamed",
+  "rationale": "The bug is a copy-paste residue: a stray debug print statement `print(f\"Processing: {filename}\")` on line 7. This is clearly leftover code from development/debugging that should have been removed before deployment. It doesn't affect the logic but pollutes stdout with unnecessary output. This matches the 'forgot to clean up' criterion for copy_paste_residue. The severity is trivial as it only causes unwanted console output for a single function call with no data corruption or persistent effects.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:05:50.722051+00:00",
+  "prompt_version": "2026-08-24-v1"
+}

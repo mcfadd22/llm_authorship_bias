@@ -1,0 +1,13 @@
+{
+  "item_id": "shipping_cost__logic_error__trivial__000",
+  "cell_id": "shipping_cost__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code": "def calculate_shipping_cost(weight):\n    if weight <= 0:\n        return 0\n    elif weight <= 5:\n        return 5.00\n    elif weight <= 10:\n        return 8.50\n    elif weight <= 20:\n        return 12.00\n    elif weight >= 20:\n        return 18.00\n    else:\n        return 25.00",
+  "rationale": "Logic error in the control flow: the condition `elif weight >= 20:` should be `elif weight > 20:` or just `else:`. With the current code, a weight of exactly 20 will match the third elif (weight <= 20) and return 12.00, while weights like 20.1 will match the fourth elif and return 18.00. More critically, the final else branch is unreachable because all numeric weights are already covered by the previous conditions (any weight is either <=20 or >=20). This creates incorrect tier boundaries for the common case of weights around 20.",
+  "generation_model": "anthropic/claude-sonnet-4.5",
+  "timestamp": "2026-08-25T01:04:14.383892+00:00",
+  "prompt_version": "2026-08-24-v1"
+}
