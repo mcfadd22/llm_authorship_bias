@@ -62,12 +62,13 @@ that can drift apart.
 
 `rationale` is meant to help you and your collaborator quickly screen
 which generated items are worth a closer look, not to serve as a
-certified, automatically-used ground truth in analysis. In particular it is **not** currently
-wired into the Tier 3 "bug-mention check" in `design.md` §5 — that would
-require the generator's self-report to be treated as verified data, which
-raises the vetting bar considerably higher than a screening aid needs.
-Revisit this only if manual vetting becomes a bottleneck and a validated
-ground-truth field becomes worth the added rigor.
+certified, automatically-used ground truth in analysis. In particular
+it is **not** currently wired into the Tier 3 "bug-mention check" in
+`design.md` §5 — that would require the generator's self-report to be
+treated as verified data, which raises the vetting bar considerably
+higher than a screening aid needs. Revisit this only if manual vetting
+becomes a bottleneck and a validated ground-truth field becomes worth
+the added rigor.
 
 ## Sourcing pre-vetted examples
 
