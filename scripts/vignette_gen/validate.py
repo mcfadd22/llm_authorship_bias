@@ -2,7 +2,7 @@ import ast
 import io
 import tokenize
 
-MIN_BODY_LINES = 5
+MIN_BODY_LINES = 3
 MAX_BODY_LINES = 25
 
 
