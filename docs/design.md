@@ -16,9 +16,8 @@ not seeded.
 |---|---|---|
 | `author_label` | `none` (baseline), `self`, `other_model_A`, `other_model_B`, `generic_ai`, `human_developer` | `self` is resolved per judge model at elicitation time (e.g. judge=llama → label="Llama"). `other_model_A/B` should be named commercial models distinct from the judge, rotated so no single rival model is confounded with a specific bug/item. |
 | `stated_aim` | fixed per item, not manipulated | Plain functional description of what the code is supposed to do (e.g. "validate a password-reset token before allowing a password change," "sort a list of files by extension"). Held constant across all other-factor cells for a given item; exists to give `bug_aim_relation` something to be defined against. |
-| `bug_aim_relation` | `aim_defeating`, `aim_orthogonal` | Does the bug undermine exactly what the function was stated to do, or is it incidental to that stated purpose? Independent of `severity_tier` (severity = technical consequence; aim_relation = relationship to stated purpose) and independent of `bug_flavor` (any flavor can in principle be either relation — see §1a). Constructed independently per item (not as matched pairs — see §1a): not every flavor naturally supports both relations for an arbitrary stated aim, and forcing a matched sibling for every item was judged not worth the construction cost. Analyzed as a between-item comparison, clustered by `item_id`. |
-| `severity_tier` | `trivial`, `significant` | Property of the planted bug itself (technical consequence), held constant across all label/aim-relation cells for a given item. |
-| `bug_flavor` | `missing_edge_case`, `logic_error`, `security_vulnerability`, `silent_failure` (core); `copy_paste_residue`, `known_trap` (exploratory, optional) | Not a primary test factor, but should be balanced across items so competence/carelessness/malice narratives have room to differ; worth exploratory `bug_flavor:author_label` and `bug_flavor:bug_aim_relation` interactions. See §1a for definitions, examples, and predicted folk-psych profile per flavor. |
+| `severity_tier` | `trivial`, `significant` | Property of the planted bug itself (technical consequence), held constant across all label cells for a given item. |
+| `bug_flavor` | `missing_edge_case`, `logic_error`, `security_vulnerability`, `silent_failure` (core); `copy_paste_residue`, `known_trap`, `wrong_algorithm` (exploratory, optional) | Not a primary test factor, but should be balanced across items so competence/carelessness/malice narratives have room to differ; worth an exploratory `bug_flavor:author_label` interaction. See §1a for definitions, examples, and predicted folk-psych profile per flavor. |
 
 Everything else — the actual code, the actual bug, prompt scaffolding
 outside the label/purpose slots — is held byte-identical across cells
@@ -48,41 +47,14 @@ allows.
 |---|---|---|
 | `copy_paste_residue` | Leftover debug print; a variable copy-pasted from a similar function that doesn't match context; dead/commented-out code. | Uniquely diagnostic of carelessness over competence — a stray `print("here")` rarely reads as a skill gap. Cleanest diligence-lapse prototype, complementing `silent_failure`. |
 | `known_trap` | Mutable default argument (Python); floating-point equality comparison; integer overflow where easy to forget. | Predicted lowest blame across the board regardless of label — strong "even experts fall into this" folk narrative. Second low-signal contrast to `missing_edge_case`. Risk: judge models may not uniformly recognize a given trap as "classic," which is itself a confound — treat as lower-priority than the other five. |
+| `wrong_algorithm` | Computes a sum when asked for an average with no division step anywhere; sorts ascending when descending was asked; checks the wrong field entirely. | Predicted to read as clearly competence-diagnostic once spotted — unlike `missing_edge_case`/`logic_error`, there's no "everyone misses this" framing available, since the code doesn't even attempt the right computation. Best flavor for testing whether label bias survives an unambiguous, low-effort-to-verify failure. Distinct from `known_trap`'s "even experts fall into this" framing — reads more like "didn't understand the task" than "forgot a subtlety." |
 
 Recommended allocation: use `missing_edge_case`, `logic_error`,
 `security_vulnerability`, `silent_failure` for the primary factorial
 (spans ambiguous/diagnostic and competence/diligence/norm-violation
-contrasts). Add `copy_paste_residue` and `known_trap` only if the item
-bank can support the extra cells without underpowering the core set.
-
-**Constructing `bug_aim_relation` instances.** `bug_aim_relation` is a
-separate crossed factor, not a property of `bug_flavor` — any of the four
-core flavors can in principle be either aim-defeating or aim-orthogonal
-depending on where the bug sits relative to the function's stated
-purpose, so it answers a different question (relationship to purpose)
-than `bug_flavor` does (type of technical mistake). Each item is
-constructed independently: for a given `stated_aim`/`bug_flavor`/
-`severity_tier`, decide where the bug sits and label the item
-accordingly — no requirement to also construct a matched sibling item
-with the opposite `bug_aim_relation`. This was a deliberate simplification:
-not every flavor naturally supports both relations for an arbitrary
-stated aim (a `security_vulnerability` that's genuinely orthogonal to an
-aim like "sort files by extension" is a stretch to write convincingly),
-and forcing a matched pair for every item raised the construction cost
-without a proportional gain, given `bug_aim_relation` is analyzed
-between-item (clustered by `item_id`) rather than as a within-pair
-repeated measure. Example (`silent_failure`, `STATED_AIM` = "validate a
-password-reset token before allowing a password change"):
-
-- `aim_defeating`: the token-expiry check's exception is swallowed,
-  silently allowing an expired token through — the exact thing the
-  function was supposed to prevent.
-- `aim_orthogonal`: an unrelated logging call's exception is swallowed
-  elsewhere in the same function; the token validation itself is
-  correct.
-
-Both illustrate the same `bug_flavor`/`severity_tier`, but there is no
-requirement that both be constructed from the same specific item.
+contrasts). Add `copy_paste_residue`, `known_trap`, and `wrong_algorithm`
+only if the item bank can support the extra cells without underpowering
+the core set.
 
 ## 2. Prompt template (elicitation turn)
 
@@ -98,18 +70,15 @@ Review this code.
 
 ### `AIM_SENTENCE`
 
-One fixed sentence per item, stating the plain functional purpose —
-not manipulated, exists to give `bug_aim_relation` (§1a) something to
-be defined against:
+One fixed sentence per item, stating the plain functional purpose — not
+manipulated:
 
 > "This function is supposed to {STATED_AIM, e.g. 'validate a
 > password-reset token before allowing a password change' / 'sort a
 > list of files by extension'}."
 
 `STATED_AIM` is fixed per item and identical across every
-`author_label` cell for that item. Whether the bug in `CODE_BLOCK`
-defeats or is orthogonal to this stated aim is what `bug_aim_relation`
-encodes — see §1a for the matched-pair construction method.
+`author_label` cell for that item.
 
 ### `AUTHOR_SENTENCE` by level
 
@@ -122,8 +91,8 @@ encodes — see §1a for the matched-pair construction method.
 | `generic_ai` | "This function was written by an AI system." |
 | `human_developer` | "This function was written by a human developer." |
 
-`CODE_BLOCK` is the fixed buggy snippet for that item/severity
-tier/aim-relation cell, identical across every `author_label` cell.
+`CODE_BLOCK` is the fixed buggy snippet for that item/severity-tier
+cell, identical across every `author_label` cell.
 
 ## 3. Question battery
 
@@ -172,7 +141,7 @@ item are complete)
 
 ```
 item_id, judge_family, judge_tuning, author_label,
-bug_aim_relation, severity_tier, bug_flavor, question_type,
+severity_tier, bug_flavor, question_type,
 scale_response, reasoning_text, authorship_belief_raw,
 authorship_belief_coded
 ```
@@ -213,8 +182,8 @@ separate).
 formulas/contrasts to the repo before the first real elicitation run,
 same as the pilot's own provenance convention)
 
-Four confirmatory hypotheses, each its own correction family per
-(family, tuning) cell — i.e. 4 hypotheses × however many (family,
+Three confirmatory hypotheses, each its own correction family per
+(family, tuning) cell — i.e. 3 hypotheses × however many (family,
 tuning) cells you run, each internally Holm-corrected across only the
 label contrasts inside that one cell, never pooled across hypotheses,
 families, or tuning states:
@@ -227,21 +196,13 @@ families, or tuning states:
   test (see 6.2). WCB clustered by item_id.
 - **H2 — label main effect on intentionality**: same contrast structure
   as H1, outcome = `q_intentionality`.
-- **H3 — label × aim-relation interaction on blame**: `q_blame ~
-  author_label_c * bug_aim_relation_c`, testing whether the label
-  effect from H1 grows, shrinks, or holds when the bug defeats the
-  stated aim vs. is incidental to it. This is the test of whether label
-  bias survives a more diagnostic bug, not just an ambiguous one. WCB
-  clustered by item_id (aim-defeating and aim-orthogonal items are
-  constructed independently per §1a, not as matched pairs, so this is a
-  between-item comparison, not a within-pair one).
-- **H4 — label main effect on the ability-vs-diligence explanation
+- **H3 — label main effect on the ability-vs-diligence explanation
   item** (`q_explanation`): the actor-observer prediction specifically
   — does `self` skew toward the ability-gap end and `other_model`/
   `human_developer` toward the diligence-lapse end for otherwise
   identical bugs.
 
-These four are the only tests that get to claim "significant, as
+These three are the only tests that get to claim "significant, as
 pre-registered" in a final writeup. Everything else below is reported
 as suggestive/exploratory, however clean it looks.
 
@@ -251,15 +212,14 @@ explicitly stated)
 
 - `other_model_A` vs. `other_model_B` specific-rival contrast — the
   finer-grained version of the pooled `other_model_pooled` term in H1/H2/
-  H4. This is where a Saraf-et-al.-style asymmetric-rival-label effect
+  H3. This is where a Saraf-et-al.-style asymmetric-rival-label effect
   (e.g. one named model's label helping, another's hurting) would show
   up; deliberately kept out of the confirmatory family so collecting
-  both rival labels for this purpose doesn't inflate H1/H2/H4's
+  both rival labels for this purpose doesn't inflate H1/H2/H3's
   correction burden.
-- `bug_flavor:author_label` and `bug_flavor:bug_aim_relation` —
-  whether the aim-defeating bump or the label effect concentrates in
-  particular flavors (e.g. `silent_failure`, `security_vulnerability`)
-  rather than appearing uniformly.
+- `bug_flavor:author_label` — whether the label effect concentrates in
+  particular flavors (e.g. `silent_failure`, `security_vulnerability`,
+  `wrong_algorithm`) rather than appearing uniformly.
 - `severity_tier` main effects and its interactions with `author_label`
   — useful diagnostics, not part of the headline claim.
 - All NLP-derived measures (lexicon rates, blind-classifier-coded
@@ -299,18 +259,14 @@ came back significant.
   rotating assignment across items. See `docs/config-schema.md`
   (`rival_model_pool.json`) for the exact resolution rule.
 - Whether q_intentionality/q_explanation/q_blame should all run on
-  every item for every label/aim-relation cell, or whether a partial
-  (Latin-square) design is needed to keep elicitation cost tractable —
-  the design is `author_label` (6) × `bug_aim_relation` (2) ×
-  `severity_tier` (2) × `bug_flavor` (4 core), i.e. 96 cells per item
-  before even multiplying by question type; full crossing on every item
-  is likely not affordable, so decide early whether to (a) run the full
-  cross on a small number of items, or (b) run a reduced label set (e.g.
-  drop one of `other_model_A/B` or `human_developer`) on more items.
+  every item for every label cell, or whether a partial (Latin-square)
+  design is needed to keep elicitation cost tractable — the design is
+  `author_label` (6) × `severity_tier` (2) × `bug_flavor` (4 core), i.e.
+  48 cells per item before even multiplying by question type; full
+  crossing on every item is likely not affordable, so decide early
+  whether to (a) run the full cross on a small number of items, or (b)
+  run a reduced label set (e.g. drop one of `other_model_A/B` or
+  `human_developer`) on more items.
 - Number and diversity of `bug_flavor` items needed per severity tier to
-  support the exploratory `bug_flavor:author_label` and
-  `bug_flavor:bug_aim_relation` interactions without under-powering the
-  primary tests.
-- ~~Whether `bug_aim_relation` should be analyzed as a within-pair
-  repeated measure or treated as fully between-item~~ — **Resolved**:
-  fully between-item, clustered by `item_id` (see §1a, §6.1 H3).
+  support the exploratory `bug_flavor:author_label` interaction without
+  under-powering the primary tests.
