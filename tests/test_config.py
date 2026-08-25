@@ -21,9 +21,7 @@ def test_load_config_rejects_unknown_bug_flavor(tmp_path):
                     "id": "bad_aim",
                     "text": "x",
                     "severity_tiers_supported": ["trivial"],
-                    "compatible_bug_flavors": [
-                        {"flavor_id": "not_a_real_flavor", "orthogonal_plausible": False}
-                    ],
+                    "compatible_bug_flavors": ["not_a_real_flavor"],
                 }
             ]
         },
@@ -44,9 +42,7 @@ def test_load_config_rejects_unknown_severity_tier(tmp_path):
                     "id": "bad_aim",
                     "text": "x",
                     "severity_tiers_supported": ["not_a_real_tier"],
-                    "compatible_bug_flavors": [
-                        {"flavor_id": "logic_error", "orthogonal_plausible": False}
-                    ],
+                    "compatible_bug_flavors": ["logic_error"],
                 }
             ]
         },
@@ -73,9 +69,7 @@ def test_load_config_indexes_flavors_and_severities_by_id(tmp_path):
                     "id": "aim_1",
                     "text": "x",
                     "severity_tiers_supported": ["trivial"],
-                    "compatible_bug_flavors": [
-                        {"flavor_id": "logic_error", "orthogonal_plausible": False}
-                    ],
+                    "compatible_bug_flavors": ["logic_error"],
                 }
             ]
         },
@@ -90,6 +84,6 @@ def test_load_config_indexes_flavors_and_severities_by_id(tmp_path):
 
 def test_real_config_loads_without_error():
     config = load_config()
-    assert len(config["bug_flavor"]) == 6
+    assert len(config["bug_flavor"]) == 7
     assert len(config["severity_tier"]) == 2
     assert len(config["stated_aims"]) == 20

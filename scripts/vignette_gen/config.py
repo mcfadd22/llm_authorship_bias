@@ -19,10 +19,10 @@ def load_config(config_dir: Optional[Path] = None) -> Dict:
     stated_aims = _load_json(config_dir, "stated_aims.json")["aims"]
 
     for aim in stated_aims:
-        for entry in aim["compatible_bug_flavors"]:
-            if entry["flavor_id"] not in bug_flavor:
+        for flavor_id in aim["compatible_bug_flavors"]:
+            if flavor_id not in bug_flavor:
                 raise ValueError(
-                    f"aim '{aim['id']}' references unknown bug_flavor '{entry['flavor_id']}'"
+                    f"aim '{aim['id']}' references unknown bug_flavor '{flavor_id}'"
                 )
         for tier in aim["severity_tiers_supported"]:
             if tier not in severity_tier:
