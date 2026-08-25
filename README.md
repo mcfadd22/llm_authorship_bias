@@ -3,8 +3,7 @@
 Study on how LLM judges ascribe folk-psychological states (intentionality,
 blame, ability-vs-diligence) to buggy code based on claimed authorship
 (self, other named model, generic AI, human developer, or no label),
-crossed with whether the bug defeats or is orthogonal to the code's stated
-purpose, bug type, and severity.
+crossed with bug type and severity.
 
 See [`docs/design.md`](docs/design.md) for the full design doc: manipulated
 factors, prompt template, question battery, response schema, and the
