@@ -4,30 +4,21 @@ STATED_AIMS = [
     {
         "id": "aim_a",
         "severity_tiers_supported": ["trivial", "significant"],
-        "compatible_bug_flavors": [
-            {"flavor_id": "logic_error", "orthogonal_plausible": True},
-            {"flavor_id": "missing_edge_case", "orthogonal_plausible": False},
-        ],
+        "compatible_bug_flavors": ["logic_error", "missing_edge_case"],
     }
 ]
 
 
-def test_enumerate_cells_crosses_flavor_severity_and_relation():
+def test_enumerate_cells_crosses_flavor_and_severity():
     cells = enumerate_cells(STATED_AIMS)
     cell_ids = {c.cell_id for c in cells}
 
-    # logic_error supports both relations for both severities: 2 x 2 = 4
-    assert "aim_a__logic_error__trivial__aim_defeating" in cell_ids
-    assert "aim_a__logic_error__trivial__aim_orthogonal" in cell_ids
-    assert "aim_a__logic_error__significant__aim_defeating" in cell_ids
-    assert "aim_a__logic_error__significant__aim_orthogonal" in cell_ids
+    assert "aim_a__logic_error__trivial" in cell_ids
+    assert "aim_a__logic_error__significant" in cell_ids
+    assert "aim_a__missing_edge_case__trivial" in cell_ids
+    assert "aim_a__missing_edge_case__significant" in cell_ids
 
-    # missing_edge_case only supports aim_defeating: 2 severities x 1 relation = 2
-    assert "aim_a__missing_edge_case__trivial__aim_defeating" in cell_ids
-    assert "aim_a__missing_edge_case__trivial__aim_orthogonal" not in cell_ids
-    assert "aim_a__missing_edge_case__significant__aim_defeating" in cell_ids
-
-    assert len(cells) == 6
+    assert len(cells) == 4
 
 
 def test_expand_items_appends_sample_index_and_keeps_cell_id():
