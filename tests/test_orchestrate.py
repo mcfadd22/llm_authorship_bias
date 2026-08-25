@@ -23,13 +23,12 @@ CONFIG = {
 }
 
 ITEM = {
-    "item_id": "aim_a__missing_edge_case__trivial__aim_defeating__000",
-    "cell_id": "aim_a__missing_edge_case__trivial__aim_defeating",
+    "item_id": "aim_a__missing_edge_case__trivial__000",
+    "cell_id": "aim_a__missing_edge_case__trivial",
     "sample_idx": 0,
     "aim_id": "aim_a",
     "bug_flavor": "missing_edge_case",
     "severity_tier": "trivial",
-    "bug_aim_relation": "aim_defeating",
 }
 
 GOOD_CODE = "def f(x):\n    total = 0\n    for n in x:\n        total += n\n    result = total\n    if not x:\n        return 0\n    return result / len(x)\n"
