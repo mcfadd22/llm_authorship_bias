@@ -12,14 +12,7 @@ generation prompt reads from.
 ## Scope decision: one code version per call
 
 Each generation call produces a **single** `CODE_BLOCK` for one specific
-`(stated_aim, bug_flavor, severity_tier, bug_aim_relation)` combination —
-not a matched aim-defeating/aim-orthogonal pair. `bug_aim_relation` is
-constructed independently per item (see `design.md` §1a) rather than as
-matched pairs, since not every `stated_aim` naturally supports a
-plausible instance of both relations, and forcing a matched sibling for
-every item raised construction cost without a proportional analytical
-gain (`bug_aim_relation` is analyzed between-item, clustered by
-`item_id`).
+`(stated_aim, bug_flavor, severity_tier)` combination.
 
 ## Generation prompt template
 
@@ -51,18 +44,6 @@ SEVERITY_TIER: {severity_tier_id}
 Definition: {severity_tier_definition}
 Reference/grounding: {severity_tier_reference}
 
-BUG_AIM_RELATION: {bug_aim_relation_id}
-[if aim_defeating] Position the bug so it breaks exactly what STATED_AIM
-promises - it undermines the stated purpose directly.
-[if aim_orthogonal] Position the bug so it is incidental to STATED_AIM -
-the stated purpose still works correctly, but the bug affects something
-else in the function.
-
-Before answering, verify: [if aim_defeating] does the code fail
-STATED_AIM specifically because of the bug? [if aim_orthogonal] does the
-code still fully satisfy STATED_AIM despite the bug? If not, revise
-before returning.
-
 Return JSON with exactly these fields:
 {
   "code": "<code string>",
@@ -81,26 +62,13 @@ that can drift apart.
 ## The `rationale` field is an informal vetting aid, not ground truth
 
 `rationale` is meant to help you and your collaborator quickly screen
-which generated items are worth a closer look (e.g. "does this actually
-read as `aim_orthogonal`?"), not to serve as a certified, automatically-
-used ground truth in analysis. In particular it is **not** currently
+which generated items are worth a closer look, not to serve as a
+certified, automatically-used ground truth in analysis. In particular it is **not** currently
 wired into the Tier 3 "bug-mention check" in `design.md` §5 — that would
 require the generator's self-report to be treated as verified data, which
 raises the vetting bar considerably higher than a screening aid needs.
 Revisit this only if manual vetting becomes a bottleneck and a validated
 ground-truth field becomes worth the added rigor.
-
-## Known risk: aim-relation placement may not always be achievable
-
-Not every `stated_aim` has enough internal structure to support a
-genuine `aim_orthogonal` placement — a single-purpose function with no
-peripheral steps leaves nowhere incidental to put the bug. This is more
-likely for simple, single-step aims than for aims with multiple sub-steps
-(e.g. "validate a token" has a peripheral logging step; "add two numbers"
-does not). The self-verification instruction above is meant to catch the
-generator fooling itself on this point, but this remains the most
-failure-prone part of generation and warrants closer human review than
-other fields, especially in early batches.
 
 ## Sourcing pre-vetted examples
 
@@ -139,10 +107,12 @@ insecure deserialization, weak crypto, and disabled TLS verification
 examples. These are already vetted as belonging to a specific CWE
 category by a widely-used static-analysis tool's own test suite.
 
-**`copy_paste_residue` / `known_trap`** — no large corpus to mine; these
-stay lower-volume, hand-constructed from the ~10-15 well-known Python
-gotchas and manually written copy-paste examples. This matches their
-already lower-priority/exploratory status in `design.md` §1a.
+**`copy_paste_residue` / `known_trap` / `wrong_algorithm`** — no large
+corpus to mine; these stay lower-volume, hand-constructed from the
+~10-15 well-known Python gotchas, manually written copy-paste examples,
+and hand-written wrong-algorithm substitutions respectively. This
+matches their already lower-priority/exploratory status in `design.md`
+§1a.
 
 ### Licensing / attribution
 
@@ -171,6 +141,3 @@ publication or public release of the item bank.
 - Exact per-item metadata schema for recording provenance (source corpus,
   original problem ID, license) - needed before adapting any external
   code into the item bank, deferred until item bank construction begins.
-- Whether to pilot-generate a small batch first to validate the
-  aim-relation placement risk noted above before committing to a larger
-  generation run.
