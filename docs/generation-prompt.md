@@ -47,8 +47,7 @@ Reference/grounding: {severity_tier_reference}
 Return JSON with exactly these fields:
 {
   "code": "<code string>",
-  "rationale": "<short technical note on what the bug is and where it is
-    in the code - for human vetting only, never shown to judge models>"
+  "rationale": "<short technical note on what the bug is and where it is in the code - for human vetting only, never shown to judge models>"
 }
 ```
 
