@@ -15,7 +15,7 @@ not seeded.
 | Factor | Levels | Notes |
 |---|---|---|
 | `author_label` | `none` (baseline), `self`, `other_model_A`, `other_model_B`, `generic_ai`, `human_developer` | `self` is resolved per judge model at elicitation time (e.g. judge=llama → label="Llama"). `other_model_A/B` should be named commercial models distinct from the judge, rotated so no single rival model is confounded with a specific bug/item. |
-| `stated_aim` | fixed per item, not manipulated | Plain functional description of what the code is supposed to do (e.g. "validate a password-reset token before allowing a password change," "sort a list of files by extension"). Held constant across all other-factor cells for a given item; exists to give `bug_aim_relation` something to be defined against. |
+| `stated_aim` | fixed per item, not manipulated | Plain functional description of what the code is supposed to do (e.g. "validate a password-reset token before allowing a password change," "sort a list of files by extension"). Held constant across all other-factor cells for a given item. |
 | `severity_tier` | `trivial`, `significant` | Property of the planted bug itself (technical consequence), held constant across all label cells for a given item. |
 | `bug_flavor` | `missing_edge_case`, `logic_error`, `security_vulnerability`, `silent_failure` (core); `copy_paste_residue`, `known_trap`, `wrong_algorithm` (exploratory, optional) | Not a primary test factor, but should be balanced across items so competence/carelessness/malice narratives have room to differ; worth an exploratory `bug_flavor:author_label` interaction. See §1a for definitions, examples, and predicted folk-psych profile per flavor. |
 
@@ -161,7 +161,7 @@ Three tiers, cheapest first, same as discussed:
    "solid grasp"), intent terms ("deliberately," "accidental,"
    "unintentional").
 2. **Blind classifier pass**: separate model, blind to
-   `author_label`/`bug_aim_relation`, codes each reasoning_text for (a)
+   `author_label`, codes each reasoning_text for (a)
    attributed cause bucket — competence / diligence / bad luck / malice,
    (b) net valence, (c) hedged vs. asserted confidence about the
    author's mental state.
@@ -229,8 +229,8 @@ explicitly stated)
   only after checking inter-rater/inter-classifier reliability on a
   held-out subset.
 - `authorship_belief_coded` as a moderator on any of the above.
-- Any three-way interaction (`author_label:bug_aim_relation:bug_flavor`,
-  etc.).
+- Any three-way interaction involving explored factors (e.g.,
+  `author_label:severity_tier:bug_flavor`, etc.).
 
 ### 6.3 Why the pooling in 6.1 also helps the streamlining question
 
@@ -241,11 +241,11 @@ somewhere in the bank) doesn't need to guarantee A and B are evenly
 represented *within the confirmatory test itself* — that guarantee is
 only needed for the exploratory A-vs-B contrast in 6.2, which can
 tolerate a noisier, best-effort balance since it isn't
-significance-tested against the same bar as H1–H4.
+significance-tested against the same bar as H1–H3.
 
 ### 6.4 Reporting convention
 
-State the confirmatory/exploratory split and the exact H1–H4 wording in
+State the confirmatory/exploratory split and the exact H1–H3 wording in
 the writeup before results, exactly as this section does now — so
 nothing here can be silently reclassified after seeing which tests
 came back significant.
