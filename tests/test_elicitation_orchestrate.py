@@ -140,8 +140,10 @@ def test_run_judge_writes_all_rows_and_resumes(tmp_path):
 
 def test_run_judge_limit_applies_after_resume(tmp_path):
     opts = _options(tmp_path, limit=1)
-    run_judge(FakeClient(), JUDGE, CONFIG, ITEMS, opts)
-    run_judge(FakeClient(), JUDGE, CONFIG, ITEMS, opts)
+    first = run_judge(FakeClient(), JUDGE, CONFIG, ITEMS, opts)
+    assert first == {"generated": 1, "skipped": 0, "failed": 0}
+    second = run_judge(FakeClient(), JUDGE, CONFIG, ITEMS, opts)
+    assert second == {"generated": 1, "skipped": 1, "failed": 0}
     out = opts.out_dir / "j.jsonl"
     assert len(out.read_text().splitlines()) == 2
 

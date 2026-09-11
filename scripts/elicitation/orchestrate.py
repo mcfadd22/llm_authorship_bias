@@ -105,9 +105,10 @@ def plan_rows(judge: Dict, config: Dict, items: List[Dict], options: RunOptions)
     out_path = options.out_dir / f"{judge['id']}.jsonl"
     existing = set() if options.overwrite else load_existing_keys(out_path)
     pending = [r for r in rows if row_key(r) not in existing]
+    skipped = len(rows) - len(pending)
     if options.limit is not None:
         pending = pending[: options.limit]
-    return pending, len(rows) - len(pending)
+    return pending, skipped
 
 
 def run_judge(
