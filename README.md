@@ -15,4 +15,23 @@ confirmatory/exploratory pre-registration split.
 - `config/` — machine-readable vignette parameters (see `docs/config-schema.md`)
 - `scripts/` — elicitation and data-generation scripts
 - `analysis/` — analysis code (WCB clustering, Holm correction, NLP coding pass)
-- `data/` — raw/intermediate data (gitignored except placeholder)
+- `data/` — raw/intermediate data (gitignored except the item bank)
+
+## Pipeline
+
+1. **Generate items** — `scripts/generate_items.py` (OpenRouter, `OPENROUTER_API_KEY`). Output:
+   `data/items/*.json`, tracked in git. Already run: 41 items, one per cell.
+2. **Elicit judgments** — `scripts/run_elicitation.py` (Anthropic + OpenAI SDKs,
+   `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`). Crosses every item with every `author_label` and
+   every question in `config/questions.json`, one fresh call each, per judge in
+   `config/judge_models.json`. Output: `data/elicitation/{judge_id}.jsonl` (gitignored),
+   one row per call in the design.md §4 schema. Resumable; `--dry-run` prints counts and a
+   cost estimate. See `docs/superpowers/specs/2026-09-11-elicitation-pipeline-design.md`.
+
+   ```bash
+   pip install -r requirements.txt
+   python scripts/run_elicitation.py --dry-run
+   python scripts/run_elicitation.py --judge claude-sonnet-5 --limit 20   # pilot
+   python scripts/run_elicitation.py                                       # full run, all judges
+   ```
+3. **Analysis** — not yet written (`analysis/`).

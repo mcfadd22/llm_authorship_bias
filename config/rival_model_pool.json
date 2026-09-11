@@ -1,4 +1,9 @@
 {
-  "pool": [],
-  "resolution_rule": "For each judge/item, select two distinct entries from `pool`, excluding any entry whose id matches the current judge, and rotate assignment across items so no single rival is confounded with a specific item/bug. Assign one to other_model_A, one to other_model_B."
+  "pool": [
+    {"id": "claude", "display_name": "Claude"},
+    {"id": "gpt", "display_name": "GPT-5"},
+    {"id": "gemini", "display_name": "Gemini"},
+    {"id": "llama", "display_name": "Llama"}
+  ],
+  "resolution_rule": "For each judge, drop every pool entry whose id equals the judge's family. Sort items by item_id; for the item at index i, other_model_A = remaining[i mod n] and other_model_B = remaining[(i + 1) mod n]. Deterministic, distinct, and each rival cycles across items so no single rival is confounded with a specific item/bug."
 }
