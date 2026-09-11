@@ -42,9 +42,9 @@ class FakeClient:
         if self.always_fail or len(self.calls) <= self.fail_first:
             raise ElicitationError("boom")
         if "score" in schema["properties"]:
-            data = {"score": 4, "explanation": "because"}
+            data = {"score": 4, "explanation": "because the code has a mutable default argument"}
         else:
-            data = {"answer": "a human"}
+            data = {"answer": "most likely a human developer"}
         return JudgeResponse(data=data, raw_text=json.dumps(data), model="served",
                              usage={"input_tokens": 1}, thinking=None)
 
@@ -69,7 +69,7 @@ def test_elicit_one_scaled_row_shape():
     record = elicit_one(client, _row("other_model_A", "q_blame"), JUDGE, CONFIG,
                         ITEMS[0], max_retries=3)
     assert record["scale_response"] == 4
-    assert record["reasoning_text"] == "because"
+    assert record["reasoning_text"] == "because the code has a mutable default argument"
     assert record["authorship_belief_raw"] is None
     assert record["authorship_belief_coded"] is None
     assert record["rival_a"] == "gpt"
@@ -77,7 +77,7 @@ def test_elicit_one_scaled_row_shape():
     assert record["author_sentence"] == "This function was written by GPT-5."
     assert record["prompt"].startswith("This function is supposed to compute the average.")
     assert record["prompt"].endswith("Blame?")
-    assert record["raw_response"] == json.dumps({"score": 4, "explanation": "because"})
+    assert record["raw_response"] == json.dumps({"score": 4, "explanation": "because the code has a mutable default argument"})
     assert record["response_model"] == "served"
     assert record["usage"] == {"input_tokens": 1}
     assert record["prompt_version"] == "2026-09-11-v1"
@@ -91,7 +91,7 @@ def test_elicit_one_free_row_shape():
                         ITEMS[0], max_retries=3)
     assert record["scale_response"] is None
     assert record["reasoning_text"] is None
-    assert record["authorship_belief_raw"] == "a human"
+    assert record["authorship_belief_raw"] == "most likely a human developer"
     assert record["author_sentence"] is None
     assert "written by" not in record["prompt"]
 
@@ -117,6 +117,30 @@ def test_elicit_one_rejects_out_of_range_score():
 
     with pytest.raises(RuntimeError, match="score"):
         elicit_one(BadScore(), _row(), JUDGE, CONFIG, ITEMS[0], max_retries=1)
+
+
+@pytest.mark.parametrize("answer", ["", "...", ")", "   ", "a human"])
+def test_elicit_one_rejects_degenerate_free_answer(answer):
+    class Degenerate(FakeClient):
+        def ask(self, prompt, schema):
+            self.calls.append(prompt)
+            data = {"answer": answer}
+            return JudgeResponse(data=data, raw_text="", model="m", usage={}, thinking=None)
+
+    client = Degenerate()
+    with pytest.raises(RuntimeError, match="degenerate"):
+        elicit_one(client, _row("none", "q_authorship_belief"), JUDGE, CONFIG, ITEMS[0], max_retries=2)
+    assert len(client.calls) == 2
+
+
+def test_elicit_one_rejects_degenerate_explanation():
+    class Degenerate(FakeClient):
+        def ask(self, prompt, schema):
+            data = {"score": 3, "explanation": "..."}
+            return JudgeResponse(data=data, raw_text="", model="m", usage={}, thinking=None)
+
+    with pytest.raises(RuntimeError, match="explanation degenerate"):
+        elicit_one(Degenerate(), _row(), JUDGE, CONFIG, ITEMS[0], max_retries=1)
 
 
 def test_run_judge_writes_all_rows_and_resumes(tmp_path):

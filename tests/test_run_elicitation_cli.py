@@ -55,7 +55,7 @@ def test_run_uses_fake_client_and_writes_rows(tmp_path, monkeypatch):
 
     class Fake:
         def ask(self, prompt, schema):
-            data = {"score": 2, "explanation": "e"} if "score" in schema["properties"] else {"answer": "a"}
+            data = {"score": 2, "explanation": "explanation long enough to pass"} if "score" in schema["properties"] else {"answer": "answer long enough to pass validation"}
             return JudgeResponse(data=data, raw_text=json.dumps(data), model="m", usage={}, thinking=None)
 
     monkeypatch.setenv("ANTHROPIC_API_KEY", "x")
