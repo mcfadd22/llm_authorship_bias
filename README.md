@@ -36,16 +36,17 @@ confirmatory/exploratory pre-registration split.
    ```
 3. **Analysis** — not yet written (`analysis/`).
 
-## Results so far (partial, 2026-09-13)
+## Results (complete, 2026-09-13)
 
 Raw elicitation rows are tracked in `data/elicitation/{judge_id}.jsonl` to enable analysis
-directly from the repo. One row per call; see the spec above for the field list.
+directly from the repo. One row per call; see the spec above for the field list. Full crossing:
+41 items x 6 author labels x 4 questions = 984 rows per judge, one repeat.
 
-| judge | rows | of | status |
+| judge | served model | rows | notes |
 |---|---|---|---|
-| `gpt-5` (served as `gpt-5-2025-08-07`) | 984 | 984 | complete |
-| `claude-sonnet-5` | 483 | 984 | paused (API credits) |
-| `claude-opus-5` | 291 | 984 | paused (API credits) |
+| `claude-opus-5` | `claude-opus-5` | 984 | |
+| `claude-sonnet-5` | `claude-sonnet-5` | 984 | 7 empty belief answers + 6 max_tokens truncations were re-asked (see git history) |
+| `gpt-5` | `gpt-5-2025-08-07` | 984 | |
 
-Resume the Claude runs with `python scripts/run_elicitation.py --judge claude-sonnet-5` and
-`--judge claude-opus-5`; existing rows are skipped.
+Provider defaults for thinking/reasoning were left in place and differ across judges; the
+`thinking` field is null on every row because neither provider returns reasoning text by default.
