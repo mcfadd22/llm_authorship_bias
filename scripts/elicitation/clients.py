@@ -29,7 +29,7 @@ FREE_SCHEMA: Dict = {
     "additionalProperties": False,
 }
 
-MAX_OUTPUT_TOKENS = 4096
+MAX_OUTPUT_TOKENS = 16000
 
 
 @dataclass
