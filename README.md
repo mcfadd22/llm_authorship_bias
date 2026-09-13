@@ -35,3 +35,17 @@ confirmatory/exploratory pre-registration split.
    python scripts/run_elicitation.py                                       # full run, all judges
    ```
 3. **Analysis** — not yet written (`analysis/`).
+
+## Results so far (partial, 2026-09-13)
+
+Raw elicitation rows are tracked in `data/elicitation/{judge_id}.jsonl` to enable analysis
+directly from the repo. One row per call; see the spec above for the field list.
+
+| judge | rows | of | status |
+|---|---|---|---|
+| `gpt-5` (served as `gpt-5-2025-08-07`) | 984 | 984 | complete |
+| `claude-sonnet-5` | 483 | 984 | paused (API credits) |
+| `claude-opus-5` | 291 | 984 | paused (API credits) |
+
+Resume the Claude runs with `python scripts/run_elicitation.py --judge claude-sonnet-5` and
+`--judge claude-opus-5`; existing rows are skipped.

@@ -14,6 +14,8 @@ data/*
 !data/items/
 !data/items/**
 !data/items.csv
+!data/elicitation/
+!data/elicitation/*.jsonl
 
 # Environment / secrets
 .env
