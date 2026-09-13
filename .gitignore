@@ -19,3 +19,4 @@ data/*
 
 # Environment / secrets
 .env
+data/elicitation/logs/
