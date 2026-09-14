@@ -1,6 +1,6 @@
 # Config Schema: Vignette Parameters
 
-**Status:** draft, pending fill-in of rubric/model/aim content by collaborators.
+**Status:** populated; all files in use by `scripts/generate_items.py` and `scripts/run_elicitation.py`.
 
 This doc specifies the machine-readable config that holds the concrete values
 and categorical-factor definitions needed to generate vignettes per
@@ -152,20 +152,24 @@ pre-filled `reference` text.
 
 ### `config/judge_models.json`
 
-Empty list to populate with the actual judge models to run. `display_name`
-is what gets substituted into `author_labels.json`'s `self` template.
+The judge models to run. `display_name` is what gets substituted into
+`author_labels.json`'s `self` template. `provider` (`anthropic` | `openai`) selects the
+API client in `scripts/elicitation/clients.py`; `model` is the provider's model ID.
 
 ```json
-{"judges": []}
+{"judges": [
+  {"id": "claude-opus-5", "family": "claude", "tuning": "opus-5", "display_name": "Claude",
+   "provider": "anthropic", "model": "claude-opus-5"}
+]}
 ```
 
-Each entry, once filled in: `{"id": "...", "family": "...", "tuning": "...",
-"display_name": "..."}`.
+`family` is also what `rival_model_pool.json` excludes on, so a judge never gets its own
+family as a rival.
 
 ### `config/rival_model_pool.json`
 
-Empty pool to populate with the fixed set of named rival models used for
-`other_model_A`/`other_model_B`. A **fixed pool with per-judge exclusion**
+The fixed pool of named rival models used for `other_model_A`/`other_model_B`. Entries are
+display names only; rivals are never called. A **fixed pool with per-judge exclusion**
 was chosen over either a pure fixed pair or a pure per-judge resolution: a
 fixed pair breaks if the judge itself is in the pair (self-as-rival is
 incoherent), while resolving purely per-judge ("the other two frontier
@@ -174,12 +178,24 @@ contrast (design.md §6.2) needs to be meaningful across the item bank.
 
 ```json
 {
-  "pool": [],
-  "resolution_rule": "For each judge/item, select two distinct entries from `pool`, excluding any entry whose id matches the current judge, and rotate assignment across items so no single rival is confounded with a specific item/bug. Assign one to other_model_A, one to other_model_B."
+  "pool": [{"id": "claude", "display_name": "Claude"}, {"id": "gpt", "display_name": "GPT-5"}, ...],
+  "resolution_rule": "For each judge, drop every pool entry whose id equals the judge's family. Sort items by item_id; for the item at index i, other_model_A = remaining[i mod n] and other_model_B = remaining[(i + 1) mod n]."
 }
 ```
 
-Each pool entry, once filled in: `{"id": "...", "display_name": "..."}`.
+Implemented in `scripts/elicitation/rivals.py`; `id` matches against the judge's `family`.
+
+### `config/questions.json`
+
+The elicitation question battery from `design.md` §3, as versioned data. `kind` is `scaled`
+(response schema `{score: 1-7, explanation}`) or `free` (`{answer}`).
+
+```json
+{"questions": [
+  {"id": "q_blame", "kind": "scaled", "text": "How much is the author to blame for this? ..."},
+  {"id": "q_authorship_belief", "kind": "free", "text": "Independent of anything you were told above, ..."}
+]}
+```
 
 ### `config/stated_aims.json`
 
@@ -212,7 +228,8 @@ Each entry, once filled in:
 - Every `severity_tiers_supported` entry in `stated_aims.json` must match an `id` present in
   `severity_tier.json`.
 - Every judge referenced during elicitation must have a corresponding entry
-  in `judge_models.json`.
+  in `judge_models.json`, with `provider` in {`anthropic`, `openai`}.
+- Every `questions.json` entry has `kind` in {`scaled`, `free`}.
 - `rival_model_pool.json`'s `pool` must contain at least 3 entries so that,
   for any given judge, at least 2 non-judge rivals remain to fill
   `other_model_A`/`other_model_B`.

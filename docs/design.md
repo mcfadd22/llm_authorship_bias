@@ -1,6 +1,7 @@
 # Authorship-Label Folk-Psychology Ascription: Prompt Template
 
-**Status:** draft template for elicitation, pending pilot. Designed to slot
+**Status:** first full elicitation wave collected 2026-09-13 (see `docs/status-2026-09-13.md`);
+treat as pilot because the analysis was not locked before collection (§6.1). Designed to slot
 into the existing `analyze_sign_wcb.py`-style pipeline (WCB clustering by
 item, Holm correction per family/tuning/question) with `author_label_c` and
 `purpose_valence_c` replacing `sign_c` as the primary manipulated factors.
@@ -258,15 +259,15 @@ came back significant.
   judge/item by excluding whichever model is the current judge and
   rotating assignment across items. See `docs/config-schema.md`
   (`rival_model_pool.json`) for the exact resolution rule.
-- Whether q_intentionality/q_explanation/q_blame should all run on
+- ~~Whether q_intentionality/q_explanation/q_blame should all run on
   every item for every label cell, or whether a partial (Latin-square)
-  design is needed to keep elicitation cost tractable — the design is
-  `author_label` (6) × `severity_tier` (2) × `bug_flavor` (4 core), i.e.
-  48 cells per item before even multiplying by question type; full
-  crossing on every item is likely not affordable, so decide early
-  whether to (a) run the full cross on a small number of items, or (b)
-  run a reduced label set (e.g. drop one of `other_model_A/B` or
-  `human_developer`) on more items.
+  design is needed~~ — **Resolved**: full crossing. `severity_tier` and
+  `bug_flavor` are properties of an item, not crossed within it, so the
+  per-item cost is 6 labels × 4 questions = 24 calls; 41 items × 3 judges
+  came to ~2,950 calls and ~$45. No reduction needed.
 - Number and diversity of `bug_flavor` items needed per severity tier to
   support the exploratory `bug_flavor:author_label` interaction without
-  under-powering the primary tests.
+  under-powering the primary tests. **Still open**: the first wave has 41
+  items (28 trivial / 13 significant; exploratory flavors 3 cells each),
+  one sample per cell — adequate for H1–H3 main effects, underpowered
+  for interactions and for the `significant` tier on its own.
