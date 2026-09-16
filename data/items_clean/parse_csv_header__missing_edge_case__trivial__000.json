@@ -1,0 +1,15 @@
+{
+  "item_id": "parse_csv_header__missing_edge_case__trivial__000",
+  "cell_id": "parse_csv_header__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "parse_csv_header__missing_edge_case__trivial__000",
+  "code": "def parse_header(line):\n    if not line:\n        return []\n    parts = line.split(',')\n    columns = []\n    for part in parts:\n        stripped = part.strip()\n        if stripped:\n            columns.append(stripped)\n    return columns",
+  "fix_rationale": "Added an explicit check at the beginning to return an empty list immediately if the input line is empty, ensuring the edge case of empty string input is handled correctly before attempting to split and process it.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:47.025667+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

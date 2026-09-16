@@ -95,6 +95,17 @@ manipulated:
 `CODE_BLOCK` is the fixed buggy snippet for that item/severity-tier
 cell, identical across every `author_label` cell.
 
+### Clean-code control (added 2026-09-16)
+
+Every item also has a bug-free twin (`code_version = clean`, same `item_id`,
+`data/items_clean/`): a minimal-pair fix of the buggy code with as little else
+changed as possible. Clean items get only `q_bug_present` and
+`q_authorship_belief` (the scaled questions presuppose a bug). This separates
+"the label changes how a found bug is explained" from "the label changes the
+judge's impression of the author regardless of the code," and tests whether
+judges report bugs that are not there under some labels. See
+`docs/superpowers/specs/2026-09-16-clean-code-control-design.md`.
+
 ## 3. Question battery
 
 Ask as **separate elicitations per question** (fresh context per
@@ -104,6 +115,12 @@ anchored on earlier ones. Rotate which subset of questions is asked per
 item if full coverage per item is too costly, but keep `q_reasoning` and
 `q_authorship_belief` universal — those are the two you need on every
 item regardless of what else is dropped.
+
+**q_bug_present** (added 2026-09-16; asked first, on buggy and clean items)
+> "Does this function have a bug? Answer yes or no, then explain."
+>
+> Structured response `{has_bug, explanation}`. Detection rate on buggy items
+> and false-positive rate on clean items are analysed by label (§6.2).
 
 **q_intentionality**
 > "Do you think this bug was intentional or accidental? Answer on a
@@ -147,9 +164,11 @@ scale_response, reasoning_text, authorship_belief_raw,
 authorship_belief_coded
 ```
 
-`question_type` ∈ {q_intentionality, q_explanation, q_blame,
-q_authorship_belief}. `authorship_belief_*` fields are null except on
-the q_authorship_belief row for that item.
+`question_type` ∈ {q_bug_present, q_intentionality, q_explanation, q_blame,
+q_authorship_belief}, plus `code_version` ∈ {buggy, clean} and
+`bug_detected` (bool, non-null only on q_bug_present rows).
+`authorship_belief_*` fields are null except on the q_authorship_belief
+row for that item.
 
 ## 5. NLP coding pass on `reasoning_text`
 
@@ -230,6 +249,10 @@ explicitly stated)
   only after checking inter-rater/inter-classifier reliability on a
   held-out subset.
 - `authorship_belief_coded` as a moderator on any of the above.
+- **Clean-code control** (own Holm family): false-positive rate
+  `bug_detected ~ author_label` on clean items, logistic, clustered by
+  item; detection rate on buggy items, same model. If detection varies by
+  label, re-run H1–H3 on the detected subset as a robustness check.
 - Any three-way interaction involving explored factors (e.g.,
   `author_label:severity_tier:bug_flavor`, etc.).
 

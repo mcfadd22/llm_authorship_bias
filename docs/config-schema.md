@@ -188,7 +188,9 @@ Implemented in `scripts/elicitation/rivals.py`; `id` matches against the judge's
 ### `config/questions.json`
 
 The elicitation question battery from `design.md` §3, as versioned data. `kind` is `scaled`
-(response schema `{score: 1-7, explanation}`) or `free` (`{answer}`).
+(response schema `{score: 1-7, explanation}`), `detect` (`{has_bug: bool, explanation}`), or
+`free` (`{answer}`). `applies_to` lists the `code_version`s (`buggy`, `clean`) the question is
+asked on; omitted means `["buggy"]`.
 
 ```json
 {"questions": [
@@ -229,7 +231,8 @@ Each entry, once filled in:
   `severity_tier.json`.
 - Every judge referenced during elicitation must have a corresponding entry
   in `judge_models.json`, with `provider` in {`anthropic`, `openai`}.
-- Every `questions.json` entry has `kind` in {`scaled`, `free`}.
+- Every `questions.json` entry has `kind` in {`scaled`, `detect`, `free`} and `applies_to`
+  values in {`buggy`, `clean`}.
 - `rival_model_pool.json`'s `pool` must contain at least 3 entries so that,
   for any given judge, at least 2 non-judge rivals remain to fill
   `other_model_A`/`other_model_B`.

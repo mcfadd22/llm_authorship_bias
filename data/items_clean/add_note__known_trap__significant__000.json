@@ -1,0 +1,15 @@
+{
+  "item_id": "add_note__known_trap__significant__000",
+  "cell_id": "add_note__known_trap__significant",
+  "sample_idx": 0,
+  "aim_id": "add_note",
+  "bug_flavor": "known_trap",
+  "severity_tier": "significant",
+  "code_version": "clean",
+  "source_item_id": "add_note__known_trap__significant__000",
+  "code": "def append_note(note, notes=None):\n    if notes is None:\n        notes = []\n    notes.append(note)\n    return notes",
+  "fix_rationale": "Changed the default parameter from notes=[] to notes=None and added a check to create a new empty list when notes is None, preventing the mutable default argument trap where the same list object would be reused across calls.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:02:46.257848+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

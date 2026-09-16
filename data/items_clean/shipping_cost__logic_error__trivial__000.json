@@ -1,0 +1,15 @@
+{
+  "item_id": "shipping_cost__logic_error__trivial__000",
+  "cell_id": "shipping_cost__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "shipping_cost__logic_error__trivial__000",
+  "code": "def calculate_shipping_cost(weight):\n    if weight <= 0:\n        return 0\n    elif weight <= 5:\n        return 5.00\n    elif weight <= 10:\n        return 8.50\n    elif weight <= 20:\n        return 12.00\n    else:\n        return 18.00",
+  "fix_rationale": "Changed the fourth condition from 'elif weight >= 20:' to 'else:' and removed the unreachable final else branch. This ensures weights over 20 correctly return 18.00 instead of creating overlapping conditions.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:04:46.807364+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

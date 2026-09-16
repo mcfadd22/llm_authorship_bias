@@ -1,0 +1,15 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__significant__000",
+  "cell_id": "process_orders_revenue__silent_failure__significant",
+  "sample_idx": 0,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "significant",
+  "code_version": "clean",
+  "source_item_id": "process_orders_revenue__silent_failure__significant__000",
+  "code": "import json\n\ndef process_orders(orders_json):\n    orders = json.loads(orders_json)\n    total_revenue = 0.0\n    processed_orders = []\n    failed_orders = []\n    \n    for order in orders:\n        try:\n            order_id = order['id']\n            amount = float(order['amount'])\n            quantity = int(order['quantity'])\n            order_total = amount * quantity\n            total_revenue += order_total\n            processed_orders.append(order_id)\n        except (KeyError, ValueError, TypeError):\n            failed_orders.append(order.get('id', 'unknown'))\n    \n    return {\n        'total_revenue': total_revenue,\n        'processed_count': len(processed_orders),\n        'processed_orders': processed_orders,\n        'failed_orders': failed_orders\n    }",
+  "fix_rationale": "Added a failed_orders list to track orders that couldn't be processed due to exceptions, and included it in the return dictionary so the caller can detect when orders were skipped.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:58.759717+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

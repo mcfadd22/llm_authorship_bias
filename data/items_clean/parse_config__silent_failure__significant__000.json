@@ -1,0 +1,15 @@
+{
+  "item_id": "parse_config__silent_failure__significant__000",
+  "cell_id": "parse_config__silent_failure__significant",
+  "sample_idx": 0,
+  "aim_id": "parse_config",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "significant",
+  "code_version": "clean",
+  "source_item_id": "parse_config__silent_failure__significant__000",
+  "code": "import json\n\ndef parse_config(config_string):\n    data = json.loads(config_string)\n    \n    if 'retry_count' not in data:\n        data['retry_count'] = 3\n    \n    return data",
+  "fix_rationale": "Removed the try-except block that was silently catching json.JSONDecodeError and returning an empty dict. Now the function allows the exception to propagate to the caller, so they are aware when JSON parsing fails.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:38.484570+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

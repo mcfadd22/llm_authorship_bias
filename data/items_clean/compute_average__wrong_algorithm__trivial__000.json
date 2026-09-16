@@ -1,0 +1,15 @@
+{
+  "item_id": "compute_average__wrong_algorithm__trivial__000",
+  "cell_id": "compute_average__wrong_algorithm__trivial",
+  "sample_idx": 0,
+  "aim_id": "compute_average",
+  "bug_flavor": "wrong_algorithm",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "compute_average__wrong_algorithm__trivial__000",
+  "code": "def calculate_average(numbers):\n    if not numbers:\n        return 0\n    total = 0\n    for num in numbers:\n        total += num\n    return total / len(numbers)",
+  "fix_rationale": "Added division by len(numbers) to the return statement to compute the average instead of just returning the sum.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:22.402376+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

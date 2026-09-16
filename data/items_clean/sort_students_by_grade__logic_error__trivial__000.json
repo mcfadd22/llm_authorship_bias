@@ -1,0 +1,15 @@
+{
+  "item_id": "sort_students_by_grade__logic_error__trivial__000",
+  "cell_id": "sort_students_by_grade__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "sort_students_by_grade",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "sort_students_by_grade__logic_error__trivial__000",
+  "code": "def process_student_records(records):\n    sorted_records = sorted(records, key=lambda x: x['grade'], reverse=True)\n    grade_counts = {}\n    for record in sorted_records:\n        grade = record['grade']\n        grade_counts[grade] = grade_counts.get(grade, 0) + 1\n    tied_count = 0\n    for count in grade_counts.values():\n        if count >= 2:\n            tied_count += 1\n    stats = {'tied_grades': tied_count}\n    return {'sorted': sorted_records, 'stats': stats}",
+  "fix_rationale": "Changed 'tied_count += count' to 'tied_count += 1' so that the function counts the number of distinct grades that have ties, rather than the total number of students with tied grades.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:04:54.142426+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

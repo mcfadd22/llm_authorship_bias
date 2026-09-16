@@ -1,0 +1,15 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__significant__000",
+  "cell_id": "reset_token_validation__missing_edge_case__significant",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "significant",
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__missing_edge_case__significant__000",
+  "code": "import hmac\nimport hashlib\nimport time\n\ndef validate_reset_token(stored_token, provided_token, expiry_timestamp, secret_key):\n    if not stored_token or not provided_token:\n        return False\n    current_time = time.time()\n    if current_time > expiry_timestamp:\n        return False\n    expected_signature = hmac.new(\n        secret_key.encode(),\n        stored_token.encode(),\n        hashlib.sha256\n    ).hexdigest()\n    provided_signature = hmac.new(\n        secret_key.encode(),\n        provided_token.encode(),\n        hashlib.sha256\n    ).hexdigest()\n    if not hmac.compare_digest(expected_signature, provided_signature):\n        return False\n    return True",
+  "fix_rationale": "Added a check at the beginning to return False if either stored_token or provided_token is None or empty, preventing AttributeError and ensuring degenerate inputs are explicitly rejected.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:04:26.661811+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

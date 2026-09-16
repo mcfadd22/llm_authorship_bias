@@ -1,0 +1,15 @@
+{
+  "item_id": "average_temperature__missing_edge_case__trivial__000",
+  "cell_id": "average_temperature__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "average_temperature__missing_edge_case__trivial__000",
+  "code": "def calculate_average_temperature(readings):\n    if len(readings) == 0:\n        return None\n    total = 0\n    for temp in readings:\n        total += temp\n    average = total / len(readings)\n    return average",
+  "fix_rationale": "Added a boundary check at the start of the function to return None when the input list is empty, preventing the ZeroDivisionError that would occur when dividing by zero.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:02:58.941371+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

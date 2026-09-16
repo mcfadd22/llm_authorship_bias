@@ -1,0 +1,15 @@
+{
+  "item_id": "shipping_cost__wrong_algorithm__trivial__000",
+  "cell_id": "shipping_cost__wrong_algorithm__trivial",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "wrong_algorithm",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "shipping_cost__wrong_algorithm__trivial__000",
+  "code": "def calculate_shipping_cost(weight):\n    tier_limits = [5, 10, 20, 50]\n    tier_costs = [5.00, 7.50, 10.00, 12.50, 15.00]\n    \n    tier_index = 0\n    for limit in tier_limits:\n        if weight > limit:\n            tier_index += 1\n    \n    total_cost = tier_costs[tier_index]\n    return total_cost",
+  "fix_rationale": "Added a tier_costs list that maps each weight tier to its corresponding shipping cost, and changed the return calculation to look up the cost from this list using the tier_index instead of adding tier_index to base_rate.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:04:50.717412+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

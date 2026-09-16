@@ -1,0 +1,15 @@
+{
+  "item_id": "celsius_to_fahrenheit__wrong_algorithm__trivial__000",
+  "cell_id": "celsius_to_fahrenheit__wrong_algorithm__trivial",
+  "sample_idx": 0,
+  "aim_id": "celsius_to_fahrenheit",
+  "bug_flavor": "wrong_algorithm",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "celsius_to_fahrenheit__wrong_algorithm__trivial__000",
+  "code": "def convert_temperature(celsius):\n    fahrenheit = (celsius * 9 / 5) + 32\n    return fahrenheit",
+  "fix_rationale": "Changed the formula from (celsius - 32) * 5 / 9 to (celsius * 9 / 5) + 32 to correctly convert from Celsius to Fahrenheit instead of the reverse direction.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:17.261018+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

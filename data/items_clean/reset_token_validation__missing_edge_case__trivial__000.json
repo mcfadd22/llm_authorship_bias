@@ -1,0 +1,15 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__trivial__000",
+  "cell_id": "reset_token_validation__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__missing_edge_case__trivial__000",
+  "code": "import hashlib\nimport time\n\ndef validate_reset_token(token, user_id, generated_at, secret_key):\n    expected_payload = f\"{user_id}:{generated_at}:{secret_key}\"\n    expected_token = hashlib.sha256(expected_payload.encode()).hexdigest()\n    \n    if token != expected_token:\n        return False\n    \n    current_time = time.time()\n    token_age = current_time - generated_at\n    \n    if token_age < 0 or token_age > 3600:\n        return False\n    \n    return True",
+  "fix_rationale": "Added a check to reject tokens when token_age is negative, which occurs when generated_at is in the future due to clock skew or timestamp tampering.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:04:29.844521+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

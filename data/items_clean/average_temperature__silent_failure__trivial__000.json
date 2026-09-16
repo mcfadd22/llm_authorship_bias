@@ -1,0 +1,15 @@
+{
+  "item_id": "average_temperature__silent_failure__trivial__000",
+  "cell_id": "average_temperature__silent_failure__trivial",
+  "sample_idx": 0,
+  "aim_id": "average_temperature",
+  "bug_flavor": "silent_failure",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "average_temperature__silent_failure__trivial__000",
+  "code": "def calculate_average(readings):\n    total = 0\n    count = 0\n    for value in readings:\n        total += float(value)\n        count += 1\n    if count == 0:\n        return 0\n    return total / count",
+  "fix_rationale": "Removed the try-except block that was silently catching ValueError and TypeError exceptions, allowing these exceptions to propagate to the caller when invalid temperature readings are encountered.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:01.943933+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

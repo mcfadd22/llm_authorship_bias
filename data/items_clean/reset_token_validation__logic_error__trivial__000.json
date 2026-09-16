@@ -1,0 +1,15 @@
+{
+  "item_id": "reset_token_validation__logic_error__trivial__000",
+  "cell_id": "reset_token_validation__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__logic_error__trivial__000",
+  "code": "import hashlib\nimport time\n\ndef validate_reset_token(token, stored_hash, timestamp, expiry_hours=24):\n    current_time = time.time()\n    token_age = current_time - timestamp\n    max_age = expiry_hours * 3600\n    \n    if token_age > max_age:\n        return False\n    \n    token_hash = hashlib.sha256(token.encode()).hexdigest()\n    \n    if token_hash == stored_hash:\n        return True\n    \n    return False",
+  "fix_rationale": "Changed the comparison operator on line 13 from != to == so the function returns True when the token hash matches the stored hash, and False when it doesn't match.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:04:22.970540+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

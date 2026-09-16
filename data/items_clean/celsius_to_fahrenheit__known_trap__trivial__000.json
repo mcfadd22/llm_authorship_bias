@@ -1,0 +1,15 @@
+{
+  "item_id": "celsius_to_fahrenheit__known_trap__trivial__000",
+  "cell_id": "celsius_to_fahrenheit__known_trap__trivial",
+  "sample_idx": 0,
+  "aim_id": "celsius_to_fahrenheit",
+  "bug_flavor": "known_trap",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "celsius_to_fahrenheit__known_trap__trivial__000",
+  "code": "def convert_temperature(celsius, cache=None):\n    if cache is None:\n        cache = {}\n    if celsius in cache:\n        return cache[celsius]\n    fahrenheit = (celsius * 9 / 5) + 32\n    cache[celsius] = fahrenheit\n    return fahrenheit",
+  "fix_rationale": "Changed the default argument from cache={} to cache=None and added a check to initialize cache as an empty dictionary if None, preventing the mutable default argument trap where the dictionary persists across function calls.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:14.882488+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

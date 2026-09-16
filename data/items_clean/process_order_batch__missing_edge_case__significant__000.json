@@ -1,0 +1,15 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__significant__000",
+  "cell_id": "process_order_batch__missing_edge_case__significant",
+  "sample_idx": 0,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "significant",
+  "code_version": "clean",
+  "source_item_id": "process_order_batch__missing_edge_case__significant__000",
+  "code": "def process_orders(orders):\n    if orders is None:\n        return []\n    charged_ids = []\n    for order in orders:\n        order_id = order['id']\n        amount = order['amount']\n        payment_method = order['payment_method']\n        \n        if payment_method == 'credit_card':\n            card_number = order['card_number']\n            if len(card_number) == 16 and amount > 0:\n                charged_ids.append(order_id)\n        elif payment_method == 'debit_card':\n            card_number = order['card_number']\n            if len(card_number) == 16 and amount > 0:\n                charged_ids.append(order_id)\n        elif payment_method == 'paypal':\n            email = order['email']\n            if '@' in email and amount > 0:\n                charged_ids.append(order_id)\n    \n    return charged_ids",
+  "fix_rationale": "Added a None-check at the beginning of the function to return an empty list when orders is None, preventing the TypeError when attempting to iterate over None.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:51.174929+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

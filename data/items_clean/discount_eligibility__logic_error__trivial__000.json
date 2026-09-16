@@ -1,0 +1,15 @@
+{
+  "item_id": "discount_eligibility__logic_error__trivial__000",
+  "cell_id": "discount_eligibility__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "discount_eligibility",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "discount_eligibility__logic_error__trivial__000",
+  "code": "def check_discount_eligibility(balance, threshold):\n    if balance > threshold:\n        return True\n    else:\n        return False",
+  "fix_rationale": "Changed the comparison operator from <= to > so that the function correctly returns True when the balance exceeds the threshold, matching the stated aim of determining eligibility based on balance exceeding a threshold.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:25.032261+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

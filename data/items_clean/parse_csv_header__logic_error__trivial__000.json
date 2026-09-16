@@ -1,0 +1,15 @@
+{
+  "item_id": "parse_csv_header__logic_error__trivial__000",
+  "cell_id": "parse_csv_header__logic_error__trivial",
+  "sample_idx": 0,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "logic_error",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "parse_csv_header__logic_error__trivial__000",
+  "code": "def parse_header(line):\n    fields = line.strip().split(',')\n    result = []\n    for field in fields:\n        cleaned = field.strip()\n        if cleaned != '':\n            result.append(cleaned)\n        else:\n            continue\n    return result",
+  "fix_rationale": "Changed 'break' to 'continue' in the else clause so that when a blank field is encountered, the loop continues processing remaining fields instead of stopping entirely.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:03:43.775825+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

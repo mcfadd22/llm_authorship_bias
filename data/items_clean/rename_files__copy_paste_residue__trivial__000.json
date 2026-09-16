@@ -1,0 +1,15 @@
+{
+  "item_id": "rename_files__copy_paste_residue__trivial__000",
+  "cell_id": "rename_files__copy_paste_residue__trivial",
+  "sample_idx": 0,
+  "aim_id": "rename_files",
+  "bug_flavor": "copy_paste_residue",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "rename_files__copy_paste_residue__trivial__000",
+  "code": "import os\n\ndef rename_files(file_list, suffix):\n    renamed = []\n    for filename in file_list:\n        name, ext = os.path.splitext(filename)\n        new_name = f\"{name}{suffix}{ext}\"\n        try:\n            os.rename(filename, new_name)\n            renamed.append(new_name)\n        except FileNotFoundError:\n            pass\n    return renamed",
+  "fix_rationale": "Removed the debug print statement that was polluting stdout with unnecessary output during file processing.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:04:14.817963+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}

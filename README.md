@@ -21,10 +21,15 @@ confirmatory/exploratory pre-registration split.
 
 1. **Generate items** — `scripts/generate_items.py` (OpenRouter, `OPENROUTER_API_KEY`). Output:
    `data/items/*.json`, tracked in git. Already run: 41 items, one per cell.
-2. **Elicit judgments** — `scripts/run_elicitation.py` (Anthropic + OpenAI SDKs,
+2. **Generate clean twins** (for the confirmatory wave) — `scripts/generate_clean_items.py`
+   (Anthropic SDK, `ANTHROPIC_API_KEY`). One bug-free, minimal-pair counterpart per item, same
+   `item_id`, `code_version: "clean"`. Output: `data/items_clean/*.json`, tracked in git.
+   Already run: 41 items. See `docs/superpowers/specs/2026-09-16-clean-code-control-design.md`.
+3. **Elicit judgments** — `scripts/run_elicitation.py` (Anthropic + OpenAI SDKs,
    `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`). Crosses every item with every `author_label` and
-   every question in `config/questions.json`, one fresh call each, per judge in
-   `config/judge_models.json`. Output: `data/elicitation/{judge_id}.jsonl` (gitignored),
+   every applicable question in `config/questions.json` (5 on buggy items: bug-detection,
+   three scaled, authorship belief; 2 on clean items: bug-detection and belief), one fresh
+   call each, per judge in `config/judge_models.json`. Output: `data/elicitation/{judge_id}.jsonl` (gitignored),
    one row per call in the design.md §4 schema. Resumable; `--dry-run` prints counts and a
    cost estimate. See `docs/superpowers/specs/2026-09-11-elicitation-pipeline-design.md`.
 
@@ -33,10 +38,13 @@ confirmatory/exploratory pre-registration split.
    python scripts/run_elicitation.py --dry-run
    python scripts/run_elicitation.py --judge claude-sonnet-5 --limit 20   # pilot
    python scripts/run_elicitation.py                                       # full run, all judges
+   # confirmatory wave (after locking analysis): buggy + clean, 2 repeats
+   python scripts/run_elicitation.py --out-dir data/elicitation_wave2/buggy --repeats 2
+   python scripts/run_elicitation.py --out-dir data/elicitation_wave2/clean --items-dir data/items_clean --repeats 2
    ```
-3. **Analysis** — not yet written (`analysis/`).
+4. **Analysis** — not yet written (`analysis/`).
 
-## Results (complete, 2026-09-13)
+## Wave 1 results (complete, 2026-09-13)
 
 Raw elicitation rows are tracked in `data/elicitation/{judge_id}.jsonl` to enable analysis
 directly from the repo. One row per call; see the spec above for the field list. Full crossing:
@@ -50,3 +58,6 @@ directly from the repo. One row per call; see the spec above for the field list.
 
 Provider defaults for thinking/reasoning were left in place and differ across judges; the
 `thinking` field is null on every row because neither provider returns reasoning text by default.
+
+Wave 1 predates the bug-detection question and the clean-code control; its rows have no
+`code_version` field (read as `buggy`) and no `q_bug_present` rows. Wave 2 adds both.

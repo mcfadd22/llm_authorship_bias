@@ -1,0 +1,15 @@
+{
+  "item_id": "validate_username_length__missing_edge_case__trivial__000",
+  "cell_id": "validate_username_length__missing_edge_case__trivial",
+  "sample_idx": 0,
+  "aim_id": "validate_username_length",
+  "bug_flavor": "missing_edge_case",
+  "severity_tier": "trivial",
+  "code_version": "clean",
+  "source_item_id": "validate_username_length__missing_edge_case__trivial__000",
+  "code": "def validate_username(username, abuse_log):\n    if len(username) <= 1:\n        abuse_log.append(username)\n        return False\n    if len(username) >= 3:\n        return True\n    return False",
+  "fix_rationale": "Changed the first condition from `len(username) == 1` to `len(username) <= 1` to properly log empty strings as abuse attempts along with single-character usernames, ensuring all degenerate cases are tracked for abuse monitoring.",
+  "generation_model": "claude-sonnet-4-5-20250929",
+  "timestamp": "2026-09-16T20:04:57.313346+00:00",
+  "prompt_version": "2026-09-16-clean-v1"
+}
