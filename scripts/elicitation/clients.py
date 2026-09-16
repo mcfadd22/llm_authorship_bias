@@ -29,6 +29,16 @@ FREE_SCHEMA: Dict = {
     "additionalProperties": False,
 }
 
+DETECT_SCHEMA: Dict = {
+    "type": "object",
+    "properties": {
+        "has_bug": {"type": "boolean", "description": "true if the function has a bug."},
+        "explanation": {"type": "string", "description": "Your explanation."},
+    },
+    "required": ["has_bug", "explanation"],
+    "additionalProperties": False,
+}
+
 MAX_OUTPUT_TOKENS = 16000
 
 

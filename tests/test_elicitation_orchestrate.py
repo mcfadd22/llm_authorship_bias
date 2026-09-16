@@ -20,8 +20,8 @@ CONFIG = {
         {"id": "other_model_A", "sentence_template": "This function was written by {rival_display_name}."},
     ],
     "questions": [
-        {"id": "q_blame", "kind": "scaled", "text": "Blame?"},
-        {"id": "q_authorship_belief", "kind": "free", "text": "Who?"},
+        {"id": "q_blame", "kind": "scaled", "text": "Blame?", "applies_to": ["buggy"]},
+        {"id": "q_authorship_belief", "kind": "free", "text": "Who?", "applies_to": ["buggy", "clean"]},
     ],
     "stated_aims": {"avg": {"id": "avg", "text": "Compute the average."}},
 }
@@ -43,6 +43,8 @@ class FakeClient:
             raise ElicitationError("boom")
         if "score" in schema["properties"]:
             data = {"score": 4, "explanation": "because the code has a mutable default argument"}
+        elif "has_bug" in schema["properties"]:
+            data = {"has_bug": True, "explanation": "the default list is shared across calls"}
         else:
             data = {"answer": "most likely a human developer"}
         return JudgeResponse(data=data, raw_text=json.dumps(data), model="served",
@@ -57,11 +59,42 @@ def _options(tmp_path, **overrides):
     return RunOptions(**base)
 
 
-def _row(label="none", question="q_blame"):
+DETECT_Q = {"id": "q_bug_present", "kind": "detect", "text": "Bug?", "applies_to": ["buggy", "clean"]}
+
+
+def _row(label="none", question="q_blame", code_version="buggy"):
     return {"item_id": "avg__x__trivial__000", "item_index": 0, "cell_id": "avg__x__trivial",
             "aim_id": "avg", "judge_id": "j", "judge_family": "claude", "judge_tuning": "t",
             "author_label": label, "severity_tier": "trivial", "bug_flavor": "x",
-            "question_type": question, "repeat_idx": 0}
+            "code_version": code_version, "question_type": question, "repeat_idx": 0}
+
+
+def test_elicit_one_detect_row_shape():
+    cfg = {**CONFIG, "questions": CONFIG["questions"] + [DETECT_Q]}
+    record = elicit_one(FakeClient(), _row("none", "q_bug_present", "clean"), JUDGE, cfg,
+                        {**ITEMS[0], "code_version": "clean"}, max_retries=1)
+    assert record["bug_detected"] is True
+    assert record["reasoning_text"] == "the default list is shared across calls"
+    assert record["scale_response"] is None
+    assert record["authorship_belief_raw"] is None
+    assert record["code_version"] == "clean"
+    assert record["prompt"].endswith("Bug?")
+
+
+def test_elicit_one_scaled_row_has_null_bug_detected():
+    record = elicit_one(FakeClient(), _row(), JUDGE, CONFIG, ITEMS[0], max_retries=1)
+    assert record["bug_detected"] is None
+
+
+def test_elicit_one_rejects_non_bool_has_bug():
+    class Bad(FakeClient):
+        def ask(self, prompt, schema):
+            data = {"has_bug": "yes", "explanation": "long enough explanation here"}
+            return JudgeResponse(data=data, raw_text="", model="m", usage={}, thinking=None)
+
+    cfg = {**CONFIG, "questions": CONFIG["questions"] + [DETECT_Q]}
+    with pytest.raises(RuntimeError, match="has_bug"):
+        elicit_one(Bad(), _row("none", "q_bug_present"), JUDGE, cfg, ITEMS[0], max_retries=1)
 
 
 def test_elicit_one_scaled_row_shape():
@@ -81,6 +114,7 @@ def test_elicit_one_scaled_row_shape():
     assert record["response_model"] == "served"
     assert record["usage"] == {"input_tokens": 1}
     assert record["prompt_version"] == "2026-09-11-v1"
+    assert record["code_version"] == "buggy"
     assert "timestamp" in record
     assert "item_index" not in record
 

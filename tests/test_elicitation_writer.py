@@ -9,7 +9,9 @@ def test_append_then_load_keys_roundtrip(tmp_path):
            "question_type": "q_blame", "repeat_idx": 0, "scale_response": 4}
     append_row(out, row)
     append_row(out, {**row, "repeat_idx": 1})
-    assert load_existing_keys(out) == {("j", "i", "none", "q_blame", 0), ("j", "i", "none", "q_blame", 1)}
+    assert load_existing_keys(out) == {
+        ("j", "i", "buggy", "none", "q_blame", 0), ("j", "i", "buggy", "none", "q_blame", 1)
+    }
     lines = out.read_text().splitlines()
     assert len(lines) == 2
     assert json.loads(lines[0])["scale_response"] == 4

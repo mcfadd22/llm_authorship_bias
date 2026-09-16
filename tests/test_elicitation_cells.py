@@ -8,7 +8,11 @@ ITEMS = [
 ]
 JUDGE = {"id": "j", "family": "claude", "tuning": "t", "display_name": "Claude"}
 LABELS = [{"id": "none"}, {"id": "self"}, {"id": "other_model_A"}]
-QUESTIONS = [{"id": "q_blame", "kind": "scaled"}, {"id": "q_authorship_belief", "kind": "free"}]
+QUESTIONS = [
+    {"id": "q_blame", "kind": "scaled", "applies_to": ["buggy"]},
+    {"id": "q_authorship_belief", "kind": "free", "applies_to": ["buggy", "clean"]},
+]
+CLEAN_ITEMS = [{**i, "code_version": "clean"} for i in ITEMS]
 
 
 def test_count_is_items_times_labels_times_questions_times_repeats():
@@ -44,6 +48,26 @@ def test_row_keys_are_unique():
     assert len(keys) == len(rows)
 
 
-def test_row_key_shape():
+def test_row_key_shape_includes_code_version():
     rows = enumerate_elicitations(ITEMS, JUDGE, LABELS, QUESTIONS, repeats=1)
-    assert row_key(rows[0]) == ("j", "a__x__trivial__000", "none", "q_blame", 0)
+    assert rows[0]["code_version"] == "buggy"
+    assert row_key(rows[0]) == ("j", "a__x__trivial__000", "buggy", "none", "q_blame", 0)
+
+
+def test_row_key_defaults_legacy_rows_to_buggy():
+    legacy = {"judge_id": "j", "item_id": "i", "author_label": "none",
+              "question_type": "q_blame", "repeat_idx": 0}
+    assert row_key(legacy) == ("j", "i", "buggy", "none", "q_blame", 0)
+
+
+def test_clean_items_only_get_applicable_questions():
+    rows = enumerate_elicitations(CLEAN_ITEMS, JUDGE, LABELS, QUESTIONS, repeats=1)
+    assert len(rows) == 2 * 3 * 1
+    assert {r["question_type"] for r in rows} == {"q_authorship_belief"}
+    assert all(r["code_version"] == "clean" for r in rows)
+
+
+def test_question_without_applies_to_is_buggy_only():
+    qs = [{"id": "q_old", "kind": "scaled"}]
+    assert len(enumerate_elicitations(ITEMS, JUDGE, LABELS, qs, repeats=1)) == 6
+    assert enumerate_elicitations(CLEAN_ITEMS, JUDGE, LABELS, qs, repeats=1) == []

@@ -8,7 +8,7 @@ import anthropic
 import openai
 
 from .cells import enumerate_elicitations, row_key
-from .clients import FREE_SCHEMA, SCALED_SCHEMA, ElicitationError, JudgeClient
+from .clients import DETECT_SCHEMA, FREE_SCHEMA, SCALED_SCHEMA, ElicitationError, JudgeClient
 from .prompt import PROMPT_VERSION, author_sentence, build_elicitation_prompt
 from .rivals import resolve_rivals
 from .writer import append_row, load_existing_keys
@@ -46,6 +46,10 @@ def _validate(question: Dict, data: Dict) -> None:
         if not isinstance(score, int) or isinstance(score, bool) or not (1 <= score <= 7):
             raise ElicitationError(f"score out of range or missing: {score!r}")
         _require_text(data.get("explanation"), "explanation")
+    elif question["kind"] == "detect":
+        if not isinstance(data.get("has_bug"), bool):
+            raise ElicitationError(f"has_bug not a boolean: {data.get('has_bug')!r}")
+        _require_text(data.get("explanation"), "explanation")
     else:
         _require_text(data.get("answer"), "answer")
 
@@ -70,7 +74,7 @@ def elicit_one(
     rivals = resolve_rivals(judge, row["item_index"], config["rival_pool"])
     aim_text = config["stated_aims"][row["aim_id"]]["text"]
     prompt = build_elicitation_prompt(aim_text, item["code"], label, judge, rivals, question)
-    schema = SCALED_SCHEMA if question["kind"] == "scaled" else FREE_SCHEMA
+    schema = {"scaled": SCALED_SCHEMA, "detect": DETECT_SCHEMA, "free": FREE_SCHEMA}[question["kind"]]
 
     last_error = None
     for _ in range(max_retries):
@@ -83,13 +87,14 @@ def elicit_one(
     else:
         raise RuntimeError(f"failed after {max_retries} attempts: {last_error}")
 
-    scaled = question["kind"] == "scaled"
+    kind = question["kind"]
     record = {k: v for k, v in row.items() if k != "item_index"}
     record.update(
         {
-            "scale_response": response.data["score"] if scaled else None,
-            "reasoning_text": response.data["explanation"] if scaled else None,
-            "authorship_belief_raw": None if scaled else response.data["answer"],
+            "scale_response": response.data["score"] if kind == "scaled" else None,
+            "bug_detected": response.data["has_bug"] if kind == "detect" else None,
+            "reasoning_text": response.data["explanation"] if kind in ("scaled", "detect") else None,
+            "authorship_belief_raw": response.data["answer"] if kind == "free" else None,
             "authorship_belief_coded": None,
             "rival_a": rivals[0]["id"],
             "rival_b": rivals[1]["id"],

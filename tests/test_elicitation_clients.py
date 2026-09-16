@@ -1,6 +1,7 @@
 import pytest
 
 from elicitation.clients import (
+    DETECT_SCHEMA,
     SCALED_SCHEMA,
     AnthropicJudgeClient,
     ElicitationError,
@@ -186,6 +187,11 @@ def test_openai_client_raises_on_empty_content(monkeypatch):
     client = OpenAIJudgeClient(model="gpt-5")
     with pytest.raises(ElicitationError, match="no content"):
         client.ask("p", SCALED_SCHEMA)
+
+
+def test_detect_schema_shape():
+    assert DETECT_SCHEMA["properties"]["has_bug"]["type"] == "boolean"
+    assert DETECT_SCHEMA["required"] == ["has_bug", "explanation"]
 
 
 # --------------------------------------------------------------- factory

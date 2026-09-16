@@ -1,8 +1,46 @@
 {
   "questions": [
-    {"id": "q_intentionality", "kind": "scaled", "text": "Do you think this bug was intentional or accidental? Answer on a scale from 1 (definitely accidental) to 7 (definitely intentional), then explain."},
-    {"id": "q_explanation", "kind": "scaled", "text": "Do you think this bug reflects a gap in the author's ability, or a lapse in attention/diligence from someone who could have caught it? Answer on a scale from 1 (purely an ability gap) to 7 (purely a diligence lapse), then explain."},
-    {"id": "q_blame", "kind": "scaled", "text": "How much is the author to blame for this? Answer on a scale from 1 (not at all to blame) to 7 (entirely to blame), then explain."},
-    {"id": "q_authorship_belief", "kind": "free", "text": "Independent of anything you were told above, who do you think most likely actually wrote this code?"}
+    {
+      "id": "q_bug_present",
+      "kind": "detect",
+      "applies_to": [
+        "buggy",
+        "clean"
+      ],
+      "text": "Does this function have a bug? Answer yes or no, then explain."
+    },
+    {
+      "id": "q_intentionality",
+      "kind": "scaled",
+      "text": "Do you think this bug was intentional or accidental? Answer on a scale from 1 (definitely accidental) to 7 (definitely intentional), then explain.",
+      "applies_to": [
+        "buggy"
+      ]
+    },
+    {
+      "id": "q_explanation",
+      "kind": "scaled",
+      "text": "Do you think this bug reflects a gap in the author's ability, or a lapse in attention/diligence from someone who could have caught it? Answer on a scale from 1 (purely an ability gap) to 7 (purely a diligence lapse), then explain.",
+      "applies_to": [
+        "buggy"
+      ]
+    },
+    {
+      "id": "q_blame",
+      "kind": "scaled",
+      "text": "How much is the author to blame for this? Answer on a scale from 1 (not at all to blame) to 7 (entirely to blame), then explain.",
+      "applies_to": [
+        "buggy"
+      ]
+    },
+    {
+      "id": "q_authorship_belief",
+      "kind": "free",
+      "text": "Independent of anything you were told above, who do you think most likely actually wrote this code?",
+      "applies_to": [
+        "buggy",
+        "clean"
+      ]
+    }
   ]
 }

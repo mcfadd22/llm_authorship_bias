@@ -80,7 +80,7 @@ def test_unknown_provider_rejected(config_dir):
         load_elicitation_config(config_dir)
 
 
-def test_question_kind_must_be_scaled_or_free(config_dir):
+def test_question_kind_must_be_scaled_free_or_detect(config_dir):
     _write(config_dir, "questions.json", {"questions": [
         {"id": "q", "kind": "essay", "text": "..."},
     ]})
@@ -88,8 +88,21 @@ def test_question_kind_must_be_scaled_or_free(config_dir):
         load_elicitation_config(config_dir)
 
 
+def test_question_applies_to_defaults_to_buggy_and_is_validated(config_dir):
+    cfg = load_elicitation_config(config_dir)
+    assert cfg["questions"][0]["applies_to"] == ["buggy"]
+    _write(config_dir, "questions.json", {"questions": [
+        {"id": "q_bug_present", "kind": "detect", "applies_to": ["buggy", "clean"], "text": "Bug?"},
+        {"id": "q_x", "kind": "free", "applies_to": ["pristine"], "text": "..."},
+    ]})
+    with pytest.raises(ValueError, match="applies_to"):
+        load_elicitation_config(config_dir)
+
+
 def test_real_repo_config_loads():
     cfg = load_elicitation_config()
     assert len(cfg["judges"]) >= 1
     assert len(cfg["rival_pool"]) >= 3
-    assert len(cfg["questions"]) == 4
+    assert len(cfg["questions"]) == 5
+    assert cfg["questions"][0]["id"] == "q_bug_present"
+    assert cfg["questions"][0]["applies_to"] == ["buggy", "clean"]
