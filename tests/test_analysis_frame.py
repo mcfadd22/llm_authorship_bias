@@ -89,3 +89,45 @@ def test_design_matrix_baseline_row_is_all_zero_contrasts():
     sub = pd.DataFrame({"author_label": ["none"], "scale_response": [4], "item_id": ["i"]})
     _, X, _ = design_matrix(sub)
     assert list(X[0]) == [1, 0, 0, 0, 0]
+
+
+def test_style_features_measures_identifier_length():
+    """The two banks differ here by ~3 characters in 59 of 64 matched cells, so
+    it has to be a covariate rather than an assumption."""
+    from frame import style_features
+
+    terse = style_features("def f(x):\n    n = x\n    return n")
+    verbose = style_features("def f(measurement):\n    accumulated_total = measurement\n    return accumulated_total")
+    assert verbose["avg_name_len"] > terse["avg_name_len"]
+    assert terse["code_lines"] == 3
+
+
+def test_style_features_survives_unparseable_code():
+    from frame import style_features
+
+    assert style_features("def f(:")["avg_name_len"] is None
+
+
+def test_frame_carries_style_covariates(tmp_path):
+    el, items = tmp_path / "el", tmp_path / "items"
+    el.mkdir(), items.mkdir()
+    (el / "j.jsonl").write_text(json.dumps(ROW))
+    (items / f"{ROW['item_id']}.json").write_text(json.dumps({
+        "item_id": ROW["item_id"],
+        "generation_model": "openai/gpt-5",
+        "generator_tag": "gpt5",
+        "code": "def total(values):\n    running = 0\n    for v in values:\n        running += v\n    return running",
+    }))
+    df = load_frame(el, items)
+    assert df.loc[0, "generator_tag"] == "gpt5"
+    assert df.loc[0, "code_lines"] == 5
+    assert df.loc[0, "avg_name_len"] > 0
+    assert df.loc[0, "n_branches"] == 0
+
+
+def test_frame_style_covariates_are_null_for_a_nameless_function():
+    """A function with no Name nodes has no average to report."""
+    from frame import style_features
+
+    assert style_features("def f(): pass")["avg_name_len"] is None
+    assert style_features("def f(): pass")["code_lines"] == 1

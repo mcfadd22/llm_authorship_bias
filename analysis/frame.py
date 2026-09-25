@@ -7,7 +7,9 @@ by claude-sonnet-4.5, so this is constant-by-construction for Claude judges'
 "written by Claude" label on some items, which is the only within-wave handle
 on the generator-model confound. See design.md 1 and the wave-1 status doc.
 """
+import ast
 import json
+import statistics as st
 from pathlib import Path
 
 import pandas as pd
@@ -41,6 +43,28 @@ def _named_author(row):
     return None  # none / generic_ai / human_developer name no specific model
 
 
+def style_features(code):
+    """Surface properties of the code a judge could notice without running it.
+
+    Carried as covariates because the two banks differ systematically here:
+    identifier length averages 5.1 characters in the GPT-5 bank against 8.3 in
+    the Gemini bank, the same direction in 59 of 64 matched cells. That cannot
+    touch H1-H3, which hold code byte-identical across an item's label cells,
+    but it is confounded with generator in any cross-bank contrast -- so it
+    needs to be measurable rather than assumed harmless.
+    """
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return {"avg_name_len": None, "code_lines": None, "n_branches": None}
+    names = {n.id for n in ast.walk(tree) if isinstance(n, ast.Name)}
+    return {
+        "avg_name_len": st.mean([len(n) for n in names]) if names else None,
+        "code_lines": len(code.strip().splitlines()),
+        "n_branches": sum(1 for n in ast.walk(tree) if isinstance(n, ast.If)),
+    }
+
+
 def load_items(items_dir=None):
     items_dir = Path(items_dir or ROOT / "data" / "items")
     out = {}
@@ -65,6 +89,11 @@ def load_frame(elicitation_dir=None, items_dir=None):
     items = load_items(items_dir)
     df["generation_model"] = df["item_id"].map(lambda i: (items.get(i) or {}).get("generation_model"))
     df["generator_family"] = df["generation_model"].map(_generator_family)
+    df["generator_tag"] = df["item_id"].map(lambda i: (items.get(i) or {}).get("generator_tag"))
+
+    style = {i: style_features(it.get("code", "")) for i, it in items.items()}
+    for feature in ("avg_name_len", "code_lines", "n_branches"):
+        df[feature] = df["item_id"].map(lambda i, f=feature: (style.get(i) or {}).get(f))
     df["named_author"] = df.apply(_named_author, axis=1)
     truth = df["named_author"].notna() & (df["named_author"] == df["generator_family"])
     df["label_is_true"] = truth.astype(object).where(df["named_author"].notna(), pd.NA)
