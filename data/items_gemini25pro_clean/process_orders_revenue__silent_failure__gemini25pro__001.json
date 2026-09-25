@@ -1,0 +1,28 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gemini25pro__001",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_orders_revenue__silent_failure__gemini25pro__001",
+  "code": "def process_batch(order_list):\n    total_revenue = 0.0\n    failed_orders = []\n    for item in order_list:\n        try:\n            total_revenue += item['amount'] * item['quantity']\n        except (KeyError, TypeError):\n            if isinstance(item, dict):\n                failed_orders.append(item.get('id'))\n            else:\n                failed_orders.append(None)\n    return (total_revenue, failed_orders)",
+  "fix_rationale": "The `pass` statement in the `except` block was replaced with logic to append the ID of a failed order to the `failed_orders` list. This change also robustly handles cases where a failed item is not a dictionary or does not have an ID, preventing a crash.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:54:52.571123+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

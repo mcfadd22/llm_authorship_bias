@@ -1,0 +1,27 @@
+{
+  "item_id": "reset_token_validation__logic_error__gemini25pro__001",
+  "cell_id": "reset_token_validation__logic_error",
+  "sample_idx": 1,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__logic_error__gemini25pro__001",
+  "code": "import time\n\ndef validate_token(submitted_token, user_id, token_store, now):\n    record = token_store.get(user_id)\n\n    if not record or not submitted_token:\n        return False\n\n    stored_token_val = record.get('token')\n    expiration_time = record.get('expires')\n\n    if stored_token_val is None or expiration_time is None:\n        return False\n\n    token_matches = (submitted_token == stored_token_val)\n    is_unexpired = (now <= expiration_time)\n\n    if token_matches and is_unexpired:\n        return True\n\n    return False",
+  "fix_rationale": "The logical operator in the final conditional statement was changed from `or` to `and`. This ensures that a token is validated as true only if it both matches the stored token and is unexpired, correcting the security flaw.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:55:16.017372+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

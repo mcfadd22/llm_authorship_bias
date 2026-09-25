@@ -1,0 +1,27 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__gemini25pro__000",
+  "cell_id": "reset_token_validation__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__missing_edge_case__gemini25pro__000",
+  "code": "import hmac\nimport time\n\ndef validate_token(user_id, submitted_token, stored_data):\n    if not submitted_token:\n        return False\n\n    user_record = stored_data.get(user_id)\n    if not user_record:\n        return False\n\n    expected_token = user_record.get('token')\n    expiry_time = user_record.get('expiry')\n\n    if not expected_token or not expiry_time:\n        return False\n\n    is_match = hmac.compare_digest(submitted_token, expected_token)\n    is_expired = time.time() > expiry_time\n\n    return is_match and not is_expired",
+  "fix_rationale": "An initial check was added to verify that the submitted token is not None or empty, preventing a TypeError from hmac.compare_digest and satisfying the contract to reject malformed tokens.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:55:16.673002+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

@@ -1,0 +1,27 @@
+{
+  "item_id": "parse_timestamps__silent_failure__gemini25pro__001",
+  "cell_id": "parse_timestamps__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "parse_timestamps",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "parse_timestamps__silent_failure__gemini25pro__001",
+  "code": "import datetime\n\ndef process_timestamps(records):\n    parsed_list = []\n    failed_list = []\n    date_format = \"%Y-%m-%d %H:%M:%S\"\n\n    for item in records:\n        try:\n            dt_obj = datetime.datetime.strptime(item, date_format)\n            parsed_list.append(dt_obj)\n        except ValueError:\n            failed_list.append(item)\n\n    return {\"parsed\": parsed_list, \"failed\": failed_list}",
+  "fix_rationale": "The original function's `except` block was empty, causing it to discard unparseable timestamps. The fix adds the failing timestamp string to the `failed_list` inside this block, correctly reporting all parsing failures as required.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:53:46.041526+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

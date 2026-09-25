@@ -1,0 +1,27 @@
+{
+  "item_id": "is_freezing__logic_error__gemini25pro__001",
+  "cell_id": "is_freezing__logic_error",
+  "sample_idx": 1,
+  "aim_id": "is_freezing",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "is_freezing__logic_error__gemini25pro__001",
+  "code": "def check_condition(value):\n    if value <= 0:\n        return True\n    else:\n        return False",
+  "fix_rationale": "The buggy function returned the inverse of the required boolean value. The comparison operator was changed from `>` to `<=` to correctly return `True` when the temperature is at or below freezing.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:53:04.780142+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

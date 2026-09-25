@@ -1,0 +1,27 @@
+{
+  "item_id": "shipping_cost__logic_error__gemini25pro__000",
+  "cell_id": "shipping_cost__logic_error",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "shipping_cost__logic_error__gemini25pro__000",
+  "code": "def process_item(value):\n    if value <= 0:\n        return 0.0\n    elif value <= 5:\n        return 5.00\n    elif value <= 10:\n        return 8.50\n    elif value <= 20:\n        return 12.00\n    else:\n        return 18.00",
+  "fix_rationale": "The third conditional check used the wrong relational operator, which caused incorrect prices for any weight over 5. It was corrected from `value > 10` to `value <= 10` to ensure the tiered pricing logic is evaluated in the correct, ascending order.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:55:42.913650+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

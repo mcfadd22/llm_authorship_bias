@@ -1,0 +1,27 @@
+{
+  "item_id": "format_address_block__copy_paste_residue__gemini25pro__000",
+  "cell_id": "format_address_block__copy_paste_residue",
+  "sample_idx": 0,
+  "aim_id": "format_address_block",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "format_address_block__copy_paste_residue__gemini25pro__000",
+  "code": "def create_address_label(record):\n    info = record['shipping_details']\n    line_1 = info['name']\n    line_2 = info['street']\n    line_3 = f\"{info['city']} {info['postcode']}\"\n    return f\"{line_1}\\n{line_2}\\n{line_3}\"",
+  "fix_rationale": "The line that modified the input dictionary by setting a 'billing_details_processed' flag was removed. This change eliminates the incorrect side-effect, as the function should only format shipping details, not alter unrelated data.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:52:54.145402+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

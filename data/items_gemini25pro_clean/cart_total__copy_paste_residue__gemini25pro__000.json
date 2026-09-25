@@ -1,0 +1,27 @@
+{
+  "item_id": "cart_total__copy_paste_residue__gemini25pro__000",
+  "cell_id": "cart_total__copy_paste_residue",
+  "sample_idx": 0,
+  "aim_id": "cart_total",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "cart_total__copy_paste_residue__gemini25pro__000",
+  "code": "def process_order(cart_data, fee):\n    total_value = 0\n    for item in cart_data:\n        price = item.get('price', 0)\n        quantity = item.get('quantity', 1)\n        total_value += price * quantity\n    return total_value + fee",
+  "fix_rationale": "The unused `total_weight` variable and all associated calculations were removed. This eliminates the dead code without altering the function's output or behavior.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:52:25.683467+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

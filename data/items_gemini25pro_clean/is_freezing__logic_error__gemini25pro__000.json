@@ -1,0 +1,27 @@
+{
+  "item_id": "is_freezing__logic_error__gemini25pro__000",
+  "cell_id": "is_freezing__logic_error",
+  "sample_idx": 0,
+  "aim_id": "is_freezing",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "is_freezing__logic_error__gemini25pro__000",
+  "code": "def process_value(reading):\n    is_cold = False\n    if reading <= 0:\n        is_cold = True\n    return is_cold",
+  "fix_rationale": "The relational operator in the conditional was changed from `>=` to `<=` to correctly identify temperatures at or below zero. This ensures the function returns `True` for freezing conditions and `False` otherwise, as intended.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:53:10.616235+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

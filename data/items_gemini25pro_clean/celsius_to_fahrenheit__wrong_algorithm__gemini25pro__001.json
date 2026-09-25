@@ -1,0 +1,27 @@
+{
+  "item_id": "celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001",
+  "cell_id": "celsius_to_fahrenheit__wrong_algorithm",
+  "sample_idx": 1,
+  "aim_id": "celsius_to_fahrenheit",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001",
+  "code": "def calculate_target_temp(source_val):\n    result = source_val * 9 / 5 + 32\n    return result",
+  "fix_rationale": "The original function incorrectly converted Fahrenheit to Celsius. The formula was changed to correctly convert Celsius to Fahrenheit by multiplying by 9/5 and adding 32, as required by the contract.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:52:32.727337+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

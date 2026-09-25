@@ -1,0 +1,27 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__gemini25pro__001",
+  "cell_id": "process_order_batch__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_order_batch__missing_edge_case__gemini25pro__001",
+  "code": "def process_data(data_list):\n    processed_ids = []\n    for item in data_list or []:\n        try:\n            if item['amount'] > 0 and item['payment']['is_valid']:\n                processed_ids.append(item['id'])\n        except (KeyError, TypeError):\n            continue\n    return processed_ids",
+  "fix_rationale": "The original function crashed on `None` input and on malformed list items. The corrected version handles a `None` input by iterating over an empty list and uses a `try-except` block to safely skip any malformed items.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:54:37.641505+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

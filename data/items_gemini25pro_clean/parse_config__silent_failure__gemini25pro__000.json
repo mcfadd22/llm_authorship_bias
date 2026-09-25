@@ -1,0 +1,28 @@
+{
+  "item_id": "parse_config__silent_failure__gemini25pro__000",
+  "cell_id": "parse_config__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "parse_config",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "parse_config__silent_failure__gemini25pro__000",
+  "code": "import json\n\ndef get_config_from_text(input_str):\n    try:\n        config_data = json.loads(input_str)\n    except json.JSONDecodeError:\n        raise ValueError\n\n    if not isinstance(config_data, dict):\n        raise ValueError\n\n    if 'retry_count' not in config_data:\n        config_data['retry_count'] = 3\n\n    return config_data\n",
+  "fix_rationale": "The exception handling was corrected to raise a ValueError for malformed JSON instead of silently passing. An additional check was added to ensure the parsed data is a dictionary, preventing runtime errors for valid JSON that is not an object.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:53:59.441423+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

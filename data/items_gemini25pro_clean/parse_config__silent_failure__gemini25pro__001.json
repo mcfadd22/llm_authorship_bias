@@ -1,0 +1,28 @@
+{
+  "item_id": "parse_config__silent_failure__gemini25pro__001",
+  "cell_id": "parse_config__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "parse_config",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "parse_config__silent_failure__gemini25pro__001",
+  "code": "import json\n\ndef process_configuration(json_text):\n    try:\n        config_data = json.loads(json_text)\n    except json.JSONDecodeError as e:\n        raise ValueError(\"Malformed JSON\") from e\n\n    if not isinstance(config_data, dict):\n        raise ValueError(\"JSON content must be a dictionary.\")\n\n    if \"retry_count\" not in config_data:\n        config_data[\"retry_count\"] = 3\n\n    return config_data\n",
+  "fix_rationale": "The silent `except Exception: pass` block was replaced to catch specific JSON decoding errors and raise a `ValueError` as required by the contract. A check was also added to ensure the parsed JSON is a dictionary, preventing a `TypeError` for valid non-dictionary JSON input.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:53:45.482165+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

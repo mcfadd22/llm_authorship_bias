@@ -1,0 +1,27 @@
+{
+  "item_id": "parse_csv_header__logic_error__gemini25pro__000",
+  "cell_id": "parse_csv_header__logic_error",
+  "sample_idx": 0,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "parse_csv_header__logic_error__gemini25pro__000",
+  "code": "def get_column_info(data_line):\n    items = data_line.split(',')\n    result = []\n    for item in items:\n        processed_item = item.strip()\n        if processed_item:\n            result.append(processed_item)\n    return result",
+  "fix_rationale": "The conditional `if not processed_item:` was inverted, causing the function to append empty fields to the result instead of the intended non-empty ones. This condition was corrected to `if processed_item:` to ensure only non-blank fields are collected.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:53:30.004437+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

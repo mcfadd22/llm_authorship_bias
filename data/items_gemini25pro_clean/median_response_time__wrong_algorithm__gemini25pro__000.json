@@ -1,0 +1,27 @@
+{
+  "item_id": "median_response_time__wrong_algorithm__gemini25pro__000",
+  "cell_id": "median_response_time__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "median_response_time",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "median_response_time__wrong_algorithm__gemini25pro__000",
+  "code": "def get_center_value(time_series):\n    if not time_series:\n        return None\n\n    sorted_list = sorted(time_series)\n    list_count = len(sorted_list)\n    mid_index = list_count // 2\n\n    if list_count % 2 == 1:\n        return sorted_list[mid_index]\n    else:\n        return (sorted_list[mid_index - 1] + sorted_list[mid_index]) / 2",
+  "fix_rationale": "The original function incorrectly calculated the mean instead of the median. The implementation was replaced with logic to sort the list and return the middle element for an odd count, or the average of the two middle elements for an even count.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:53:12.095762+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

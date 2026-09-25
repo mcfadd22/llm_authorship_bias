@@ -1,0 +1,27 @@
+{
+  "item_id": "shipping_cost__wrong_algorithm__gemini25pro__000",
+  "cell_id": "shipping_cost__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "shipping_cost__wrong_algorithm__gemini25pro__000",
+  "code": "def calculate_shipping_cost(weight):\n    if weight <= 0:\n        return 0.0\n    elif weight <= 5:\n        return 5.00\n    elif weight <= 10:\n        return 8.50\n    elif weight <= 20:\n        return 12.00\n    else:\n        return 18.00",
+  "fix_rationale": "The original function used a linear pricing model instead of the required tiered pricing. The function was rewritten to use conditional statements that map the weight to the correct fixed price for each tier.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:56:03.063198+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

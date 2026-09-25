@@ -1,0 +1,27 @@
+{
+  "item_id": "median_response_time__wrong_algorithm__gemini25pro__001",
+  "cell_id": "median_response_time__wrong_algorithm",
+  "sample_idx": 1,
+  "aim_id": "median_response_time",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "median_response_time__wrong_algorithm__gemini25pro__001",
+  "code": "def process_response_times(times):\n    n = len(times)\n    if n == 0:\n        return None\n    \n    sorted_times = sorted(times)\n    mid = n // 2\n\n    if n % 2 == 1:\n        result = sorted_times[mid]\n    else:\n        result = (sorted_times[mid - 1] + sorted_times[mid]) / 2\n\n    return result",
+  "fix_rationale": "The original function incorrectly calculated the mean instead of the median. The corrected version now sorts the list and computes the median by finding the middle value, or the average of the two middle values for an even-sized list.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:53:30.558767+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

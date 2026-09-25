@@ -1,0 +1,27 @@
+{
+  "item_id": "reset_token_validation__logic_error__gemini25pro__000",
+  "cell_id": "reset_token_validation__logic_error",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__logic_error__gemini25pro__000",
+  "code": "import time\n\ndef check_authorization(principal_id, credential, stored_data):\n    try:\n        if not credential or not stored_data:\n            return False\n\n        id_match = (stored_data.get('principal_id') == principal_id)\n        credential_match = (stored_data.get('credential_value') == credential)\n        within_validity_period = (time.time() < stored_data.get('valid_until', 0))\n\n        return id_match and credential_match and within_validity_period\n    except (AttributeError, TypeError):\n        return False",
+  "fix_rationale": "The logical operator in the return statement was changed from `or` to `and` to require all validation checks to pass, and a try-except block was added to prevent crashes from malformed data.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:55:24.660114+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

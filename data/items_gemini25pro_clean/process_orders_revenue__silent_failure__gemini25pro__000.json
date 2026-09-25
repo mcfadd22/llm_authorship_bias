@@ -1,0 +1,28 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gemini25pro__000",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_orders_revenue__silent_failure__gemini25pro__000",
+  "code": "import json\n\ndef process_batch(order_data):\n    total_revenue = 0.0\n    unprocessed_ids = []\n\n    for entry in order_data:\n        try:\n            revenue = entry['amount'] * entry['quantity']\n            total_revenue += revenue\n        except (KeyError, TypeError):\n            try:\n                unprocessed_ids.append(entry.get('id'))\n            except AttributeError:\n                unprocessed_ids.append(None)\n\n    return total_revenue, unprocessed_ids",
+  "fix_rationale": "The `pass` statement in the `except` block was replaced with logic to append the failed order's ID to the `unprocessed_ids` list. This change robustly handles various types of malformed orders, preventing crashes while safely retrieving the ID.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:56:11.989670+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

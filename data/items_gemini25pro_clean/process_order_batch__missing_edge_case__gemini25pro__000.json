@@ -1,0 +1,27 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__gemini25pro__000",
+  "cell_id": "process_order_batch__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_order_batch__missing_edge_case__gemini25pro__000",
+  "code": "def process_orders(batch):\n    if not batch:\n        return []\n    \n    succeeded_ids = []\n    for item in batch:\n        if not isinstance(item, dict):\n            continue\n\n        payment_info = item.get('payment_method', {})\n        validator = payment_info.get('validator')\n        amount = item.get('amount', 0)\n\n        if 'id' in item and validator and validator() and amount > 0:\n            succeeded_ids.append(item['id'])\n\n    return succeeded_ids",
+  "fix_rationale": "An initial check was added to handle a None batch as required, and the loop was hardened to safely skip any malformed order items to prevent crashes on invalid data.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:54:46.710104+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

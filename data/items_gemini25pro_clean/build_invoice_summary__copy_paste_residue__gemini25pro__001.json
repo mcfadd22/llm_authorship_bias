@@ -1,0 +1,27 @@
+{
+  "item_id": "build_invoice_summary__copy_paste_residue__gemini25pro__001",
+  "cell_id": "build_invoice_summary__copy_paste_residue",
+  "sample_idx": 1,
+  "aim_id": "build_invoice_summary",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "build_invoice_summary__copy_paste_residue__gemini25pro__001",
+  "code": "def build_summary(input_doc):\n    record = {}\n    record['total'] = input_doc['total_amount']\n    record['currency'] = input_doc['currency_code']\n    record['issued_at'] = input_doc['date_of_issue']\n    return record",
+  "fix_rationale": "The extraneous line adding the 'payment_total' key to the dictionary was removed. This ensures the function returns a dictionary with exactly the three keys required by the contract.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:52:24.114375+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

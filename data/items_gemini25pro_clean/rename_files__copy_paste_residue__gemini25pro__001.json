@@ -1,0 +1,27 @@
+{
+  "item_id": "rename_files__copy_paste_residue__gemini25pro__001",
+  "cell_id": "rename_files__copy_paste_residue",
+  "sample_idx": 1,
+  "aim_id": "rename_files",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "rename_files__copy_paste_residue__gemini25pro__001",
+  "code": "import os\n\ndef create_tagged_filenames(source_paths, tag):\n    processed_list = []\n    for path_item in source_paths:\n        base, extension = os.path.splitext(path_item)\n        new_path = f\"{base}{tag}{extension}\"\n        processed_list.append(new_path)\n    return processed_list",
+  "fix_rationale": "The unused `path_mapping` dictionary and the logic to populate it were removed. This code was superfluous and had no effect on the function's output.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:55:01.709938+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

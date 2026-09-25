@@ -1,0 +1,27 @@
+{
+  "item_id": "codes_match__known_trap__gemini25pro__001",
+  "cell_id": "codes_match__known_trap",
+  "sample_idx": 1,
+  "aim_id": "codes_match",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "codes_match__known_trap__gemini25pro__001",
+  "code": "def check_code_match(parsed_code, expected_code):\n    is_identical = parsed_code == expected_code\n    return is_identical",
+  "fix_rationale": "The identity operator `is` was replaced with the equality operator `==` to ensure the function compares integer values rather than their object identities. This change ensures that any two equal integers will correctly result in True, as required.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:52:51.538912+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

@@ -1,0 +1,27 @@
+{
+  "item_id": "price_total_match__known_trap__gemini25pro__000",
+  "cell_id": "price_total_match__known_trap",
+  "sample_idx": 0,
+  "aim_id": "price_total_match",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "price_total_match__known_trap__gemini25pro__000",
+  "code": "import decimal\n\ndef check_total(item_prices, expected_value):\n    cent_quantizer = decimal.Decimal('0.01')\n    computed_sum = sum(decimal.Decimal(str(p)) for p in item_prices).quantize(cent_quantizer)\n    expected_value = decimal.Decimal(str(expected_value)).quantize(cent_quantizer)\n    return computed_sum == expected_value",
+  "fix_rationale": "The original function's direct comparison of floating-point numbers is unreliable; the fix converts inputs to `Decimal` types for precise financial arithmetic. It then rounds both the computed sum and the expected total to two decimal places before comparison, satisfying the contract and preventing rounding errors.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:54:35.980694+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}
