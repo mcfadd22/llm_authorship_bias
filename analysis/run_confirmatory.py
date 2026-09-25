@@ -61,12 +61,26 @@ def main(argv=None):
     ap.add_argument("--items-dir", default=None)
     ap.add_argument("--n-boot", type=int, default=4999)
     ap.add_argument("--seed", type=int, default=20260924)
+    ap.add_argument("--verdicts", default=None,
+                    help="CSV of item-bank review verdicts (item_id,verdict,note)")
+    ap.add_argument("--exclude-verdicts", default="drop,not_a_bug",
+                    help="comma-separated verdicts to exclude when --verdicts is given")
     ap.add_argument("--item-fe", action="store_true",
                     help="add item fixed effects (robustness, NOT the locked 6.1 spec)")
     ap.add_argument("--out", default=None, help="write results CSV here")
     args = ap.parse_args(argv)
 
     df = load_frame(args.elicitation_dir, args.items_dir)
+
+    if args.verdicts:
+        verdicts = pd.read_csv(args.verdicts)
+        drop = set(args.exclude_verdicts.split(","))
+        excluded = set(verdicts.loc[verdicts["verdict"].isin(drop), "item_id"])
+        before = df["item_id"].nunique()
+        df = df[~df["item_id"].isin(excluded)]
+        print(f"excluded {len(excluded)} items with verdict in {sorted(drop)}: "
+              f"{before} -> {df['item_id'].nunique()} items")
+
     res = run(df, args.n_boot, args.seed, item_fe=args.item_fe)
 
     label = "6.1 CONFIRMATORY" + ("  [+item FE robustness variant]" if args.item_fe else "")
