@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Optional
 
-from elicitation.clients import AnthropicJudgeClient, ElicitationError, JudgeClient
+from elicitation.clients import ElicitationError, JudgeClient, make_client
 from elicitation.config import load_elicitation_config
 from elicitation.writer import load_items
 from vignette_gen.validate import ValidationError, validate_code
@@ -152,6 +152,9 @@ def run(client: Optional[JudgeClient], items_dir: Path, out_dir: Path, stated_ai
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default="claude-sonnet-4-5")
+    parser.add_argument("--provider", default="anthropic", choices=["anthropic", "openai"],
+                        help="match the provider that generated the buggy bank, so an "
+                             "item and its twin share a true author")
     parser.add_argument("--items-dir", type=Path, default=DATA_DIR / "items")
     parser.add_argument("--out-dir", type=Path, default=DATA_DIR / "items_clean")
     parser.add_argument("--limit", type=int, default=None)
@@ -168,7 +171,7 @@ def main(argv=None):
     if not args.dry_run:
         if not os.environ.get("ANTHROPIC_API_KEY"):
             raise SystemExit("ANTHROPIC_API_KEY environment variable is required.")
-        client = AnthropicJudgeClient(model=args.model)
+        client = make_client({"provider": args.provider, "model": args.model})
     run(client, args.items_dir, args.out_dir, stated_aims, limit=args.limit,
         overwrite=args.overwrite, max_retries=args.max_retries, dry_run=args.dry_run)
 

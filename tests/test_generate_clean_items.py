@@ -147,3 +147,13 @@ def test_parse_args_defaults():
     assert args.dry_run is False
     assert args.limit is None
     assert args.max_retries == 3
+
+
+def test_parse_args_defaults_to_anthropic_and_accepts_a_provider():
+    assert gci.parse_args([]).provider == "anthropic"
+    assert gci.parse_args(["--provider", "openai", "--model", "gpt-5"]).provider == "openai"
+
+
+def test_parse_args_rejects_an_unknown_provider():
+    with pytest.raises(SystemExit):
+        gci.parse_args(["--provider", "not_a_provider"])
