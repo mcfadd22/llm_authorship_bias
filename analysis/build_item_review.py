@@ -8,6 +8,7 @@ checkable at a glance. Verdicts are recorded in-page and exported as CSV.
 
     python analysis/build_item_review.py
 """
+import argparse
 import difflib
 import html
 import json
@@ -15,11 +16,19 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ITEMS, CLEAN = ROOT / "data" / "items", ROOT / "data" / "items_clean"
-OUT = ROOT / "analysis" / "item_review.html"
 
 
-def load():
+def parse_args(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--items-dir", type=Path, default=ROOT / "data" / "items")
+    ap.add_argument("--clean-dir", type=Path, default=None,
+                    help="defaults to <items-dir>_clean")
+    ap.add_argument("--out", type=Path, default=None,
+                    help="defaults to analysis/item_review_<bank>.html")
+    return ap.parse_args(argv)
+
+
+def load(ITEMS, CLEAN):
     aims = {a["id"]: a for a in json.loads((ROOT / "config" / "stated_aims.json").read_text())["aims"]}
     flavors = {f["id"]: f for f in json.loads((ROOT / "config" / "bug_flavor.json").read_text())["levels"]}
     rows = []
@@ -30,6 +39,7 @@ def load():
         item["fix_rationale"] = json.loads(twin.read_text()).get("fix_rationale") if twin.exists() else None
         aim = aims.get(item["aim_id"], {})
         item["aim_text"] = aim.get("text") or aim.get("aim") or item["aim_id"]
+        item["contract"] = aim.get("contract", "")
         item["flavor_def"] = (flavors.get(item["bug_flavor"], {}) or {}).get("definition", "")
         rows.append(item)
     return rows
@@ -57,6 +67,14 @@ def diff_html(buggy, clean):
     return "".join(out)
 
 
+def _severity_tag(it):
+    tier = it.get("severity_tier")
+    if tier:
+        return f'<span class="tag tier t-{html.escape(tier)}">{html.escape(tier)}</span>'
+    expected = " / ".join(it.get("expected_severity_tiers") or ["?"])
+    return f'<span class="tag tier open">severity open: {html.escape(expected)}</span>'
+
+
 def card(it, n):
     changed = "" if it["clean_code"] else '<span class="warn">no clean twin</span>'
     iid = html.escape(it["item_id"])
@@ -66,10 +84,11 @@ def card(it, n):
     <span class="num">{n}</span>
     <code class="iid">{iid}</code>
     <span class="tag flavor">{html.escape(it['bug_flavor'])}</span>
-    <span class="tag tier t-{html.escape(it['severity_tier'])}">{html.escape(it['severity_tier'])}</span>
+    {_severity_tag(it)}
     {changed}
   </header>
   <p class="aim"><strong>Stated aim:</strong> {html.escape(it['aim_text'])}</p>
+  <p class="contract"><strong>Contract:</strong> {html.escape(it.get('contract') or '(none)')}</p>
   <div class="code">{diff_html(it['code'], it['clean_code'])}</div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
     <p class="rat">{html.escape(it.get('rationale') or '')}</p>
@@ -77,18 +96,31 @@ def card(it, n):
     <p class="def"><strong>Declared flavor means:</strong> {html.escape(it['flavor_def'])}</p>
   </details>
   <div class="verdict" data-item="{iid}">
-    <label><input type="radio" name="v{n}" value="ok"> flavor + tier correct</label>
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v{n}" value="ok"> ok</label>
     <label><input type="radio" name="v{n}" value="wrong_flavor"> wrong flavor</label>
     <label><input type="radio" name="v{n}" value="wrong_tier"> wrong tier</label>
     <label><input type="radio" name="v{n}" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v{n}" value="drop"> drop / regenerate</label>
+    <label><input type="radio" name="v{n}" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v{n}" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="{iid}">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t{n}" value="ok"> clean</label>
+    <label><input type="radio" name="t{n}" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t{n}" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t{n}" value="twin_not_minimal"> changes too much</label>
     <input class="note" type="text" placeholder="note (optional)">
   </div>
 </section>'''
 
 
-def main():
-    rows = load()
+def main(argv=None):
+    args = parse_args(argv)
+    items_dir = args.items_dir
+    clean_dir = args.clean_dir or items_dir.parent / f"{items_dir.name}_clean"
+    out_path = args.out or ROOT / "analysis" / f"item_review_{items_dir.name}.html"
+    rows = load(items_dir, clean_dir)
     by_flavor = defaultdict(list)
     for r in rows:
         by_flavor[r["bug_flavor"]].append(r)
@@ -107,7 +139,7 @@ def main():
     summary = " · ".join(f"{k}: {v}" for k, v in sorted(tiers.items()))
     missing = sum(1 for r in rows if not r["clean_code"])
 
-    OUT.write_text(f'''<!doctype html><meta charset="utf-8">
+    out_path.write_text(f'''<!doctype html><meta charset="utf-8">
 <title>Item bank review — {len(rows)} items</title>
 <style>
  :root {{ --bg:#fbfaf8; --fg:#1c1a17; --mut:#6b6560; --line:#e3ded7;
@@ -148,6 +180,12 @@ def main():
  .verdict {{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px;
    padding-top:11px; border-top:1px solid var(--line); font-size:12.5px }}
  .verdict label {{ cursor:pointer; color:var(--mut) }}
+ .verdict.twin {{ border-top:1px dashed var(--line) }}
+ .vlabel {{ font-size:10.5px; text-transform:uppercase; letter-spacing:.07em;
+   color:var(--mut); min-width:34px }}
+ .contract {{ margin:0 0 10px; font-size:13px; color:var(--fg);
+   border-left:2px solid var(--line); padding-left:9px }}
+ .tag.open {{ border-style:dashed }}
  .verdict input[type=radio] {{ margin-right:4px }}
  .note {{ flex:1; min-width:160px; font:inherit; font-size:12.5px; padding:4px 8px;
    border:1px solid var(--line); border-radius:5px; background:transparent; color:var(--fg) }}
@@ -169,10 +207,12 @@ const upd=()=>document.getElementById('prog').textContent=
   document.querySelectorAll('.verdict input[type=radio]:checked').length+' / {len(rows)} reviewed';
 document.addEventListener('change',upd);
 function exportCsv(){{
-  const out=[['item_id','verdict','note']];
-  document.querySelectorAll('.verdict').forEach(v=>{{
+  const out=[['item_id','verdict','twin_verdict','note']];
+  document.querySelectorAll('.verdict[data-item]').forEach(v=>{{
+    const t=document.querySelector('.verdict.twin[data-twin="'+v.dataset.item+'"]');
     const c=v.querySelector('input[type=radio]:checked');
-    out.push([v.dataset.item, c?c.value:'', v.querySelector('.note').value]);
+    const tc=t?t.querySelector('input[type=radio]:checked'):null;
+    out.push([v.dataset.item, c?c.value:'', tc?tc.value:'', t?t.querySelector('.note').value:'']);
   }});
   const csv=out.map(r=>r.map(f=>'"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\\n');
   const a=document.createElement('a');
@@ -180,7 +220,7 @@ function exportCsv(){{
   a.download='item_verdicts.csv'; a.click();
 }}
 </script>''', encoding="utf-8")
-    print(f"wrote {OUT}  ({len(rows)} items, {summary}, {missing} missing twins)")
+    print(f"wrote {out_path}  ({len(rows)} items, {summary}, {missing} missing twins)")
 
 
 if __name__ == "__main__":

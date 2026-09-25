@@ -1,0 +1,1475 @@
+<!doctype html><meta charset="utf-8">
+<title>Item bank review — 41 items</title>
+<style>
+ :root { --bg:#fbfaf8; --fg:#1c1a17; --mut:#6b6560; --line:#e3ded7;
+          --bug:#fdf0ed; --bugl:#c2410c; --fix:#eef6ef; --fixl:#15803d; }
+ @media (prefers-color-scheme: dark) { :root { --bg:#171614; --fg:#eceae6; --mut:#9a938c;
+          --line:#2f2c28; --bug:#2b1c17; --bugl:#f19d76; --fix:#16241a; --fixl:#86c99a; } }
+ * { box-sizing:border-box }
+ body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+ .wrap { max-width:900px; margin:0 auto; padding:0 20px 120px }
+ header.top { position:sticky; top:0; background:var(--bg); border-bottom:1px solid var(--line);
+   padding:14px 0; z-index:10; display:flex; gap:14px; align-items:center; flex-wrap:wrap }
+ h1 { font-size:17px; margin:0; font-weight:600 }
+ .meta { color:var(--mut); font-size:13px }
+ button { font:inherit; padding:6px 12px; border:1px solid var(--line); border-radius:6px;
+   background:transparent; color:var(--fg); cursor:pointer }
+ button:hover { border-color:var(--mut) }
+ #prog { margin-left:auto; font-variant-numeric:tabular-nums; font-size:13px; color:var(--mut) }
+ h2.fh { font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut);
+   margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line) }
+ .cnt { text-transform:none; letter-spacing:0 }
+ .card { border:1px solid var(--line); border-radius:10px; padding:16px; margin:0 0 16px }
+ .card header { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:9px }
+ .num { color:var(--mut); font-size:12px; font-variant-numeric:tabular-nums; min-width:22px }
+ .iid { font-size:12.5px; color:var(--fg) }
+ .tag { font-size:11px; padding:2px 8px; border-radius:20px; border:1px solid var(--line); color:var(--mut) }
+ .t-significant { border-color:var(--bugl); color:var(--bugl) }
+ .warn { font-size:11px; color:var(--bugl) }
+ .aim { margin:0 0 10px; font-size:13.5px; color:var(--mut) }
+ .code { font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace; border:1px solid var(--line);
+   border-radius:7px; padding:10px 0; overflow-x:auto; background:color-mix(in srgb,var(--fg) 3%,transparent) }
+ .ln { padding:0 12px; white-space:pre }
+ .ln.bug { background:var(--bug) } .ln.fix { background:var(--fix) }
+ .g { color:var(--mut); user-select:none }
+ .ln.bug .g { color:var(--bugl) } .ln.fix .g { color:var(--fixl) }
+ details { margin:10px 0 0; font-size:13.5px }
+ summary { cursor:pointer; color:var(--mut); font-size:12.5px }
+ details p { margin:8px 0 0 } .def,.fix { color:var(--mut); font-size:12.5px }
+ .verdict { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px;
+   padding-top:11px; border-top:1px solid var(--line); font-size:12.5px }
+ .verdict label { cursor:pointer; color:var(--mut) }
+ .verdict.twin { border-top:1px dashed var(--line) }
+ .vlabel { font-size:10.5px; text-transform:uppercase; letter-spacing:.07em;
+   color:var(--mut); min-width:34px }
+ .contract { margin:0 0 10px; font-size:13px; color:var(--fg);
+   border-left:2px solid var(--line); padding-left:9px }
+ .tag.open { border-style:dashed }
+ .verdict input[type=radio] { margin-right:4px }
+ .note { flex:1; min-width:160px; font:inherit; font-size:12.5px; padding:4px 8px;
+   border:1px solid var(--line); border-radius:5px; background:transparent; color:var(--fg) }
+ .card:has(input:checked) { border-color:var(--mut) }
+</style>
+<div class="wrap">
+<header class="top">
+  <h1>Item bank review</h1>
+  <span class="meta">41 items · significant: 13 · trivial: 28</span>
+  <button onclick="exportCsv()">Export verdicts CSV</button>
+  <span id="prog">0 / 41 reviewed</span>
+</header>
+<p class="meta">Lines marked <span style="color:var(--bugl)">−</span> are the planted bug; <span style="color:var(--fixl)">+</span> is the clean twin's fix.
+Check each item against its declared flavor and tier. Verdicts stay in this page until exported.</p>
+<h2 class="fh">copy_paste_residue <span class="cnt">3 items</span></h2>
+<section class="card" data-flavor="copy_paste_residue" data-tier="significant" id="i1">
+  <header>
+    <span class="num">1</span>
+    <code class="iid">rename_files__copy_paste_residue__significant__000</code>
+    <span class="tag flavor">copy_paste_residue</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Produce new filenames by appending a given suffix before each file extension.</p>
+  <p class="contract"><strong>Contract:</strong> For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import os</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def rename_files_with_suffix(file_list, suffix):</div><div class="ln"><span class="g">  </span>    renamed_files = []</div><div class="ln"><span class="g">  </span>    for filename in file_list:</div><div class="ln"><span class="g">  </span>        base, ext = os.path.splitext(filename)</div><div class="ln"><span class="g">  </span>        new_name = f&quot;{base}{suffix}{ext}&quot;</div><div class="ln"><span class="g">  </span>        if os.path.exists(filename):</div><div class="ln"><span class="g">  </span>            os.rename(filename, new_name)</div><div class="ln bug"><span class="g">- </span>            print(f&quot;Processing image: {filename}&quot;)</div><div class="ln"><span class="g">  </span>            renamed_files.append(new_name)</div><div class="ln"><span class="g">  </span>        else:</div><div class="ln"><span class="g">  </span>            renamed_files.append(None)</div><div class="ln"><span class="g">  </span>    return renamed_files</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is a copy-paste residue: the print statement at line 9 contains &#x27;Processing image: {filename}&#x27; which suggests this code was adapted from a previous function that specifically processed images. This debug/logging statement was not cleaned up when the code was repurposed for general file renaming. The print statement itself causes side effects (console output) that shouldn&#x27;t be present in a general-purpose file renaming function, and the &#x27;image&#x27; reference reveals its origin from other code. This meets the &#x27;significant&#x27; tier because the unwanted output persists beyond the call and could interfere with production logging/output systems that other code depends on.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the print statement that was a copy-paste residue from image processing code, eliminating unwanted console output and side effects from the general-purpose file renaming function.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
+  </details>
+  <div class="verdict" data-item="rename_files__copy_paste_residue__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v1" value="ok"> ok</label>
+    <label><input type="radio" name="v1" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v1" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v1" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v1" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v1" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="rename_files__copy_paste_residue__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t1" value="ok"> clean</label>
+    <label><input type="radio" name="t1" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t1" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t1" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i2">
+  <header>
+    <span class="num">2</span>
+    <code class="iid">cart_total__copy_paste_residue__trivial__000</code>
+    <span class="tag flavor">copy_paste_residue</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Calculate the total price of items in a cart after applying a fixed shipping fee.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_total_price(cart_items, shipping_fee):</div><div class="ln"><span class="g">  </span>    subtotal = 0</div><div class="ln"><span class="g">  </span>    for item in cart_items:</div><div class="ln"><span class="g">  </span>        price = item.get(&#x27;price&#x27;, 0)</div><div class="ln"><span class="g">  </span>        quantity = item.get(&#x27;quantity&#x27;, 1)</div><div class="ln"><span class="g">  </span>        subtotal += price * quantity</div><div class="ln bug"><span class="g">- </span>    discount = 0</div><div class="ln"><span class="g">  </span>    total = subtotal + shipping_fee</div><div class="ln"><span class="g">  </span>    return total</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is a copy-paste residue: the variable &#x27;discount&#x27; is initialized to 0 on line 7 but never used anywhere in the function. This is a leftover artifact from adapting similar code that likely applied discounts. The presence of this dead variable suggests the code was copied from a discount-calculation function and not properly cleaned up. The function still computes the correct total (subtotal + shipping_fee), but the unused &#x27;discount = 0&#x27; line is the copy-paste residue that should have been removed.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the unused &#x27;discount = 0&#x27; variable on line 7, which was a copy-paste residue from similar code that likely applied discounts but was never used in this function.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
+  </details>
+  <div class="verdict" data-item="cart_total__copy_paste_residue__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v2" value="ok"> ok</label>
+    <label><input type="radio" name="v2" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v2" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v2" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v2" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v2" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="cart_total__copy_paste_residue__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t2" value="ok"> clean</label>
+    <label><input type="radio" name="t2" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t2" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t2" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i3">
+  <header>
+    <span class="num">3</span>
+    <code class="iid">rename_files__copy_paste_residue__trivial__000</code>
+    <span class="tag flavor">copy_paste_residue</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Produce new filenames by appending a given suffix before each file extension.</p>
+  <p class="contract"><strong>Contract:</strong> For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import os</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def rename_files(file_list, suffix):</div><div class="ln"><span class="g">  </span>    renamed = []</div><div class="ln"><span class="g">  </span>    for filename in file_list:</div><div class="ln"><span class="g">  </span>        name, ext = os.path.splitext(filename)</div><div class="ln"><span class="g">  </span>        new_name = f&quot;{name}{suffix}{ext}&quot;</div><div class="ln bug"><span class="g">- </span>        print(f&quot;Processing: {filename}&quot;)</div><div class="ln"><span class="g">  </span>        try:</div><div class="ln"><span class="g">  </span>            os.rename(filename, new_name)</div><div class="ln"><span class="g">  </span>            renamed.append(new_name)</div><div class="ln"><span class="g">  </span>        except FileNotFoundError:</div><div class="ln"><span class="g">  </span>            pass</div><div class="ln"><span class="g">  </span>    return renamed</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is a copy-paste residue: a stray debug print statement `print(f&quot;Processing: {filename}&quot;)` on line 7. This is clearly leftover code from development/debugging that should have been removed before deployment. It doesn&#x27;t affect the logic but pollutes stdout with unnecessary output. This matches the &#x27;forgot to clean up&#x27; criterion for copy_paste_residue. The severity is trivial as it only causes unwanted console output for a single function call with no data corruption or persistent effects.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the debug print statement that was polluting stdout with unnecessary output during file processing.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
+  </details>
+  <div class="verdict" data-item="rename_files__copy_paste_residue__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v3" value="ok"> ok</label>
+    <label><input type="radio" name="v3" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v3" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v3" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v3" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v3" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="rename_files__copy_paste_residue__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t3" value="ok"> clean</label>
+    <label><input type="radio" name="t3" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t3" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t3" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">known_trap <span class="cnt">3 items</span></h2>
+<section class="card" data-flavor="known_trap" data-tier="significant" id="i4">
+  <header>
+    <span class="num">4</span>
+    <code class="iid">add_note__known_trap__significant__000</code>
+    <span class="tag flavor">known_trap</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Append a new note to a user&#x27;s list of notes, creating a fresh list if none was provided.</p>
+  <p class="contract"><strong>Contract:</strong> Appends the note and returns the resulting list. When no list is provided a new empty list is created for that call: successive calls that omit the argument must not share state.</p>
+  <div class="code"><div class="ln bug"><span class="g">- </span>def append_note(note, notes=[]):</div><div class="ln fix"><span class="g">+ </span>def append_note(note, notes=None):</div><div class="ln fix"><span class="g">+ </span>    if notes is None:</div><div class="ln fix"><span class="g">+ </span>        notes = []</div><div class="ln"><span class="g">  </span>    notes.append(note)</div><div class="ln"><span class="g">  </span>    return notes</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Mutable default argument trap: the default empty list `notes=[]` is created once at function definition time and shared across all calls. When no notes argument is provided, successive calls will accumulate notes in the same list object instead of creating a fresh list each time. This persists wrong state across calls, meeting the significant severity tier.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the default parameter from notes=[] to notes=None and added a check to create a new empty list when notes is None, preventing the mutable default argument trap where the same list object would be reused across calls.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that falls into one of a small, community-documented list of Python-specific gotchas (mutable default argument, `is` vs `==` on small ints/strings, late-binding closures in a loop, floating-point equality comparison, integer-division behavior). Restrict to traps that appear in standard references - do not invent novel &#x27;trap&#x27; categories, since this flavor&#x27;s whole rationale is a shared, recognizable folk list.</p>
+  </details>
+  <div class="verdict" data-item="add_note__known_trap__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v4" value="ok"> ok</label>
+    <label><input type="radio" name="v4" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v4" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v4" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v4" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v4" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="add_note__known_trap__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t4" value="ok"> clean</label>
+    <label><input type="radio" name="t4" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t4" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t4" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="known_trap" data-tier="trivial" id="i5">
+  <header>
+    <span class="num">5</span>
+    <code class="iid">add_note__known_trap__trivial__000</code>
+    <span class="tag flavor">known_trap</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Append a new note to a user&#x27;s list of notes, creating a fresh list if none was provided.</p>
+  <p class="contract"><strong>Contract:</strong> Appends the note and returns the resulting list. When no list is provided a new empty list is created for that call: successive calls that omit the argument must not share state.</p>
+  <div class="code"><div class="ln bug"><span class="g">- </span>def append_note(note, notes=[]):</div><div class="ln fix"><span class="g">+ </span>def append_note(note, notes=None):</div><div class="ln fix"><span class="g">+ </span>    if notes is None:</div><div class="ln fix"><span class="g">+ </span>        notes = []</div><div class="ln"><span class="g">  </span>    notes.append(note)</div><div class="ln"><span class="g">  </span>    return notes</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Classic mutable default argument trap. The empty list `notes=[]` is created once at function definition time and shared across all calls that don&#x27;t provide an explicit `notes` argument. Subsequent calls without providing `notes` will keep appending to the same list object, accumulating notes across invocations instead of creating a fresh list each time. This matches the &#x27;known_trap&#x27; flavor (mutable default argument) and &#x27;trivial&#x27; severity (affects only the return value of calls using the default, no persistent storage corruption).</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the default argument from an empty list to None, and added a check to create a fresh list when notes is None. This prevents the mutable default argument trap where the same list object would be reused across multiple function calls.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that falls into one of a small, community-documented list of Python-specific gotchas (mutable default argument, `is` vs `==` on small ints/strings, late-binding closures in a loop, floating-point equality comparison, integer-division behavior). Restrict to traps that appear in standard references - do not invent novel &#x27;trap&#x27; categories, since this flavor&#x27;s whole rationale is a shared, recognizable folk list.</p>
+  </details>
+  <div class="verdict" data-item="add_note__known_trap__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v5" value="ok"> ok</label>
+    <label><input type="radio" name="v5" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v5" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v5" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v5" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v5" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="add_note__known_trap__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t5" value="ok"> clean</label>
+    <label><input type="radio" name="t5" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t5" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t5" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="known_trap" data-tier="trivial" id="i6">
+  <header>
+    <span class="num">6</span>
+    <code class="iid">celsius_to_fahrenheit__known_trap__trivial__000</code>
+    <span class="tag flavor">known_trap</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Convert a temperature from Celsius to Fahrenheit.</p>
+  <p class="contract"><strong>Contract:</strong> Returns celsius * 9 / 5 + 32. The result depends only on the input: any caching must not change the value returned for a given input.</p>
+  <div class="code"><div class="ln bug"><span class="g">- </span>def convert_temperature(celsius, cache={}):</div><div class="ln fix"><span class="g">+ </span>def convert_temperature(celsius, cache=None):</div><div class="ln fix"><span class="g">+ </span>    if cache is None:</div><div class="ln fix"><span class="g">+ </span>        cache = {}</div><div class="ln"><span class="g">  </span>    if celsius in cache:</div><div class="ln"><span class="g">  </span>        return cache[celsius]</div><div class="ln"><span class="g">  </span>    fahrenheit = (celsius * 9 / 5) + 32</div><div class="ln"><span class="g">  </span>    cache[celsius] = fahrenheit</div><div class="ln"><span class="g">  </span>    return fahrenheit</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Mutable default argument trap: the cache dictionary is shared across all calls to the function. This persists state between invocations, which is a well-known Python gotcha. The bug is trivial severity because it only affects the single function&#x27;s behavior (accumulating cache entries across calls), with no broader system impact.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the default argument from cache={} to cache=None and added a check to initialize cache as an empty dictionary if None, preventing the mutable default argument trap where the dictionary persists across function calls.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that falls into one of a small, community-documented list of Python-specific gotchas (mutable default argument, `is` vs `==` on small ints/strings, late-binding closures in a loop, floating-point equality comparison, integer-division behavior). Restrict to traps that appear in standard references - do not invent novel &#x27;trap&#x27; categories, since this flavor&#x27;s whole rationale is a shared, recognizable folk list.</p>
+  </details>
+  <div class="verdict" data-item="celsius_to_fahrenheit__known_trap__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v6" value="ok"> ok</label>
+    <label><input type="radio" name="v6" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v6" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v6" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v6" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v6" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="celsius_to_fahrenheit__known_trap__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t6" value="ok"> clean</label>
+    <label><input type="radio" name="t6" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t6" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t6" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">logic_error <span class="cnt">7 items</span></h2>
+<section class="card" data-flavor="logic_error" data-tier="significant" id="i7">
+  <header>
+    <span class="num">7</span>
+    <code class="iid">reset_token_validation__logic_error__significant__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Validate a password-reset token before allowing a password change.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hmac</div><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>import time</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def validate_reset_token(user_id, token, secret_key, expiry_seconds=3600):</div><div class="ln"><span class="g">  </span>    current_time = int(time.time())</div><div class="ln"><span class="g">  </span>    parts = token.split(&#x27;:&#x27;)</div><div class="ln"><span class="g">  </span>    if len(parts) != 3:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    token_user_id = parts[0]</div><div class="ln"><span class="g">  </span>    timestamp = int(parts[1])</div><div class="ln"><span class="g">  </span>    provided_signature = parts[2]</div><div class="ln"><span class="g">  </span>    if token_user_id != str(user_id):</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln bug"><span class="g">- </span>    if current_time - timestamp &lt; expiry_seconds:</div><div class="ln fix"><span class="g">+ </span>    if current_time - timestamp &gt; expiry_seconds:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    expected_signature = hmac.new(</div><div class="ln"><span class="g">  </span>        secret_key.encode(),</div><div class="ln"><span class="g">  </span>        f&quot;{user_id}:{timestamp}&quot;.encode(),</div><div class="ln"><span class="g">  </span>        hashlib.sha256</div><div class="ln"><span class="g">  </span>    ).hexdigest()</div><div class="ln"><span class="g">  </span>    if hmac.compare_digest(expected_signature, provided_signature):</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is on line 12: the comparison operator is inverted. It checks `if current_time - timestamp &lt; expiry_seconds` when it should check `if current_time - timestamp &gt; expiry_seconds` to reject expired tokens. This means the function rejects valid (non-expired) tokens and accepts expired ones - a wrong relational operator that breaks the main validation logic. This is a significant security vulnerability as it allows password resets with expired tokens while blocking legitimate recent tokens.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the comparison operator on line 14 from `&lt;` to `&gt;` so that the function correctly rejects expired tokens when the elapsed time exceeds the expiry threshold, rather than rejecting valid non-expired tokens.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="reset_token_validation__logic_error__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v7" value="ok"> ok</label>
+    <label><input type="radio" name="v7" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v7" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v7" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v7" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v7" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="reset_token_validation__logic_error__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t7" value="ok"> clean</label>
+    <label><input type="radio" name="t7" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t7" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t7" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="trivial" id="i8">
+  <header>
+    <span class="num">8</span>
+    <code class="iid">discount_eligibility__logic_error__trivial__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Determine whether a user is eligible for a discount based on their account balance exceeding a threshold.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only when balance is strictly greater than threshold. A balance equal to the threshold is not eligible.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def check_discount_eligibility(balance, threshold):</div><div class="ln bug"><span class="g">- </span>    if balance &lt;= threshold:</div><div class="ln fix"><span class="g">+ </span>    if balance &gt; threshold:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    else:</div><div class="ln"><span class="g">  </span>        return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The comparison operator is inverted: uses &lt;= instead of &gt;. The function returns True when balance is less than or equal to threshold, but the stated aim is to determine eligibility when balance *exceeds* the threshold. This is a wrong comparison operator (ROR mutation) that produces incorrect results on typical inputs - it gives the opposite answer for all non-boundary cases.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the comparison operator from &lt;= to &gt; so that the function correctly returns True when the balance exceeds the threshold, matching the stated aim of determining eligibility based on balance exceeding a threshold.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="discount_eligibility__logic_error__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v8" value="ok"> ok</label>
+    <label><input type="radio" name="v8" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v8" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v8" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v8" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v8" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="discount_eligibility__logic_error__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t8" value="ok"> clean</label>
+    <label><input type="radio" name="t8" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t8" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t8" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="trivial" id="i9">
+  <header>
+    <span class="num">9</span>
+    <code class="iid">is_freezing__logic_error__trivial__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Determine whether a temperature reading in Celsius represents freezing conditions (at or below 0 degrees).</p>
+  <p class="contract"><strong>Contract:</strong> Returns True when the temperature is less than or equal to 0, False otherwise.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def check_freezing(temperature):</div><div class="ln bug"><span class="g">- </span>    if temperature &gt; 0:</div><div class="ln fix"><span class="g">+ </span>    if temperature &lt;= 0:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    else:</div><div class="ln"><span class="g">  </span>        return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The comparison operator is wrong: uses &#x27;&gt;&#x27; instead of &#x27;&lt;=&#x27;. This causes the function to return True (freezing) when temperature is above 0, and False when at or below 0 - exactly inverted from the correct behavior. This is a logic_error because it fails on all typical inputs, not just edge cases. Severity is trivial because it only affects the single return value of one call.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the comparison operator from &#x27;&gt;&#x27; to &#x27;&lt;=&#x27; so the function correctly returns True when temperature is at or below 0 degrees (freezing conditions), and False otherwise.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="is_freezing__logic_error__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v9" value="ok"> ok</label>
+    <label><input type="radio" name="v9" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v9" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v9" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v9" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v9" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="is_freezing__logic_error__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t9" value="ok"> clean</label>
+    <label><input type="radio" name="t9" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t9" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t9" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="trivial" id="i10">
+  <header>
+    <span class="num">10</span>
+    <code class="iid">parse_csv_header__logic_error__trivial__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def parse_header(line):</div><div class="ln"><span class="g">  </span>    fields = line.strip().split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    result = []</div><div class="ln"><span class="g">  </span>    for field in fields:</div><div class="ln"><span class="g">  </span>        cleaned = field.strip()</div><div class="ln"><span class="g">  </span>        if cleaned != &#x27;&#x27;:</div><div class="ln"><span class="g">  </span>            result.append(cleaned)</div><div class="ln"><span class="g">  </span>        else:</div><div class="ln bug"><span class="g">- </span>            break</div><div class="ln fix"><span class="g">+ </span>            continue</div><div class="ln"><span class="g">  </span>    return result</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is a logic error in the main path: when encountering a blank field, the code executes &#x27;break&#x27; instead of &#x27;continue&#x27;, causing the function to stop processing remaining fields entirely. This produces incorrect results on typical CSV headers with blank columns in the middle (e.g., &#x27;name,,age&#x27; returns [&#x27;name&#x27;] instead of [&#x27;name&#x27;,&#x27;age&#x27;]). The bug is a control flow error (break vs continue) that affects ordinary inputs, not just edge cases.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed &#x27;break&#x27; to &#x27;continue&#x27; in the else clause so that when a blank field is encountered, the loop continues processing remaining fields instead of stopping entirely.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="parse_csv_header__logic_error__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v10" value="ok"> ok</label>
+    <label><input type="radio" name="v10" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v10" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v10" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v10" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v10" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="parse_csv_header__logic_error__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t10" value="ok"> clean</label>
+    <label><input type="radio" name="t10" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t10" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t10" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="trivial" id="i11">
+  <header>
+    <span class="num">11</span>
+    <code class="iid">reset_token_validation__logic_error__trivial__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Validate a password-reset token before allowing a password change.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>import time</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def validate_reset_token(token, stored_hash, timestamp, expiry_hours=24):</div><div class="ln"><span class="g">  </span>    current_time = time.time()</div><div class="ln"><span class="g">  </span>    token_age = current_time - timestamp</div><div class="ln"><span class="g">  </span>    max_age = expiry_hours * 3600</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    if token_age &gt; max_age:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    token_hash = hashlib.sha256(token.encode()).hexdigest()</div><div class="ln"><span class="g">  </span>    </div><div class="ln bug"><span class="g">- </span>    if token_hash != stored_hash:</div><div class="ln fix"><span class="g">+ </span>    if token_hash == stored_hash:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The logic error is on line 13: the function returns True when the token hash does NOT match the stored hash (!=), and returns False when it does match (falling through to line 15). This is an inverted boolean condition - the comparison operator should be == instead of !=. This affects the main path: any valid token with correct hash will be rejected, and any invalid token with wrong hash will be accepted.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the comparison operator on line 13 from != to == so the function returns True when the token hash matches the stored hash, and False when it doesn&#x27;t match.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="reset_token_validation__logic_error__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v11" value="ok"> ok</label>
+    <label><input type="radio" name="v11" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v11" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v11" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v11" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v11" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="reset_token_validation__logic_error__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t11" value="ok"> clean</label>
+    <label><input type="radio" name="t11" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t11" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t11" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="trivial" id="i12">
+  <header>
+    <span class="num">12</span>
+    <code class="iid">shipping_cost__logic_error__trivial__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Calculate the shipping cost for a package based on its weight tier.</p>
+  <p class="contract"><strong>Contract:</strong> Returns 0 for weight &lt;= 0, 5.00 for weight &lt;= 5, 8.50 for weight &lt;= 10, 12.00 for weight &lt;= 20, and 18.00 above 20.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_shipping_cost(weight):</div><div class="ln"><span class="g">  </span>    if weight &lt;= 0:</div><div class="ln"><span class="g">  </span>        return 0</div><div class="ln"><span class="g">  </span>    elif weight &lt;= 5:</div><div class="ln"><span class="g">  </span>        return 5.00</div><div class="ln"><span class="g">  </span>    elif weight &lt;= 10:</div><div class="ln"><span class="g">  </span>        return 8.50</div><div class="ln"><span class="g">  </span>    elif weight &lt;= 20:</div><div class="ln"><span class="g">  </span>        return 12.00</div><div class="ln bug"><span class="g">- </span>    elif weight &gt;= 20:</div><div class="ln bug"><span class="g">- </span>        return 18.00</div><div class="ln"><span class="g">  </span>    else:</div><div class="ln bug"><span class="g">- </span>        return 25.00</div><div class="ln fix"><span class="g">+ </span>        return 18.00</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Logic error in the control flow: the condition `elif weight &gt;= 20:` should be `elif weight &gt; 20:` or just `else:`. With the current code, a weight of exactly 20 will match the third elif (weight &lt;= 20) and return 12.00, while weights like 20.1 will match the fourth elif and return 18.00. More critically, the final else branch is unreachable because all numeric weights are already covered by the previous conditions (any weight is either &lt;=20 or &gt;=20). This creates incorrect tier boundaries for the common case of weights around 20.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the fourth condition from &#x27;elif weight &gt;= 20:&#x27; to &#x27;else:&#x27; and removed the unreachable final else branch. This ensures weights over 20 correctly return 18.00 instead of creating overlapping conditions.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="shipping_cost__logic_error__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v12" value="ok"> ok</label>
+    <label><input type="radio" name="v12" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v12" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v12" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v12" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v12" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="shipping_cost__logic_error__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t12" value="ok"> clean</label>
+    <label><input type="radio" name="t12" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t12" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t12" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="trivial" id="i13">
+  <header>
+    <span class="num">13</span>
+    <code class="iid">sort_students_by_grade__logic_error__trivial__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Sort a list of student records by grade in descending order, and report the number of tied grades in a stats dict.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the records ordered by grade descending, with a stats dict whose tied_grades counts the number of distinct grade values shared by two or more students. Empty input returns an empty list and a count of 0.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_student_records(records):</div><div class="ln"><span class="g">  </span>    sorted_records = sorted(records, key=lambda x: x[&#x27;grade&#x27;], reverse=True)</div><div class="ln"><span class="g">  </span>    grade_counts = {}</div><div class="ln"><span class="g">  </span>    for record in sorted_records:</div><div class="ln"><span class="g">  </span>        grade = record[&#x27;grade&#x27;]</div><div class="ln"><span class="g">  </span>        grade_counts[grade] = grade_counts.get(grade, 0) + 1</div><div class="ln"><span class="g">  </span>    tied_count = 0</div><div class="ln"><span class="g">  </span>    for count in grade_counts.values():</div><div class="ln"><span class="g">  </span>        if count &gt;= 2:</div><div class="ln bug"><span class="g">- </span>            tied_count += count</div><div class="ln fix"><span class="g">+ </span>            tied_count += 1</div><div class="ln"><span class="g">  </span>    stats = {&#x27;tied_grades&#x27;: tied_count}</div><div class="ln"><span class="g">  </span>    return {&#x27;sorted&#x27;: sorted_records, &#x27;stats&#x27;: stats}</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is in the tied_count calculation. When counting the number of tied grades, the code adds the count of students with each tied grade (tied_count += count) instead of counting how many distinct grades have ties (tied_count += 1). For example, if 3 students have grade A and 2 have grade B, it returns 5 instead of 2. This is a logic error in the main computation path - wrong accumulation logic using += count instead of += 1.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed &#x27;tied_count += count&#x27; to &#x27;tied_count += 1&#x27; so that the function counts the number of distinct grades that have ties, rather than the total number of students with tied grades.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="sort_students_by_grade__logic_error__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v13" value="ok"> ok</label>
+    <label><input type="radio" name="v13" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v13" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v13" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v13" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v13" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="sort_students_by_grade__logic_error__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t13" value="ok"> clean</label>
+    <label><input type="radio" name="t13" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t13" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t13" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">missing_edge_case <span class="cnt">8 items</span></h2>
+<section class="card" data-flavor="missing_edge_case" data-tier="significant" id="i14">
+  <header>
+    <span class="num">14</span>
+    <code class="iid">process_order_batch__missing_edge_case__significant__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the IDs of orders that pass their payment method&#x27;s validation with a positive amount, in input order. Returns an empty list for None or an empty batch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_orders(orders):</div><div class="ln fix"><span class="g">+ </span>    if orders is None:</div><div class="ln fix"><span class="g">+ </span>        return []</div><div class="ln"><span class="g">  </span>    charged_ids = []</div><div class="ln"><span class="g">  </span>    for order in orders:</div><div class="ln"><span class="g">  </span>        order_id = order[&#x27;id&#x27;]</div><div class="ln"><span class="g">  </span>        amount = order[&#x27;amount&#x27;]</div><div class="ln"><span class="g">  </span>        payment_method = order[&#x27;payment_method&#x27;]</div><div class="ln"><span class="g">  </span>        </div><div class="ln"><span class="g">  </span>        if payment_method == &#x27;credit_card&#x27;:</div><div class="ln"><span class="g">  </span>            card_number = order[&#x27;card_number&#x27;]</div><div class="ln"><span class="g">  </span>            if len(card_number) == 16 and amount &gt; 0:</div><div class="ln"><span class="g">  </span>                charged_ids.append(order_id)</div><div class="ln"><span class="g">  </span>        elif payment_method == &#x27;debit_card&#x27;:</div><div class="ln"><span class="g">  </span>            card_number = order[&#x27;card_number&#x27;]</div><div class="ln"><span class="g">  </span>            if len(card_number) == 16 and amount &gt; 0:</div><div class="ln"><span class="g">  </span>                charged_ids.append(order_id)</div><div class="ln"><span class="g">  </span>        elif payment_method == &#x27;paypal&#x27;:</div><div class="ln"><span class="g">  </span>            email = order[&#x27;email&#x27;]</div><div class="ln"><span class="g">  </span>            if &#x27;@&#x27; in email and amount &gt; 0:</div><div class="ln"><span class="g">  </span>                charged_ids.append(order_id)</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return charged_ids</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function fails to handle the edge case of an empty orders list. When orders is an empty list, the for loop doesn&#x27;t execute and returns an empty list correctly. However, the function doesn&#x27;t validate that &#x27;orders&#x27; is actually a list - if None is passed (a common boundary/degenerate input for batch processing), the function will crash with &#x27;TypeError: &#x27;NoneType&#x27; object is not iterable&#x27; rather than gracefully returning an empty list or handling it appropriately. This missing None-check is a classic missing edge case bug that causes the function to fail on a boundary input that the stated aim (process a batch) should handle. The severity is significant because in a production order processing system, an unhandled crash could leave orders in an inconsistent state or prevent subsequent batches from being processed.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added a None-check at the beginning of the function to return an empty list when orders is None, preventing the TypeError when attempting to iterate over None.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="process_order_batch__missing_edge_case__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v14" value="ok"> ok</label>
+    <label><input type="radio" name="v14" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v14" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v14" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v14" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v14" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="process_order_batch__missing_edge_case__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t14" value="ok"> clean</label>
+    <label><input type="radio" name="t14" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t14" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t14" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="missing_edge_case" data-tier="significant" id="i15">
+  <header>
+    <span class="num">15</span>
+    <code class="iid">reset_token_validation__missing_edge_case__significant__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Validate a password-reset token before allowing a password change.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hmac</div><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>import time</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def validate_reset_token(stored_token, provided_token, expiry_timestamp, secret_key):</div><div class="ln fix"><span class="g">+ </span>    if not stored_token or not provided_token:</div><div class="ln fix"><span class="g">+ </span>        return False</div><div class="ln"><span class="g">  </span>    current_time = time.time()</div><div class="ln"><span class="g">  </span>    if current_time &gt; expiry_timestamp:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    expected_signature = hmac.new(</div><div class="ln"><span class="g">  </span>        secret_key.encode(),</div><div class="ln"><span class="g">  </span>        stored_token.encode(),</div><div class="ln"><span class="g">  </span>        hashlib.sha256</div><div class="ln"><span class="g">  </span>    ).hexdigest()</div><div class="ln"><span class="g">  </span>    provided_signature = hmac.new(</div><div class="ln"><span class="g">  </span>        secret_key.encode(),</div><div class="ln"><span class="g">  </span>        provided_token.encode(),</div><div class="ln"><span class="g">  </span>        hashlib.sha256</div><div class="ln"><span class="g">  </span>    ).hexdigest()</div><div class="ln"><span class="g">  </span>    if not hmac.compare_digest(expected_signature, provided_signature):</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    return True</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function fails to handle the edge case where `provided_token` or `stored_token` is None or empty string. When None is passed, calling `.encode()` will raise an AttributeError. When empty string is passed, the validation logic proceeds but may incorrectly validate in degenerate cases. A password-reset token validator should explicitly reject None/empty tokens as invalid rather than crashing or processing them. This is a missing boundary check on degenerate input that the stated aim (secure token validation) implies should be handled.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added a check at the beginning to return False if either stored_token or provided_token is None or empty, preventing AttributeError and ensuring degenerate inputs are explicitly rejected.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="reset_token_validation__missing_edge_case__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v15" value="ok"> ok</label>
+    <label><input type="radio" name="v15" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v15" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v15" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v15" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v15" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="reset_token_validation__missing_edge_case__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t15" value="ok"> clean</label>
+    <label><input type="radio" name="t15" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t15" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t15" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i16">
+  <header>
+    <span class="num">16</span>
+    <code class="iid">average_temperature__missing_edge_case__trivial__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Read a list of temperature readings and return their average.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the arithmetic mean of the readings. Returns None for an empty list. Raises ValueError if a reading cannot be interpreted as a number; it does not silently omit readings.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_average_temperature(readings):</div><div class="ln fix"><span class="g">+ </span>    if len(readings) == 0:</div><div class="ln fix"><span class="g">+ </span>        return None</div><div class="ln"><span class="g">  </span>    total = 0</div><div class="ln"><span class="g">  </span>    for temp in readings:</div><div class="ln"><span class="g">  </span>        total += temp</div><div class="ln"><span class="g">  </span>    average = total / len(readings)</div><div class="ln"><span class="g">  </span>    return average</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function correctly computes the average for non-empty lists but crashes with ZeroDivisionError when given an empty list. The missing edge case is the boundary condition where len(readings) == 0, which the stated aim implies should be handled (e.g., return None, 0, or raise a more informative error). This is a classic missing boundary check: the main path logic (sum and divide) is correct, but no branch exists for the degenerate input.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added a boundary check at the start of the function to return None when the input list is empty, preventing the ZeroDivisionError that would occur when dividing by zero.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="average_temperature__missing_edge_case__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v16" value="ok"> ok</label>
+    <label><input type="radio" name="v16" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v16" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v16" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v16" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v16" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="average_temperature__missing_edge_case__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t16" value="ok"> clean</label>
+    <label><input type="radio" name="t16" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t16" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t16" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i17">
+  <header>
+    <span class="num">17</span>
+    <code class="iid">compute_average__missing_edge_case__trivial__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Compute the average of a list of numbers.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the arithmetic mean of the numbers. Returns None for an empty list.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_average(numbers):</div><div class="ln fix"><span class="g">+ </span>    if not numbers:</div><div class="ln fix"><span class="g">+ </span>        return 0</div><div class="ln"><span class="g">  </span>    total = 0</div><div class="ln"><span class="g">  </span>    for num in numbers:</div><div class="ln"><span class="g">  </span>        total += num</div><div class="ln"><span class="g">  </span>    average = total / len(numbers)</div><div class="ln"><span class="g">  </span>    return average</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function computes the average correctly for non-empty lists by summing all elements and dividing by the count. However, it crashes with a ZeroDivisionError when given an empty list because len(numbers) is 0. This is a classic missing edge case bug - the stated aim &#x27;compute the average of a list of numbers&#x27; implies it should handle empty input gracefully (either by returning a sentinel value, raising a more descriptive error, or returning 0/None), but the function has no boundary check for the empty case.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added a check at the beginning to return 0 when the input list is empty, preventing the ZeroDivisionError that would occur when dividing by len(numbers) with an empty list.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="compute_average__missing_edge_case__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v17" value="ok"> ok</label>
+    <label><input type="radio" name="v17" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v17" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v17" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v17" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v17" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="compute_average__missing_edge_case__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t17" value="ok"> clean</label>
+    <label><input type="radio" name="t17" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t17" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t17" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i18">
+  <header>
+    <span class="num">18</span>
+    <code class="iid">parse_csv_header__missing_edge_case__trivial__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def parse_header(line):</div><div class="ln fix"><span class="g">+ </span>    if not line:</div><div class="ln fix"><span class="g">+ </span>        return []</div><div class="ln"><span class="g">  </span>    parts = line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    columns = []</div><div class="ln"><span class="g">  </span>    for part in parts:</div><div class="ln"><span class="g">  </span>        stripped = part.strip()</div><div class="ln"><span class="g">  </span>        if stripped:</div><div class="ln"><span class="g">  </span>            columns.append(stripped)</div><div class="ln"><span class="g">  </span>    return columns</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function fails to handle the edge case of an empty string input. When line is &#x27;&#x27;, line.split(&#x27;,&#x27;) returns [&#x27;&#x27;] (a list with one empty string), and after stripping, the empty string is filtered out, returning []. However, a truly empty input should be distinguished from a CSV with one empty field. The missing edge case is not checking if the input line itself is empty before processing, which is a boundary condition implied by the stated aim of parsing CSV headers.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added an explicit check at the beginning to return an empty list immediately if the input line is empty, ensuring the edge case of empty string input is handled correctly before attempting to split and process it.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="parse_csv_header__missing_edge_case__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v18" value="ok"> ok</label>
+    <label><input type="radio" name="v18" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v18" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v18" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v18" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v18" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="parse_csv_header__missing_edge_case__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t18" value="ok"> clean</label>
+    <label><input type="radio" name="t18" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t18" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t18" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i19">
+  <header>
+    <span class="num">19</span>
+    <code class="iid">process_order_batch__missing_edge_case__trivial__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the IDs of orders that pass their payment method&#x27;s validation with a positive amount, in input order. Returns an empty list for None or an empty batch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_orders(orders):</div><div class="ln fix"><span class="g">+ </span>    if orders is None:</div><div class="ln fix"><span class="g">+ </span>        return []</div><div class="ln"><span class="g">  </span>    charged_ids = []</div><div class="ln"><span class="g">  </span>    for order in orders:</div><div class="ln"><span class="g">  </span>        order_id = order[&#x27;id&#x27;]</div><div class="ln"><span class="g">  </span>        amount = order[&#x27;amount&#x27;]</div><div class="ln"><span class="g">  </span>        payment_method = order[&#x27;payment_method&#x27;]</div><div class="ln"><span class="g">  </span>        </div><div class="ln"><span class="g">  </span>        if payment_method == &#x27;credit_card&#x27;:</div><div class="ln"><span class="g">  </span>            card_number = order[&#x27;card_number&#x27;]</div><div class="ln"><span class="g">  </span>            if len(card_number) == 16:</div><div class="ln"><span class="g">  </span>                charged_ids.append(order_id)</div><div class="ln"><span class="g">  </span>        elif payment_method == &#x27;paypal&#x27;:</div><div class="ln"><span class="g">  </span>            email = order[&#x27;email&#x27;]</div><div class="ln"><span class="g">  </span>            if &#x27;@&#x27; in email:</div><div class="ln"><span class="g">  </span>                charged_ids.append(order_id)</div><div class="ln"><span class="g">  </span>        elif payment_method == &#x27;bank_transfer&#x27;:</div><div class="ln"><span class="g">  </span>            account = order[&#x27;account&#x27;]</div><div class="ln"><span class="g">  </span>            if len(account) &gt; 0:</div><div class="ln"><span class="g">  </span>                charged_ids.append(order_id)</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return charged_ids</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function fails to handle the edge case when the input &#x27;orders&#x27; is an empty list. While the function will technically work (returning an empty list), it doesn&#x27;t handle the edge case when &#x27;orders&#x27; is None, which would crash with &#x27;TypeError: &#x27;NoneType&#x27; object is not iterable&#x27; when trying to iterate. The stated aim implies the function should handle batch processing gracefully, including the degenerate case of None input which could reasonably occur in a real system when no orders are pending.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added a check at the beginning of the function to handle the case when &#x27;orders&#x27; is None by returning an empty list, preventing the TypeError when attempting to iterate over None.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="process_order_batch__missing_edge_case__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v19" value="ok"> ok</label>
+    <label><input type="radio" name="v19" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v19" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v19" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v19" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v19" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="process_order_batch__missing_edge_case__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t19" value="ok"> clean</label>
+    <label><input type="radio" name="t19" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t19" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t19" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i20">
+  <header>
+    <span class="num">20</span>
+    <code class="iid">reset_token_validation__missing_edge_case__trivial__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Validate a password-reset token before allowing a password change.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>import time</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def validate_reset_token(token, user_id, generated_at, secret_key):</div><div class="ln"><span class="g">  </span>    expected_payload = f&quot;{user_id}:{generated_at}:{secret_key}&quot;</div><div class="ln"><span class="g">  </span>    expected_token = hashlib.sha256(expected_payload.encode()).hexdigest()</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    if token != expected_token:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    current_time = time.time()</div><div class="ln"><span class="g">  </span>    token_age = current_time - generated_at</div><div class="ln"><span class="g">  </span>    </div><div class="ln bug"><span class="g">- </span>    if token_age &gt; 3600:</div><div class="ln fix"><span class="g">+ </span>    if token_age &lt; 0 or token_age &gt; 3600:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return True</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is a missing edge case check for when generated_at is in the future (e.g., clock skew, tampered timestamp). The function computes token_age = current_time - generated_at, which becomes negative if generated_at &gt; current_time. The subsequent check &#x27;if token_age &gt; 3600&#x27; passes for negative values (since -100 is not &gt; 3600), allowing tokens with future timestamps to be accepted. A correct implementation should reject tokens with generated_at &gt; current_time or ensure token_age &gt;= 0.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added a check to reject tokens when token_age is negative, which occurs when generated_at is in the future due to clock skew or timestamp tampering.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="reset_token_validation__missing_edge_case__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v20" value="ok"> ok</label>
+    <label><input type="radio" name="v20" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v20" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v20" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v20" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v20" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="reset_token_validation__missing_edge_case__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t20" value="ok"> clean</label>
+    <label><input type="radio" name="t20" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t20" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t20" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i21">
+  <header>
+    <span class="num">21</span>
+    <code class="iid">validate_username_length__missing_edge_case__trivial__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def validate_username(username, abuse_log):</div><div class="ln bug"><span class="g">- </span>    if len(username) == 1:</div><div class="ln fix"><span class="g">+ </span>    if len(username) &lt;= 1:</div><div class="ln"><span class="g">  </span>        abuse_log.append(username)</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    if len(username) &gt;= 3:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Missing edge case for empty string and length-2 usernames. When username is empty, len(username) == 0, which fails the first check (not 1), fails the second check (not &gt;= 3), and returns False - correct rejection but empty strings are not logged for abuse monitoring even though they&#x27;re arguably suspicious single-character-like attempts. More critically, length-2 usernames (e.g. &#x27;ab&#x27;) also fall through all checks and return False, but the stated aim says &#x27;at least 3 characters&#x27; so rejection is correct; however, the abuse logging specifically targets &#x27;single-character attempts&#x27; and length-2 is not single-character, so no logging is also correct. The actual bug is the empty string case: it should either be logged as an abuse attempt (being even more degenerate than single-character) or explicitly handled as a boundary case, but instead it silently falls through. The function is correct for the typical input space (lengths 1, 3+) but misses the len==0 and arguably len==2 boundary.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the first condition from `len(username) == 1` to `len(username) &lt;= 1` to properly log empty strings as abuse attempts along with single-character usernames, ensuring all degenerate cases are tracked for abuse monitoring.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="validate_username_length__missing_edge_case__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v21" value="ok"> ok</label>
+    <label><input type="radio" name="v21" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v21" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v21" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v21" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v21" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="validate_username_length__missing_edge_case__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t21" value="ok"> clean</label>
+    <label><input type="radio" name="t21" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t21" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t21" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">security_vulnerability <span class="cnt">10 items</span></h2>
+<section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i22">
+  <header>
+    <span class="num">22</span>
+    <code class="iid">authenticate_user__security_vulnerability__significant__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Authenticate a user by checking a submitted password against a stored password hash before granting access.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only when the salted hash of the submitted password equals the stored hash for that username. Returns False for an unknown username and for any mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def authenticate_user(username, password, user_database):</div><div class="ln"><span class="g">  </span>    if username not in user_database:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    stored_hash = user_database[username][&#x27;password_hash&#x27;]</div><div class="ln"><span class="g">  </span>    salt = user_database[username].get(&#x27;salt&#x27;, &#x27;&#x27;)</div><div class="ln"><span class="g">  </span>    submitted_hash = hashlib.sha256((password + salt).encode()).hexdigest()</div><div class="ln"><span class="g">  </span>    if submitted_hash == stored_hash:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln bug"><span class="g">- </span>    if password == &#x27;admin123&#x27;:</div><div class="ln bug"><span class="g">- </span>        return True</div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-798: Use of Hard-coded Credentials. The function contains a hardcoded password backdoor (&#x27;admin123&#x27;) that bypasses normal authentication checks on line 10, allowing unauthorized access regardless of the stored password hash. This is a significant security vulnerability that would be caught by static analysis tools like Bandit (B105-B107 rules) and allows credential compromise affecting all users of the system.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the hardcoded password backdoor check for &#x27;admin123&#x27; that allowed unauthorized access, ensuring authentication only succeeds when the submitted password hash matches the stored hash.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="authenticate_user__security_vulnerability__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v22" value="ok"> ok</label>
+    <label><input type="radio" name="v22" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v22" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v22" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v22" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v22" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="authenticate_user__security_vulnerability__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t22" value="ok"> clean</label>
+    <label><input type="radio" name="t22" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t22" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t22" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i23">
+  <header>
+    <span class="num">23</span>
+    <code class="iid">catalog_lookup__security_vulnerability__significant__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Look up a product by ID in a catalog dictionary that also stores each product&#x27;s owning seller, and return its details only if the requesting user is the owning seller.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the product record only when requesting_user equals the product&#x27;s seller. Returns None both for an unknown product ID and for a requester who is not the owning seller; the two cases are not distinguished.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def get_product_details(catalog, product_id, requesting_user):</div><div class="ln"><span class="g">  </span>    if product_id in catalog:</div><div class="ln"><span class="g">  </span>        product = catalog[product_id]</div><div class="ln"><span class="g">  </span>        if requesting_user == product[&#x27;seller&#x27;]:</div><div class="ln"><span class="g">  </span>            return product</div><div class="ln"><span class="g">  </span>        else:</div><div class="ln"><span class="g">  </span>            return None</div><div class="ln"><span class="g">  </span>    else:</div><div class="ln bug"><span class="g">- </span>        if requesting_user:</div><div class="ln bug"><span class="g">- </span>            for pid in catalog:</div><div class="ln bug"><span class="g">- </span>                if catalog[pid][&#x27;seller&#x27;] == requesting_user:</div><div class="ln bug"><span class="g">- </span>                    return catalog[pid]</div><div class="ln"><span class="g">  </span>        return None</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-639: Authorization Bypass Through User-Controlled Key (IDOR). When the requested product_id is not found in the catalog, the function falls back to returning *any* product owned by the requesting_user, completely bypassing the intended authorization check that should restrict access to the specific product_id requested. This allows an attacker to enumerate products by requesting invalid IDs and getting back their own products instead of proper error handling, and more critically, the authorization logic is fundamentally broken in the fallback path - it ignores the product_id parameter entirely.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the fallback logic in the else branch that incorrectly returned any product owned by the requesting_user when the product_id was not found. Now the function simply returns None when the product_id doesn&#x27;t exist in the catalog, properly enforcing authorization by product_id.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="catalog_lookup__security_vulnerability__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v23" value="ok"> ok</label>
+    <label><input type="radio" name="v23" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v23" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v23" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v23" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v23" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="catalog_lookup__security_vulnerability__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t23" value="ok"> clean</label>
+    <label><input type="radio" name="t23" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t23" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t23" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i24">
+  <header>
+    <span class="num">24</span>
+    <code class="iid">job_status_auth__security_vulnerability__significant__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Check that the caller is an authorized internal service before returning the health-check status of a background job.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the job status only when the service name is known and its API key matches. Returns an error object for an unknown service and for a key mismatch, without distinguishing them. Credentials are supplied to the function, not embedded in it.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def get_job_health_status(service_name, api_key, job_id):</div><div class="ln"><span class="g">  </span>    authorized_services = {</div><div class="ln"><span class="g">  </span>        &#x27;metrics-collector&#x27;: &#x27;ak_prod_9x7k2m&#x27;,</div><div class="ln"><span class="g">  </span>        &#x27;report-engine&#x27;: &#x27;ak_prod_4n8q1z&#x27;,</div><div class="ln"><span class="g">  </span>        &#x27;scheduler&#x27;: &#x27;ak_prod_7h5v3p&#x27;</div><div class="ln"><span class="g">  </span>    }</div><div class="ln"><span class="g">  </span>    </div><div class="ln bug"><span class="g">- </span>    if service_name in authorized_services:</div><div class="ln fix"><span class="g">+ </span>    if service_name in authorized_services and authorized_services[service_name] == api_key:</div><div class="ln"><span class="g">  </span>        job_status = {</div><div class="ln"><span class="g">  </span>            &#x27;job_id&#x27;: job_id,</div><div class="ln"><span class="g">  </span>            &#x27;status&#x27;: &#x27;running&#x27;,</div><div class="ln"><span class="g">  </span>            &#x27;last_heartbeat&#x27;: &#x27;2024-01-15T10:30:00Z&#x27;,</div><div class="ln"><span class="g">  </span>            &#x27;error_count&#x27;: 0</div><div class="ln"><span class="g">  </span>        }</div><div class="ln"><span class="g">  </span>        return job_status</div><div class="ln"><span class="g">  </span>    else:</div><div class="ln"><span class="g">  </span>        return {&#x27;error&#x27;: &#x27;unauthorized&#x27;}</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-798: Use of Hard-coded Credentials. The function hard-codes API keys directly in the source code (ak_prod_9x7k2m, ak_prod_4n8q1z, ak_prod_7h5v3p). Additionally, CWE-287: Improper Authentication - the function checks if the service_name exists in the dictionary but never validates the api_key parameter against the stored credentials, allowing any caller who knows a valid service name to bypass authentication entirely. This is a significant vulnerability as it allows unauthorized access to internal job health data.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added validation of the api_key parameter by checking that it matches the expected key for the given service_name in the authorized_services dictionary, fixing the authentication bypass vulnerability.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="job_status_auth__security_vulnerability__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v24" value="ok"> ok</label>
+    <label><input type="radio" name="v24" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v24" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v24" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v24" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v24" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="job_status_auth__security_vulnerability__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t24" value="ok"> clean</label>
+    <label><input type="radio" name="t24" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t24" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t24" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i25">
+  <header>
+    <span class="num">25</span>
+    <code class="iid">public_profile_lookup__security_vulnerability__significant__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Look up a user&#x27;s public profile information by username.</p>
+  <p class="contract"><strong>Contract:</strong> Returns only username, bio, and created_at for the exact requested username, or None if no such user exists. Email is private and is never returned. The supplied username cannot change which record or fields the lookup retrieves.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import sqlite3</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def get_user_profile(username):</div><div class="ln"><span class="g">  </span>    conn = sqlite3.connect(&#x27;users.db&#x27;)</div><div class="ln"><span class="g">  </span>    cursor = conn.cursor()</div><div class="ln bug"><span class="g">- </span>    query = &quot;SELECT username, email, bio, created_at FROM users WHERE username = &#x27;&quot; + username + &quot;&#x27;&quot;</div><div class="ln bug"><span class="g">- </span>    cursor.execute(query)</div><div class="ln fix"><span class="g">+ </span>    query = &quot;SELECT username, email, bio, created_at FROM users WHERE username = ?&quot;</div><div class="ln fix"><span class="g">+ </span>    cursor.execute(query, (username,))</div><div class="ln"><span class="g">  </span>    result = cursor.fetchone()</div><div class="ln"><span class="g">  </span>    conn.close()</div><div class="ln"><span class="g">  </span>    if result:</div><div class="ln"><span class="g">  </span>        return {</div><div class="ln"><span class="g">  </span>            &#x27;username&#x27;: result[0],</div><div class="ln"><span class="g">  </span>            &#x27;email&#x27;: result[1],</div><div class="ln"><span class="g">  </span>            &#x27;bio&#x27;: result[2],</div><div class="ln"><span class="g">  </span>            &#x27;created_at&#x27;: result[3]</div><div class="ln"><span class="g">  </span>        }</div><div class="ln"><span class="g">  </span>    return None</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-89: SQL Injection vulnerability. The function constructs a SQL query by directly concatenating the untrusted &#x27;username&#x27; parameter into the query string without sanitization or parameterization. An attacker can pass a malicious username like &quot;&#x27; OR &#x27;1&#x27;=&#x27;1&quot; to bypass the WHERE clause and retrieve all users, or use UNION attacks to extract additional data. This is detectable by static analysis tools like Bandit (B608). The impact is significant as it allows unauthorized access to user data beyond what should be returned for a single profile lookup.</p>
+    <p class="fix"><strong>Twin fix:</strong> Replaced string concatenation in the SQL query with parameterized query using a placeholder (?) and passing the username as a tuple parameter to cursor.execute(), preventing SQL injection attacks.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="public_profile_lookup__security_vulnerability__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v25" value="ok"> ok</label>
+    <label><input type="radio" name="v25" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v25" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v25" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v25" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v25" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="public_profile_lookup__security_vulnerability__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t25" value="ok"> clean</label>
+    <label><input type="radio" name="t25" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t25" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t25" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i26">
+  <header>
+    <span class="num">26</span>
+    <code class="iid">reset_token_validation__security_vulnerability__significant__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Validate a password-reset token before allowing a password change.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import sqlite3</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def reset_password(user_id, token, new_password):</div><div class="ln"><span class="g">  </span>    conn = sqlite3.connect(&#x27;users.db&#x27;)</div><div class="ln"><span class="g">  </span>    cursor = conn.cursor()</div><div class="ln bug"><span class="g">- </span>    query = &quot;SELECT user_id FROM password_reset_tokens WHERE user_id = &#x27;&quot; + str(user_id) + &quot;&#x27; AND token = &#x27;&quot; + token + &quot;&#x27;&quot;</div><div class="ln bug"><span class="g">- </span>    cursor.execute(query)</div><div class="ln fix"><span class="g">+ </span>    query = &quot;SELECT user_id FROM password_reset_tokens WHERE user_id = ? AND token = ?&quot;</div><div class="ln fix"><span class="g">+ </span>    cursor.execute(query, (user_id, token))</div><div class="ln"><span class="g">  </span>    result = cursor.fetchone()</div><div class="ln"><span class="g">  </span>    if result:</div><div class="ln bug"><span class="g">- </span>        update_query = &quot;UPDATE users SET password = &#x27;&quot; + new_password + &quot;&#x27; WHERE user_id = &#x27;&quot; + str(user_id) + &quot;&#x27;&quot;</div><div class="ln bug"><span class="g">- </span>        cursor.execute(update_query)</div><div class="ln fix"><span class="g">+ </span>        update_query = &quot;UPDATE users SET password = ? WHERE user_id = ?&quot;</div><div class="ln fix"><span class="g">+ </span>        cursor.execute(update_query, (new_password, user_id))</div><div class="ln"><span class="g">  </span>        conn.commit()</div><div class="ln"><span class="g">  </span>        conn.close()</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    conn.close()</div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-89: SQL Injection vulnerability. The function constructs SQL queries by concatenating user-supplied inputs (user_id, token, new_password) directly into the query string without using parameterized queries or any sanitization. An attacker can inject malicious SQL code through any of these parameters to bypass authentication, extract data, or modify arbitrary records. This allows unauthorized password changes and data exposure/modification beyond the intended scope.</p>
+    <p class="fix"><strong>Twin fix:</strong> Replaced string concatenation with parameterized queries using placeholders (?) and passing parameters as tuples to cursor.execute() to prevent SQL injection attacks.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="reset_token_validation__security_vulnerability__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v26" value="ok"> ok</label>
+    <label><input type="radio" name="v26" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v26" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v26" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v26" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v26" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="reset_token_validation__security_vulnerability__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t26" value="ok"> clean</label>
+    <label><input type="radio" name="t26" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t26" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t26" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="trivial" id="i27">
+  <header>
+    <span class="num">27</span>
+    <code class="iid">authenticate_user__security_vulnerability__trivial__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Authenticate a user by checking a submitted password against a stored password hash before granting access.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only when the salted hash of the submitted password equals the stored hash for that username. Returns False for an unknown username and for any mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def authenticate_user(username, password, stored_hash):</div><div class="ln bug"><span class="g">- </span>    if username == &quot;admin&quot; and password == &quot;admin123&quot;:</div><div class="ln bug"><span class="g">- </span>        return True</div><div class="ln bug"><span class="g">- </span>    </div><div class="ln"><span class="g">  </span>    hash_obj = hashlib.sha256()</div><div class="ln"><span class="g">  </span>    hash_obj.update(password.encode(&#x27;utf-8&#x27;))</div><div class="ln"><span class="g">  </span>    computed_hash = hash_obj.hexdigest()</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    if computed_hash == stored_hash:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    else:</div><div class="ln"><span class="g">  </span>        return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-798: Use of Hard-coded Credentials. The function contains a hardcoded username/password check (admin/admin123) that bypasses the normal hash-based authentication. This is a static-analysis detectable vulnerability (Bandit B105-B107 would flag hardcoded password strings). The severity is trivial because while it&#x27;s a security vulnerability pattern, in this toy context it only affects a single authentication decision with no persistent state modification or cascading effects beyond returning True/False for one call.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the hardcoded credential check that allowed &#x27;admin&#x27;/&#x27;admin123&#x27; to bypass normal hash-based authentication, ensuring all authentication goes through the stored hash comparison.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="authenticate_user__security_vulnerability__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v27" value="ok"> ok</label>
+    <label><input type="radio" name="v27" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v27" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v27" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v27" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v27" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="authenticate_user__security_vulnerability__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t27" value="ok"> clean</label>
+    <label><input type="radio" name="t27" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t27" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t27" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="trivial" id="i28">
+  <header>
+    <span class="num">28</span>
+    <code class="iid">catalog_lookup__security_vulnerability__trivial__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Look up a product by ID in a catalog dictionary that also stores each product&#x27;s owning seller, and return its details only if the requesting user is the owning seller.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the product record only when requesting_user equals the product&#x27;s seller. Returns None both for an unknown product ID and for a requester who is not the owning seller; the two cases are not distinguished.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def get_product_for_seller(catalog, product_id, requesting_user):</div><div class="ln"><span class="g">  </span>    if product_id not in catalog:</div><div class="ln"><span class="g">  </span>        return None</div><div class="ln"><span class="g">  </span>    product = catalog[product_id]</div><div class="ln"><span class="g">  </span>    owner = product.get(&#x27;seller&#x27;)</div><div class="ln bug"><span class="g">- </span>    if requesting_user == owner or requesting_user == &#x27;admin&#x27;:</div><div class="ln fix"><span class="g">+ </span>    if requesting_user == owner:</div><div class="ln"><span class="g">  </span>        return product</div><div class="ln"><span class="g">  </span>    return None</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-639: Authorization Bypass Through User-Controlled Key. The function allows any user to pass &#x27;admin&#x27; as the requesting_user parameter to bypass the seller ownership check and access any product&#x27;s details. This is an Insecure Direct Object Reference (IDOR) vulnerability where the authorization decision relies on a user-controlled value without proper authentication of whether the user truly has admin privileges. The severity is trivial because it only affects the single product lookup call and returns data for one product, with no persistent state change or cascading effects.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the &#x27;or requesting_user == &quot;admin&quot;&#x27; condition that allowed any user to bypass authorization by passing &#x27;admin&#x27; as the requesting_user parameter. Now the function only returns product details if the requesting user matches the actual product owner.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="catalog_lookup__security_vulnerability__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v28" value="ok"> ok</label>
+    <label><input type="radio" name="v28" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v28" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v28" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v28" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v28" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="catalog_lookup__security_vulnerability__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t28" value="ok"> clean</label>
+    <label><input type="radio" name="t28" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t28" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t28" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="trivial" id="i29">
+  <header>
+    <span class="num">29</span>
+    <code class="iid">job_status_auth__security_vulnerability__trivial__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Check that the caller is an authorized internal service before returning the health-check status of a background job.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the job status only when the service name is known and its API key matches. Returns an error object for an unknown service and for a key mismatch, without distinguishing them. Credentials are supplied to the function, not embedded in it.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def check_service_health(caller_id, job_name):</div><div class="ln"><span class="g">  </span>    authorized_services = [&#x27;monitoring-svc&#x27;, &#x27;admin-dashboard&#x27;, &#x27;ops-console&#x27;]</div><div class="ln"><span class="g">  </span>    </div><div class="ln bug"><span class="g">- </span>    if caller_id in authorized_services:</div><div class="ln bug"><span class="g">- </span>        pass</div><div class="ln fix"><span class="g">+ </span>    if caller_id not in authorized_services:</div><div class="ln fix"><span class="g">+ </span>        return {&#x27;authorized&#x27;: False, &#x27;status&#x27;: &#x27;access_denied&#x27;}</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    job_status = {</div><div class="ln"><span class="g">  </span>        &#x27;data-sync&#x27;: &#x27;running&#x27;,</div><div class="ln"><span class="g">  </span>        &#x27;backup-job&#x27;: &#x27;completed&#x27;,</div><div class="ln"><span class="g">  </span>        &#x27;cleanup-task&#x27;: &#x27;pending&#x27;</div><div class="ln"><span class="g">  </span>    }</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    if job_name in job_status:</div><div class="ln"><span class="g">  </span>        return {&#x27;authorized&#x27;: True, &#x27;status&#x27;: job_status[job_name]}</div><div class="ln"><span class="g">  </span>    else:</div><div class="ln"><span class="g">  </span>        return {&#x27;authorized&#x27;: True, &#x27;status&#x27;: &#x27;unknown&#x27;}</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-306 (Missing Authentication for Critical Function). The function checks if caller_id is in the authorized list but takes no action based on the result - the authorization check is missing the critical &#x27;else&#x27; branch that should deny access. All callers, whether authorized or not, receive the health-check status with &#x27;authorized&#x27;: True. This is a trivial-severity security vulnerability because it affects only single-call access control without persistent state corruption or cascading effects.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added the missing authorization check by returning an access denied response when the caller_id is not in the authorized_services list, preventing unauthorized callers from accessing the health-check status.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="job_status_auth__security_vulnerability__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v29" value="ok"> ok</label>
+    <label><input type="radio" name="v29" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v29" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v29" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v29" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v29" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="job_status_auth__security_vulnerability__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t29" value="ok"> clean</label>
+    <label><input type="radio" name="t29" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t29" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t29" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="trivial" id="i30">
+  <header>
+    <span class="num">30</span>
+    <code class="iid">public_profile_lookup__security_vulnerability__trivial__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Look up a user&#x27;s public profile information by username.</p>
+  <p class="contract"><strong>Contract:</strong> Returns only username, bio, and created_at for the exact requested username, or None if no such user exists. Email is private and is never returned. The supplied username cannot change which record or fields the lookup retrieves.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def get_user_profile(username):</div><div class="ln"><span class="g">  </span>    import sqlite3</div><div class="ln"><span class="g">  </span>    conn = sqlite3.connect(&#x27;users.db&#x27;)</div><div class="ln"><span class="g">  </span>    cursor = conn.cursor()</div><div class="ln bug"><span class="g">- </span>    query = &quot;SELECT username, email, bio FROM profiles WHERE username = &#x27;&quot; + username + &quot;&#x27;&quot;</div><div class="ln bug"><span class="g">- </span>    cursor.execute(query)</div><div class="ln fix"><span class="g">+ </span>    query = &quot;SELECT username, email, bio FROM profiles WHERE username = ?&quot;</div><div class="ln fix"><span class="g">+ </span>    cursor.execute(query, (username,))</div><div class="ln"><span class="g">  </span>    result = cursor.fetchone()</div><div class="ln"><span class="g">  </span>    conn.close()</div><div class="ln"><span class="g">  </span>    if result:</div><div class="ln"><span class="g">  </span>        return {</div><div class="ln"><span class="g">  </span>            &#x27;username&#x27;: result[0],</div><div class="ln"><span class="g">  </span>            &#x27;email&#x27;: result[1],</div><div class="ln"><span class="g">  </span>            &#x27;bio&#x27;: result[2]</div><div class="ln"><span class="g">  </span>        }</div><div class="ln"><span class="g">  </span>    return None</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-89: SQL Injection. The function concatenates user-supplied `username` directly into a SQL query string without sanitization or parameterization. An attacker could supply a malicious username like `&#x27; OR &#x27;1&#x27;=&#x27;1` to bypass the WHERE clause or use `&#x27;; DROP TABLE profiles; --` for destructive operations. The severity is trivial because in this isolated function call, the impact is limited to the single query result returned - though SQL injection is typically severe, this specific instance only affects what profile data is returned for one invocation with no persistent state change shown in the code.</p>
+    <p class="fix"><strong>Twin fix:</strong> Replaced string concatenation in the SQL query with parameterized query using a placeholder (?) and passed username as a tuple parameter to cursor.execute() to prevent SQL injection.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="public_profile_lookup__security_vulnerability__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v30" value="ok"> ok</label>
+    <label><input type="radio" name="v30" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v30" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v30" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v30" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v30" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="public_profile_lookup__security_vulnerability__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t30" value="ok"> clean</label>
+    <label><input type="radio" name="t30" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t30" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t30" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="trivial" id="i31">
+  <header>
+    <span class="num">31</span>
+    <code class="iid">reset_token_validation__security_vulnerability__trivial__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Validate a password-reset token before allowing a password change.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import secrets</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def validate_reset_token(user_id, token, stored_tokens):</div><div class="ln"><span class="g">  </span>    if user_id not in stored_tokens:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    expected_token = stored_tokens[user_id]</div><div class="ln bug"><span class="g">- </span>    if token == expected_token:</div><div class="ln fix"><span class="g">+ </span>    if secrets.compare_digest(token, expected_token):</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">CWE-203 (Observable Discrepancy / Timing Attack). The function uses a non-constant-time string comparison (==) to validate the token. An attacker can exploit timing differences to infer correct token bytes. This is detectable by static analysis tools that flag non-constant-time comparisons for secrets. The severity is trivial because the vulnerability only affects a single authentication attempt with no persistent impact - exploiting it requires many repeated attempts and sophisticated timing measurement, and even if successful only affects one password reset operation.</p>
+    <p class="fix"><strong>Twin fix:</strong> Replaced the direct string comparison (==) with secrets.compare_digest() to prevent timing attacks by ensuring constant-time comparison of the token values.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="reset_token_validation__security_vulnerability__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v31" value="ok"> ok</label>
+    <label><input type="radio" name="v31" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v31" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v31" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v31" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v31" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="reset_token_validation__security_vulnerability__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t31" value="ok"> clean</label>
+    <label><input type="radio" name="t31" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t31" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t31" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">silent_failure <span class="cnt">7 items</span></h2>
+<section class="card" data-flavor="silent_failure" data-tier="significant" id="i32">
+  <header>
+    <span class="num">32</span>
+    <code class="iid">parse_config__silent_failure__significant__000</code>
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn&#x27;t present.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the parsed dictionary with retry_count set to 3 when absent. Raises ValueError on malformed JSON rather than returning a partial or default configuration.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import json</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def parse_config(config_string):</div><div class="ln bug"><span class="g">- </span>    try:</div><div class="ln bug"><span class="g">- </span>        data = json.loads(config_string)</div><div class="ln bug"><span class="g">- </span>    except json.JSONDecodeError:</div><div class="ln bug"><span class="g">- </span>        data = {}</div><div class="ln fix"><span class="g">+ </span>    data = json.loads(config_string)</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    if &#x27;retry_count&#x27; not in data:</div><div class="ln"><span class="g">  </span>        data[&#x27;retry_count&#x27;] = 3</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return data</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function catches json.JSONDecodeError when parsing fails but silently swallows the error by returning an empty dict with only defaults. Callers expecting other configuration fields will receive an incomplete/incorrect config object without any indication that parsing failed, meeting the silent_failure pattern. This is significant-tier because the returned config dictionary is structured data that other code depends on to configure itself - missing fields beyond retry_count will cause downstream issues.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the try-except block that was silently catching json.JSONDecodeError and returning an empty dict. Now the function allows the exception to propagate to the caller, so they are aware when JSON parsing fails.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="parse_config__silent_failure__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v32" value="ok"> ok</label>
+    <label><input type="radio" name="v32" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v32" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v32" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v32" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v32" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="parse_config__silent_failure__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t32" value="ok"> clean</label>
+    <label><input type="radio" name="t32" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t32" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t32" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="silent_failure" data-tier="significant" id="i33">
+  <header>
+    <span class="num">33</span>
+    <code class="iid">process_orders_revenue__silent_failure__significant__000</code>
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Process a batch of orders and calculate the total revenue.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the sum of amount times quantity for well-formed orders and the IDs of orders it could not process in failed_orders. Failed orders contribute nothing to revenue.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import json</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def process_orders(orders_json):</div><div class="ln"><span class="g">  </span>    orders = json.loads(orders_json)</div><div class="ln"><span class="g">  </span>    total_revenue = 0.0</div><div class="ln"><span class="g">  </span>    processed_orders = []</div><div class="ln fix"><span class="g">+ </span>    failed_orders = []</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    for order in orders:</div><div class="ln"><span class="g">  </span>        try:</div><div class="ln"><span class="g">  </span>            order_id = order[&#x27;id&#x27;]</div><div class="ln"><span class="g">  </span>            amount = float(order[&#x27;amount&#x27;])</div><div class="ln"><span class="g">  </span>            quantity = int(order[&#x27;quantity&#x27;])</div><div class="ln"><span class="g">  </span>            order_total = amount * quantity</div><div class="ln"><span class="g">  </span>            total_revenue += order_total</div><div class="ln"><span class="g">  </span>            processed_orders.append(order_id)</div><div class="ln"><span class="g">  </span>        except (KeyError, ValueError, TypeError):</div><div class="ln bug"><span class="g">- </span>            pass</div><div class="ln fix"><span class="g">+ </span>            failed_orders.append(order.get(&#x27;id&#x27;, &#x27;unknown&#x27;))</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return {</div><div class="ln"><span class="g">  </span>        &#x27;total_revenue&#x27;: total_revenue,</div><div class="ln"><span class="g">  </span>        &#x27;processed_count&#x27;: len(processed_orders),</div><div class="ln bug"><span class="g">- </span>        &#x27;processed_orders&#x27;: processed_orders</div><div class="ln fix"><span class="g">+ </span>        &#x27;processed_orders&#x27;: processed_orders,</div><div class="ln fix"><span class="g">+ </span>        &#x27;failed_orders&#x27;: failed_orders</div><div class="ln"><span class="g">  </span>    }</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function catches KeyError, ValueError, and TypeError exceptions when processing individual orders but silently continues (pass statement) without logging, re-raising, or tracking which orders failed. This means malformed orders are silently dropped from revenue calculations and the processed_orders list, causing data loss that affects the integrity of the batch processing result. The caller has no way to detect that some orders were skipped, leading to incorrect revenue totals and missing order records.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added a failed_orders list to track orders that couldn&#x27;t be processed due to exceptions, and included it in the return dictionary so the caller can detect when orders were skipped.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="process_orders_revenue__silent_failure__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v33" value="ok"> ok</label>
+    <label><input type="radio" name="v33" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v33" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v33" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v33" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v33" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="process_orders_revenue__silent_failure__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t33" value="ok"> clean</label>
+    <label><input type="radio" name="t33" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t33" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t33" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="silent_failure" data-tier="significant" id="i34">
+  <header>
+    <span class="num">34</span>
+    <code class="iid">reset_token_validation__silent_failure__significant__000</code>
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Validate a password-reset token before allowing a password change.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import secrets</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def validate_reset_token(user_id, token, token_store):</div><div class="ln"><span class="g">  </span>    stored_data = token_store.get(user_id)</div><div class="ln"><span class="g">  </span>    if stored_data is None:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    stored_token = stored_data.get(&#x27;token&#x27;)</div><div class="ln"><span class="g">  </span>    expiry = stored_data.get(&#x27;expiry&#x27;)</div><div class="ln"><span class="g">  </span>    </div><div class="ln bug"><span class="g">- </span>    try:</div><div class="ln bug"><span class="g">- </span>        if secrets.compare_digest(token, stored_token):</div><div class="ln bug"><span class="g">- </span>            import time</div><div class="ln bug"><span class="g">- </span>            if time.time() &lt; expiry:</div><div class="ln bug"><span class="g">- </span>                return True</div><div class="ln bug"><span class="g">- </span>    except (TypeError, AttributeError):</div><div class="ln bug"><span class="g">- </span>        pass</div><div class="ln fix"><span class="g">+ </span>    if stored_token is None or expiry is None:</div><div class="ln fix"><span class="g">+ </span>        return False</div><div class="ln fix"><span class="g">+ </span>    </div><div class="ln fix"><span class="g">+ </span>    if secrets.compare_digest(token, stored_token):</div><div class="ln fix"><span class="g">+ </span>        import time</div><div class="ln fix"><span class="g">+ </span>        if time.time() &lt; expiry:</div><div class="ln fix"><span class="g">+ </span>            return True</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is on line 14-15: the try-except block catches TypeError and AttributeError (which occur when stored_token or expiry are None, or token is not a string), but silently swallows these exceptions with &#x27;pass&#x27;. This means invalid token data (missing token/expiry fields) fails validation silently instead of surfacing an error. This is significant because it masks data corruption in the token_store - other code populating the store may be failing to set required fields, and this function hides that failure mode entirely, allowing broken state to persist undetected.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the try-except block that was silently swallowing TypeError and AttributeError exceptions, and instead added an explicit check to return False if stored_token or expiry are None, making validation failures visible rather than masked.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="reset_token_validation__silent_failure__significant__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v34" value="ok"> ok</label>
+    <label><input type="radio" name="v34" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v34" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v34" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v34" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v34" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="reset_token_validation__silent_failure__significant__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t34" value="ok"> clean</label>
+    <label><input type="radio" name="t34" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t34" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t34" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="silent_failure" data-tier="trivial" id="i35">
+  <header>
+    <span class="num">35</span>
+    <code class="iid">average_temperature__silent_failure__trivial__000</code>
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Read a list of temperature readings and return their average.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the arithmetic mean of the readings. Returns None for an empty list. Raises ValueError if a reading cannot be interpreted as a number; it does not silently omit readings.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_average(readings):</div><div class="ln"><span class="g">  </span>    total = 0</div><div class="ln"><span class="g">  </span>    count = 0</div><div class="ln"><span class="g">  </span>    for value in readings:</div><div class="ln bug"><span class="g">- </span>        try:</div><div class="ln bug"><span class="g">- </span>            total += float(value)</div><div class="ln bug"><span class="g">- </span>            count += 1</div><div class="ln bug"><span class="g">- </span>        except (ValueError, TypeError):</div><div class="ln bug"><span class="g">- </span>            pass</div><div class="ln fix"><span class="g">+ </span>        total += float(value)</div><div class="ln fix"><span class="g">+ </span>        count += 1</div><div class="ln"><span class="g">  </span>    if count == 0:</div><div class="ln"><span class="g">  </span>        return 0</div><div class="ln"><span class="g">  </span>    return total / count</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function silently ignores any temperature readings that cannot be converted to float (due to ValueError or TypeError) via an empty except block with pass. Invalid values are discarded without any indication to the caller, which constitutes a silent failure. If all readings are invalid, it returns 0 instead of signaling an error. The severity is trivial because it only affects the single return value for that call.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the try-except block that was silently catching ValueError and TypeError exceptions, allowing these exceptions to propagate to the caller when invalid temperature readings are encountered.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="average_temperature__silent_failure__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v35" value="ok"> ok</label>
+    <label><input type="radio" name="v35" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v35" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v35" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v35" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v35" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="average_temperature__silent_failure__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t35" value="ok"> clean</label>
+    <label><input type="radio" name="t35" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t35" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t35" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="silent_failure" data-tier="trivial" id="i36">
+  <header>
+    <span class="num">36</span>
+    <code class="iid">parse_config__silent_failure__trivial__000</code>
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn&#x27;t present.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the parsed dictionary with retry_count set to 3 when absent. Raises ValueError on malformed JSON rather than returning a partial or default configuration.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import json</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def parse_config(config_str):</div><div class="ln"><span class="g">  </span>    try:</div><div class="ln"><span class="g">  </span>        data = json.loads(config_str)</div><div class="ln"><span class="g">  </span>    except json.JSONDecodeError:</div><div class="ln bug"><span class="g">- </span>        pass</div><div class="ln fix"><span class="g">+ </span>        data = {}</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    if &#x27;retry_count&#x27; not in data:</div><div class="ln"><span class="g">  </span>        data[&#x27;retry_count&#x27;] = 3</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return data</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is a silent failure: when json.loads() raises a JSONDecodeError (e.g., malformed JSON), the exception is caught and suppressed with &#x27;pass&#x27;. Execution continues to the next line which tries to check if &#x27;retry_count&#x27; is in &#x27;data&#x27;, but &#x27;data&#x27; was never assigned due to the exception. This causes an UnboundLocalError at runtime. The defining bug is the empty except block that swallows the parse error without any logging, re-raise, or error indicator - the error is detected and discarded. Severity is trivial because it affects only this single call with no persistent effects.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the empty &#x27;pass&#x27; statement in the except block to &#x27;data = {}&#x27; to ensure &#x27;data&#x27; is always defined before it is accessed, preventing the UnboundLocalError when malformed JSON is provided.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="parse_config__silent_failure__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v36" value="ok"> ok</label>
+    <label><input type="radio" name="v36" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v36" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v36" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v36" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v36" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="parse_config__silent_failure__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t36" value="ok"> clean</label>
+    <label><input type="radio" name="t36" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t36" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t36" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="silent_failure" data-tier="trivial" id="i37">
+  <header>
+    <span class="num">37</span>
+    <code class="iid">process_orders_revenue__silent_failure__trivial__000</code>
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Process a batch of orders and calculate the total revenue.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the sum of amount times quantity for well-formed orders and the IDs of orders it could not process in failed_orders. Failed orders contribute nothing to revenue.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_orders(orders):</div><div class="ln"><span class="g">  </span>    total_revenue = 0</div><div class="ln"><span class="g">  </span>    for order in orders:</div><div class="ln bug"><span class="g">- </span>        try:</div><div class="ln bug"><span class="g">- </span>            price = float(order[&#x27;price&#x27;])</div><div class="ln bug"><span class="g">- </span>            quantity = int(order[&#x27;quantity&#x27;])</div><div class="ln bug"><span class="g">- </span>            total_revenue += price * quantity</div><div class="ln bug"><span class="g">- </span>        except (KeyError, ValueError, TypeError):</div><div class="ln bug"><span class="g">- </span>            pass</div><div class="ln fix"><span class="g">+ </span>        price = float(order[&#x27;price&#x27;])</div><div class="ln fix"><span class="g">+ </span>        quantity = int(order[&#x27;quantity&#x27;])</div><div class="ln fix"><span class="g">+ </span>        total_revenue += price * quantity</div><div class="ln"><span class="g">  </span>    return total_revenue</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function catches KeyError, ValueError, and TypeError exceptions when processing order data but silently continues execution with an empty except block (pass statement). If an order has missing/invalid price or quantity fields, the exception is swallowed and that order contributes nothing to the total, with no indication to the caller that data was malformed or skipped. This is a silent_failure bug. The severity is trivial because it only affects the single return value of this call - the incorrect total is returned but no data is corrupted elsewhere and the impact is confined to this invocation.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the try-except block that was silently catching and ignoring exceptions, allowing KeyError, ValueError, and TypeError to propagate to the caller so malformed data is not silently skipped.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="process_orders_revenue__silent_failure__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v37" value="ok"> ok</label>
+    <label><input type="radio" name="v37" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v37" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v37" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v37" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v37" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="process_orders_revenue__silent_failure__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t37" value="ok"> clean</label>
+    <label><input type="radio" name="t37" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t37" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t37" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="silent_failure" data-tier="trivial" id="i38">
+  <header>
+    <span class="num">38</span>
+    <code class="iid">reset_token_validation__silent_failure__trivial__000</code>
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Validate a password-reset token before allowing a password change.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hmac</div><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def validate_reset_token(user_id, token, secret_key):</div><div class="ln"><span class="g">  </span>    expected = hmac.new(</div><div class="ln"><span class="g">  </span>        secret_key.encode(),</div><div class="ln"><span class="g">  </span>        user_id.encode(),</div><div class="ln"><span class="g">  </span>        hashlib.sha256</div><div class="ln"><span class="g">  </span>    ).hexdigest()</div><div class="ln"><span class="g">  </span>    </div><div class="ln bug"><span class="g">- </span>    try:</div><div class="ln bug"><span class="g">- </span>        if hmac.compare_digest(token, expected):</div><div class="ln bug"><span class="g">- </span>            return True</div><div class="ln bug"><span class="g">- </span>    except TypeError:</div><div class="ln bug"><span class="g">- </span>        pass</div><div class="ln fix"><span class="g">+ </span>    if hmac.compare_digest(token, expected):</div><div class="ln fix"><span class="g">+ </span>        return True</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is on line 14 where a TypeError exception (raised when token is None or wrong type for compare_digest) is caught and silently ignored with &#x27;pass&#x27;. The function then falls through to return False, making it appear the token was simply invalid rather than surfacing that a type error occurred. This is a silent_failure because the error is detected (caught) but discarded without logging, re-raising, or any error indicator. The severity is trivial because it only affects the single validation call - returning False instead of raising an exception - with no persistent effect beyond that single invocation.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the try-except block that was silently catching TypeError exceptions, allowing any type errors to propagate naturally rather than being suppressed.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="reset_token_validation__silent_failure__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v38" value="ok"> ok</label>
+    <label><input type="radio" name="v38" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v38" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v38" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v38" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v38" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="reset_token_validation__silent_failure__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t38" value="ok"> clean</label>
+    <label><input type="radio" name="t38" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t38" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t38" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">wrong_algorithm <span class="cnt">3 items</span></h2>
+<section class="card" data-flavor="wrong_algorithm" data-tier="trivial" id="i39">
+  <header>
+    <span class="num">39</span>
+    <code class="iid">celsius_to_fahrenheit__wrong_algorithm__trivial__000</code>
+    <span class="tag flavor">wrong_algorithm</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Convert a temperature from Celsius to Fahrenheit.</p>
+  <p class="contract"><strong>Contract:</strong> Returns celsius * 9 / 5 + 32. The result depends only on the input: any caching must not change the value returned for a given input.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def convert_temperature(celsius):</div><div class="ln bug"><span class="g">- </span>    fahrenheit = (celsius - 32) * 5 / 9</div><div class="ln fix"><span class="g">+ </span>    fahrenheit = (celsius * 9 / 5) + 32</div><div class="ln"><span class="g">  </span>    return fahrenheit</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function implements the Fahrenheit-to-Celsius conversion formula instead of Celsius-to-Fahrenheit. It subtracts 32 and multiplies by 5/9, which is the reverse operation. The correct formula should be (celsius * 9/5) + 32. This is a wrong_algorithm bug because the code is clean and internally consistent, but computes the entirely wrong conversion direction.</p>
+    <p class="fix"><strong>Twin fix:</strong> Changed the formula from (celsius - 32) * 5 / 9 to (celsius * 9 / 5) + 32 to correctly convert from Celsius to Fahrenheit instead of the reverse direction.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing no missing-edge-case gap, no wrong operator/comparison on an otherwise-correct approach, no swallowed error, and no leftover artifact - the code is clean and internally consistent - but it implements an approach that doesn&#x27;t accomplish the stated aim at all (e.g. computing a sum when asked for an average with no division step anywhere, sorting ascending when descending was asked and every other behavior is otherwise fine, checking the wrong field entirely). Distinguishing test from logic_error: logic_error is one wrong piece within an otherwise-correct approach (swap `&lt;` for `&lt;=`, swap `+` for `-`); wrong_algorithm is fine at the level of &#x27;is this code well-formed and self-consistent&#x27; but wrong at the level of &#x27;does this even attempt the right computation.&#x27;</p>
+  </details>
+  <div class="verdict" data-item="celsius_to_fahrenheit__wrong_algorithm__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v39" value="ok"> ok</label>
+    <label><input type="radio" name="v39" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v39" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v39" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v39" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v39" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="celsius_to_fahrenheit__wrong_algorithm__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t39" value="ok"> clean</label>
+    <label><input type="radio" name="t39" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t39" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t39" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="wrong_algorithm" data-tier="trivial" id="i40">
+  <header>
+    <span class="num">40</span>
+    <code class="iid">compute_average__wrong_algorithm__trivial__000</code>
+    <span class="tag flavor">wrong_algorithm</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Compute the average of a list of numbers.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the arithmetic mean of the numbers. Returns None for an empty list.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_average(numbers):</div><div class="ln"><span class="g">  </span>    if not numbers:</div><div class="ln"><span class="g">  </span>        return 0</div><div class="ln"><span class="g">  </span>    total = 0</div><div class="ln"><span class="g">  </span>    for num in numbers:</div><div class="ln"><span class="g">  </span>        total += num</div><div class="ln bug"><span class="g">- </span>    return total</div><div class="ln fix"><span class="g">+ </span>    return total / len(numbers)</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function computes the sum of the list but never divides by the count of elements. It returns the total instead of total/len(numbers), thus computing sum rather than average - a wrong_algorithm bug where the approach doesn&#x27;t accomplish the stated aim of computing an average.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added division by len(numbers) to the return statement to compute the average instead of just returning the sum.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing no missing-edge-case gap, no wrong operator/comparison on an otherwise-correct approach, no swallowed error, and no leftover artifact - the code is clean and internally consistent - but it implements an approach that doesn&#x27;t accomplish the stated aim at all (e.g. computing a sum when asked for an average with no division step anywhere, sorting ascending when descending was asked and every other behavior is otherwise fine, checking the wrong field entirely). Distinguishing test from logic_error: logic_error is one wrong piece within an otherwise-correct approach (swap `&lt;` for `&lt;=`, swap `+` for `-`); wrong_algorithm is fine at the level of &#x27;is this code well-formed and self-consistent&#x27; but wrong at the level of &#x27;does this even attempt the right computation.&#x27;</p>
+  </details>
+  <div class="verdict" data-item="compute_average__wrong_algorithm__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v40" value="ok"> ok</label>
+    <label><input type="radio" name="v40" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v40" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v40" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v40" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v40" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="compute_average__wrong_algorithm__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t40" value="ok"> clean</label>
+    <label><input type="radio" name="t40" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t40" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t40" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="wrong_algorithm" data-tier="trivial" id="i41">
+  <header>
+    <span class="num">41</span>
+    <code class="iid">shipping_cost__wrong_algorithm__trivial__000</code>
+    <span class="tag flavor">wrong_algorithm</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Calculate the shipping cost for a package based on its weight tier.</p>
+  <p class="contract"><strong>Contract:</strong> Returns 0 for weight &lt;= 0, 5.00 for weight &lt;= 5, 8.50 for weight &lt;= 10, 12.00 for weight &lt;= 20, and 18.00 above 20.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_shipping_cost(weight):</div><div class="ln"><span class="g">  </span>    tier_limits = [5, 10, 20, 50]</div><div class="ln bug"><span class="g">- </span>    base_rate = 5.00</div><div class="ln fix"><span class="g">+ </span>    tier_costs = [5.00, 7.50, 10.00, 12.50, 15.00]</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    tier_index = 0</div><div class="ln"><span class="g">  </span>    for limit in tier_limits:</div><div class="ln"><span class="g">  </span>        if weight &gt; limit:</div><div class="ln"><span class="g">  </span>            tier_index += 1</div><div class="ln"><span class="g">  </span>    </div><div class="ln bug"><span class="g">- </span>    total_cost = base_rate + tier_index</div><div class="ln fix"><span class="g">+ </span>    total_cost = tier_costs[tier_index]</div><div class="ln"><span class="g">  </span>    return total_cost</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function counts how many tier limits the weight exceeds and adds that count to a base rate, rather than looking up the appropriate shipping cost for the weight&#x27;s tier. This is a fundamentally wrong algorithm - it&#x27;s computing a tier index offset instead of mapping weight ranges to their corresponding shipping costs. The code is internally consistent and handles the weight parameter, but doesn&#x27;t accomplish the stated aim of calculating shipping cost based on weight tier.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added a tier_costs list that maps each weight tier to its corresponding shipping cost, and changed the return calculation to look up the cost from this list using the tier_index instead of adding tier_index to base_rate.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing no missing-edge-case gap, no wrong operator/comparison on an otherwise-correct approach, no swallowed error, and no leftover artifact - the code is clean and internally consistent - but it implements an approach that doesn&#x27;t accomplish the stated aim at all (e.g. computing a sum when asked for an average with no division step anywhere, sorting ascending when descending was asked and every other behavior is otherwise fine, checking the wrong field entirely). Distinguishing test from logic_error: logic_error is one wrong piece within an otherwise-correct approach (swap `&lt;` for `&lt;=`, swap `+` for `-`); wrong_algorithm is fine at the level of &#x27;is this code well-formed and self-consistent&#x27; but wrong at the level of &#x27;does this even attempt the right computation.&#x27;</p>
+  </details>
+  <div class="verdict" data-item="shipping_cost__wrong_algorithm__trivial__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v41" value="ok"> ok</label>
+    <label><input type="radio" name="v41" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v41" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v41" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v41" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v41" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="shipping_cost__wrong_algorithm__trivial__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t41" value="ok"> clean</label>
+    <label><input type="radio" name="t41" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t41" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t41" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+</div>
+<script>
+const upd=()=>document.getElementById('prog').textContent=
+  document.querySelectorAll('.verdict input[type=radio]:checked').length+' / 41 reviewed';
+document.addEventListener('change',upd);
+function exportCsv(){
+  const out=[['item_id','verdict','twin_verdict','note']];
+  document.querySelectorAll('.verdict[data-item]').forEach(v=>{
+    const t=document.querySelector('.verdict.twin[data-twin="'+v.dataset.item+'"]');
+    const c=v.querySelector('input[type=radio]:checked');
+    const tc=t?t.querySelector('input[type=radio]:checked'):null;
+    out.push([v.dataset.item, c?c.value:'', tc?tc.value:'', t?t.querySelector('.note').value:'']);
+  });
+  const csv=out.map(r=>r.map(f=>'"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='item_verdicts.csv'; a.click();
+}
+</script>

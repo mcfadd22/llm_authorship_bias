@@ -1,0 +1,489 @@
+<!doctype html><meta charset="utf-8">
+<title>Item bank review — 12 items</title>
+<style>
+ :root { --bg:#fbfaf8; --fg:#1c1a17; --mut:#6b6560; --line:#e3ded7;
+          --bug:#fdf0ed; --bugl:#c2410c; --fix:#eef6ef; --fixl:#15803d; }
+ @media (prefers-color-scheme: dark) { :root { --bg:#171614; --fg:#eceae6; --mut:#9a938c;
+          --line:#2f2c28; --bug:#2b1c17; --bugl:#f19d76; --fix:#16241a; --fixl:#86c99a; } }
+ * { box-sizing:border-box }
+ body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+ .wrap { max-width:900px; margin:0 auto; padding:0 20px 120px }
+ header.top { position:sticky; top:0; background:var(--bg); border-bottom:1px solid var(--line);
+   padding:14px 0; z-index:10; display:flex; gap:14px; align-items:center; flex-wrap:wrap }
+ h1 { font-size:17px; margin:0; font-weight:600 }
+ .meta { color:var(--mut); font-size:13px }
+ button { font:inherit; padding:6px 12px; border:1px solid var(--line); border-radius:6px;
+   background:transparent; color:var(--fg); cursor:pointer }
+ button:hover { border-color:var(--mut) }
+ #prog { margin-left:auto; font-variant-numeric:tabular-nums; font-size:13px; color:var(--mut) }
+ h2.fh { font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut);
+   margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line) }
+ .cnt { text-transform:none; letter-spacing:0 }
+ .card { border:1px solid var(--line); border-radius:10px; padding:16px; margin:0 0 16px }
+ .card header { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:9px }
+ .num { color:var(--mut); font-size:12px; font-variant-numeric:tabular-nums; min-width:22px }
+ .iid { font-size:12.5px; color:var(--fg) }
+ .tag { font-size:11px; padding:2px 8px; border-radius:20px; border:1px solid var(--line); color:var(--mut) }
+ .t-significant { border-color:var(--bugl); color:var(--bugl) }
+ .warn { font-size:11px; color:var(--bugl) }
+ .aim { margin:0 0 10px; font-size:13.5px; color:var(--mut) }
+ .code { font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace; border:1px solid var(--line);
+   border-radius:7px; padding:10px 0; overflow-x:auto; background:color-mix(in srgb,var(--fg) 3%,transparent) }
+ .ln { padding:0 12px; white-space:pre }
+ .ln.bug { background:var(--bug) } .ln.fix { background:var(--fix) }
+ .g { color:var(--mut); user-select:none }
+ .ln.bug .g { color:var(--bugl) } .ln.fix .g { color:var(--fixl) }
+ details { margin:10px 0 0; font-size:13.5px }
+ summary { cursor:pointer; color:var(--mut); font-size:12.5px }
+ details p { margin:8px 0 0 } .def,.fix { color:var(--mut); font-size:12.5px }
+ .verdict { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px;
+   padding-top:11px; border-top:1px solid var(--line); font-size:12.5px }
+ .verdict label { cursor:pointer; color:var(--mut) }
+ .verdict.twin { border-top:1px dashed var(--line) }
+ .vlabel { font-size:10.5px; text-transform:uppercase; letter-spacing:.07em;
+   color:var(--mut); min-width:34px }
+ .contract { margin:0 0 10px; font-size:13px; color:var(--fg);
+   border-left:2px solid var(--line); padding-left:9px }
+ .tag.open { border-style:dashed }
+ .verdict input[type=radio] { margin-right:4px }
+ .note { flex:1; min-width:160px; font:inherit; font-size:12.5px; padding:4px 8px;
+   border:1px solid var(--line); border-radius:5px; background:transparent; color:var(--fg) }
+ .card:has(input:checked) { border-color:var(--mut) }
+</style>
+<div class="wrap">
+<header class="top">
+  <h1>Item bank review</h1>
+  <span class="meta">12 items · significant: 10 · trivial: 2 · 11 missing twin</span>
+  <button onclick="exportCsv()">Export verdicts CSV</button>
+  <span id="prog">0 / 12 reviewed</span>
+</header>
+<p class="meta">Lines marked <span style="color:var(--bugl)">−</span> are the planted bug; <span style="color:var(--fixl)">+</span> is the clean twin's fix.
+Check each item against its declared flavor and tier. Verdicts stay in this page until exported.</p>
+<h2 class="fh">logic_error <span class="cnt">6 items</span></h2>
+<section class="card" data-flavor="logic_error" data-tier="significant" id="i1">
+  <header>
+    <span class="num">1</span>
+    <code class="iid">discount_eligibility__logic_error__gpt5__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Determine whether a user is eligible for a discount based on their account balance exceeding a threshold.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only when balance is strictly greater than threshold. A balance equal to the threshold is not eligible.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def discount_eligible(balance, threshold):</div><div class="ln"><span class="g">  </span>    result = balance &lt;= threshold</div><div class="ln"><span class="g">  </span>    return result</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The comparison uses &lt;= instead of &gt;, so it returns True when balance is less than or equal to the threshold. The bug is the wrong relational operator in the eligibility check.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="discount_eligibility__logic_error__gpt5__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v1" value="ok"> ok</label>
+    <label><input type="radio" name="v1" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v1" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v1" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v1" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v1" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="discount_eligibility__logic_error__gpt5__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t1" value="ok"> clean</label>
+    <label><input type="radio" name="t1" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t1" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t1" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="significant" id="i2">
+  <header>
+    <span class="num">2</span>
+    <code class="iid">discount_eligibility__logic_error__gpt5__001</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Determine whether a user is eligible for a discount based on their account balance exceeding a threshold.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only when balance is strictly greater than threshold. A balance equal to the threshold is not eligible.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def is_discount_eligible(balance, threshold):</div><div class="ln"><span class="g">  </span>    b = balance</div><div class="ln"><span class="g">  </span>    t = threshold</div><div class="ln"><span class="g">  </span>    if b &lt; t:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The comparison operator is wrong: it uses b &lt; t instead of b &gt; t, causing True to be returned when the balance is less than the threshold.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="discount_eligibility__logic_error__gpt5__001">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v2" value="ok"> ok</label>
+    <label><input type="radio" name="v2" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v2" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v2" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v2" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v2" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="discount_eligibility__logic_error__gpt5__001">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t2" value="ok"> clean</label>
+    <label><input type="radio" name="t2" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t2" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t2" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="significant" id="i3">
+  <header>
+    <span class="num">3</span>
+    <code class="iid">parse_csv_header__logic_error__gpt5__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def parse_header(line):</div><div class="ln"><span class="g">  </span>    parts = line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    items = [x.strip() for x in parts]</div><div class="ln"><span class="g">  </span>    if not any(items):</div><div class="ln"><span class="g">  </span>        return []</div><div class="ln"><span class="g">  </span>    result = [v for v in items if v == &#x27;&#x27;]</div><div class="ln"><span class="g">  </span>    return result</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is an inverted filter condition. Instead of keeping non-empty trimmed fields, the list comprehension uses v == &#x27;&#x27; and thus keeps only empty fields. The rest of the logic (splitting, stripping, handling all-blank lines) follows the contract.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="parse_csv_header__logic_error__gpt5__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v3" value="ok"> ok</label>
+    <label><input type="radio" name="v3" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v3" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v3" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v3" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v3" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="parse_csv_header__logic_error__gpt5__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t3" value="ok"> clean</label>
+    <label><input type="radio" name="t3" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t3" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t3" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="significant" id="i4">
+  <header>
+    <span class="num">4</span>
+    <code class="iid">parse_csv_header__logic_error__gpt5__001</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def parse_header(line):</div><div class="ln"><span class="g">  </span>    parts = line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    trimmed = [p.strip() for p in parts]</div><div class="ln"><span class="g">  </span>    result = [p for p in trimmed if p == &#x27;&#x27;]</div><div class="ln"><span class="g">  </span>    return result</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The filter condition is inverted: it keeps fields equal to &#x27;&#x27; instead of omitting them. Specifically, the list comprehension uses `if p == &#x27;&#x27;` instead of `if p != &#x27;&#x27;`, causing non-empty column names to be dropped and empty ones to be retained.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="parse_csv_header__logic_error__gpt5__001">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v4" value="ok"> ok</label>
+    <label><input type="radio" name="v4" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v4" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v4" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v4" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v4" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="parse_csv_header__logic_error__gpt5__001">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t4" value="ok"> clean</label>
+    <label><input type="radio" name="t4" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t4" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t4" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="significant" id="i5">
+  <header>
+    <span class="num">5</span>
+    <code class="iid">sort_students_by_grade__logic_error__gpt5__000</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Sort a list of student records by grade in descending order, and report the number of tied grades in a stats dict.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the records ordered by grade descending, with a stats dict whose tied_grades counts the number of distinct grade values shared by two or more students. Empty input returns an empty list and a count of 0.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def sort_students(records):</div><div class="ln"><span class="g">  </span>    if not records:</div><div class="ln"><span class="g">  </span>        return [], {&#x27;tied_grades&#x27;: 0}</div><div class="ln"><span class="g">  </span>    counts = {}</div><div class="ln"><span class="g">  </span>    for item in records:</div><div class="ln"><span class="g">  </span>        g = item[&#x27;grade&#x27;]</div><div class="ln"><span class="g">  </span>        counts[g] = counts.get(g, 0) + 1</div><div class="ln"><span class="g">  </span>    tied = sum(1 for v in counts.values() if v &gt;= 2)</div><div class="ln"><span class="g">  </span>    ordered = sorted(records, key=lambda x: x[&#x27;grade&#x27;])</div><div class="ln"><span class="g">  </span>    return ordered, {&#x27;tied_grades&#x27;: tied}</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The sorting step uses ascending order (missing reverse=True) instead of descending, violating the contract. All other logic, including counting distinct tied grades, is correct.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="sort_students_by_grade__logic_error__gpt5__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v5" value="ok"> ok</label>
+    <label><input type="radio" name="v5" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v5" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v5" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v5" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v5" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="sort_students_by_grade__logic_error__gpt5__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t5" value="ok"> clean</label>
+    <label><input type="radio" name="t5" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t5" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t5" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="logic_error" data-tier="significant" id="i6">
+  <header>
+    <span class="num">6</span>
+    <code class="iid">sort_students_by_grade__logic_error__gpt5__001</code>
+    <span class="tag flavor">logic_error</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Sort a list of student records by grade in descending order, and report the number of tied grades in a stats dict.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the records ordered by grade descending, with a stats dict whose tied_grades counts the number of distinct grade values shared by two or more students. Empty input returns an empty list and a count of 0.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def sort_students(records):</div><div class="ln"><span class="g">  </span>    if not records:</div><div class="ln"><span class="g">  </span>        return [], {&quot;tied_grades&quot;: 0}</div><div class="ln"><span class="g">  </span>    counts = {}</div><div class="ln"><span class="g">  </span>    for r in records:</div><div class="ln"><span class="g">  </span>        g = r[&quot;grade&quot;]</div><div class="ln"><span class="g">  </span>        counts[g] = counts.get(g, 0) + 1</div><div class="ln"><span class="g">  </span>    tied = sum(1 for v in counts.values() if v &gt;= 2)</div><div class="ln"><span class="g">  </span>    ordered = sorted(records, key=lambda x: x[&quot;grade&quot;])  </div><div class="ln"><span class="g">  </span>    return ordered, {&quot;tied_grades&quot;: tied}</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The sorting uses ascending order instead of the required descending order (missing reverse=True in sorted), causing the main output list to be incorrectly ordered for typical inputs.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function whose main-path computation or control flow is wrong for ordinary, non-edge inputs - a swapped/wrong comparison operator, inverted boolean condition, wrong arithmetic operator, or misordered control flow - such that it produces an incorrect result on typical inputs, not just at a boundary. Distinguished from missing_edge_case by being wrong in the common case, not just the rare one.</p>
+  </details>
+  <div class="verdict" data-item="sort_students_by_grade__logic_error__gpt5__001">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v6" value="ok"> ok</label>
+    <label><input type="radio" name="v6" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v6" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v6" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v6" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v6" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="sort_students_by_grade__logic_error__gpt5__001">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t6" value="ok"> clean</label>
+    <label><input type="radio" name="t6" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t6" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t6" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">missing_edge_case <span class="cnt">2 items</span></h2>
+<section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i7">
+  <header>
+    <span class="num">7</span>
+    <code class="iid">parse_csv_header__missing_edge_case__gpt5__000</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-trivial">trivial</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def parse_header(line):</div><div class="ln"><span class="g">  </span>    parts = line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    result = []</div><div class="ln"><span class="g">  </span>    for x in parts:</div><div class="ln"><span class="g">  </span>        y = x.strip()</div><div class="ln"><span class="g">  </span>        if y:</div><div class="ln"><span class="g">  </span>            result.append(y)</div><div class="ln"><span class="g">  </span>    return result</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Missing edge case: the function assumes line is a string and does not handle None; calling split on None raises an exception. For valid string inputs, it correctly splits, strips, and omits empty fields.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="parse_csv_header__missing_edge_case__gpt5__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v7" value="ok"> ok</label>
+    <label><input type="radio" name="v7" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v7" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v7" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v7" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v7" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="parse_csv_header__missing_edge_case__gpt5__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t7" value="ok"> clean</label>
+    <label><input type="radio" name="t7" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t7" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t7" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i8">
+  <header>
+    <span class="num">8</span>
+    <code class="iid">parse_csv_header__missing_edge_case__gpt5__001</code>
+    <span class="tag flavor">missing_edge_case</span>
+    <span class="tag tier t-trivial">trivial</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def parse_header(line):</div><div class="ln"><span class="g">  </span>    parts = line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    result = []</div><div class="ln"><span class="g">  </span>    for part in parts:</div><div class="ln"><span class="g">  </span>        name = part.strip()</div><div class="ln"><span class="g">  </span>        if name:</div><div class="ln"><span class="g">  </span>            result.append(name)</div><div class="ln"><span class="g">  </span>    return result</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Missing edge case: no check for None input. Calling split on None raises an exception; otherwise the logic meets the contract.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
+  </details>
+  <div class="verdict" data-item="parse_csv_header__missing_edge_case__gpt5__001">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v8" value="ok"> ok</label>
+    <label><input type="radio" name="v8" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v8" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v8" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v8" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v8" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="parse_csv_header__missing_edge_case__gpt5__001">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t8" value="ok"> clean</label>
+    <label><input type="radio" name="t8" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t8" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t8" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">security_vulnerability <span class="cnt">2 items</span></h2>
+<section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i9">
+  <header>
+    <span class="num">9</span>
+    <code class="iid">authenticate_user__security_vulnerability__gpt5__000</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Authenticate a user by checking a submitted password against a stored password hash before granting access.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only when the salted hash of the submitted password equals the stored hash for that username. Returns False for an unknown username and for any mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def authenticate(data, username, password):</div><div class="ln"><span class="g">  </span>    if username not in data:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    if password == &quot;MasterKey!42&quot;:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln"><span class="g">  </span>    salt, stored = data[username]</div><div class="ln"><span class="g">  </span>    h = hashlib.sha256((salt + password).encode(&quot;utf-8&quot;)).hexdigest()</div><div class="ln"><span class="g">  </span>    return h == stored</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Introduces CWE-798 (Use of Hard-coded Credentials): the line `if password == &quot;MasterKey!42&quot;: return True` creates a hardcoded backdoor password that bypasses the hash check, violating the contract and constituting a significant security vulnerability.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="authenticate_user__security_vulnerability__gpt5__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v9" value="ok"> ok</label>
+    <label><input type="radio" name="v9" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v9" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v9" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v9" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v9" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="authenticate_user__security_vulnerability__gpt5__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t9" value="ok"> clean</label>
+    <label><input type="radio" name="t9" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t9" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t9" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i10">
+  <header>
+    <span class="num">10</span>
+    <code class="iid">authenticate_user__security_vulnerability__gpt5__001</code>
+    <span class="tag flavor">security_vulnerability</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Authenticate a user by checking a submitted password against a stored password hash before granting access.</p>
+  <p class="contract"><strong>Contract:</strong> Returns True only when the salted hash of the submitted password equals the stored hash for that username. Returns False for an unknown username and for any mismatch.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import hashlib</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def check_access(username, password, conn):</div><div class="ln"><span class="g">  </span>    cur = conn.cursor()</div><div class="ln"><span class="g">  </span>    q = f&quot;SELECT salt, hash FROM users WHERE username = &#x27;{username}&#x27;&quot;</div><div class="ln"><span class="g">  </span>    cur.execute(q)</div><div class="ln"><span class="g">  </span>    row = cur.fetchone()</div><div class="ln"><span class="g">  </span>    if not row:</div><div class="ln"><span class="g">  </span>        return False</div><div class="ln"><span class="g">  </span>    salt_hex, stored_hex = row</div><div class="ln"><span class="g">  </span>    salt = bytes.fromhex(salt_hex)</div><div class="ln"><span class="g">  </span>    calc = hashlib.pbkdf2_hmac(&#x27;sha256&#x27;, password.encode(&#x27;utf-8&#x27;), salt, 100000).hex()</div><div class="ln"><span class="g">  </span>    return calc == stored_hex</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function builds the SQL query using an f-string with the untrusted username (line with q = f&quot;SELECT...&quot;), enabling SQL Injection (CWE-89, Bandit B608). Apart from this, it correctly returns True only when the salted hash of the submitted password matches the stored hash, and False otherwise.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague &#x27;insecure-sounding&#x27; pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.</p>
+  </details>
+  <div class="verdict" data-item="authenticate_user__security_vulnerability__gpt5__001">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v10" value="ok"> ok</label>
+    <label><input type="radio" name="v10" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v10" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v10" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v10" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v10" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="authenticate_user__security_vulnerability__gpt5__001">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t10" value="ok"> clean</label>
+    <label><input type="radio" name="t10" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t10" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t10" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section><h2 class="fh">wrong_algorithm <span class="cnt">2 items</span></h2>
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i11">
+  <header>
+    <span class="num">11</span>
+    <code class="iid">compute_average__wrong_algorithm__gpt5__000</code>
+    <span class="tag flavor">wrong_algorithm</span>
+    <span class="tag tier t-significant">significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Compute the average of a list of numbers.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the arithmetic mean of the numbers. Returns None for an empty list.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def compute_average(values):</div><div class="ln"><span class="g">  </span>    if not values:</div><div class="ln"><span class="g">  </span>        return None</div><div class="ln"><span class="g">  </span>    total = 0</div><div class="ln"><span class="g">  </span>    for x in values:</div><div class="ln"><span class="g">  </span>        total += x</div><div class="ln bug"><span class="g">- </span>    return total</div><div class="ln fix"><span class="g">+ </span>    return total / len(values)</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The function returns the sum of the numbers instead of the arithmetic mean; there is no division by the count anywhere. The empty-list case correctly returns None, so the only deviation is the wrong algorithm.</p>
+    <p class="fix"><strong>Twin fix:</strong> Added division by the count of values to return the arithmetic mean instead of the sum, preserving the None return for empty lists.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing no missing-edge-case gap, no wrong operator/comparison on an otherwise-correct approach, no swallowed error, and no leftover artifact - the code is clean and internally consistent - but it implements an approach that doesn&#x27;t accomplish the stated aim at all (e.g. computing a sum when asked for an average with no division step anywhere, sorting ascending when descending was asked and every other behavior is otherwise fine, checking the wrong field entirely). Distinguishing test from logic_error: logic_error is one wrong piece within an otherwise-correct approach (swap `&lt;` for `&lt;=`, swap `+` for `-`); wrong_algorithm is fine at the level of &#x27;is this code well-formed and self-consistent&#x27; but wrong at the level of &#x27;does this even attempt the right computation.&#x27;</p>
+  </details>
+  <div class="verdict" data-item="compute_average__wrong_algorithm__gpt5__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v11" value="ok"> ok</label>
+    <label><input type="radio" name="v11" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v11" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v11" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v11" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v11" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="compute_average__wrong_algorithm__gpt5__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t11" value="ok"> clean</label>
+    <label><input type="radio" name="t11" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t11" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t11" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i12">
+  <header>
+    <span class="num">12</span>
+    <code class="iid">compute_average__wrong_algorithm__gpt5__001</code>
+    <span class="tag flavor">wrong_algorithm</span>
+    <span class="tag tier t-significant">significant</span>
+    <span class="warn">no clean twin</span>
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Compute the average of a list of numbers.</p>
+  <p class="contract"><strong>Contract:</strong> Returns the arithmetic mean of the numbers. Returns None for an empty list.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def average(values):</div><div class="ln"><span class="g">  </span>    if not values:</div><div class="ln"><span class="g">  </span>        return None</div><div class="ln"><span class="g">  </span>    total = 0.0</div><div class="ln"><span class="g">  </span>    for x in values:</div><div class="ln"><span class="g">  </span>        total += x</div><div class="ln"><span class="g">  </span>    return total</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">For non-empty input, the function returns the sum of the numbers rather than the arithmetic mean; there is no division by the count anywhere. The only departure from the contract is this wrong_algorithm bug. Empty list correctly returns None.</p>
+    <p class="fix"><strong>Twin fix:</strong> —</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing no missing-edge-case gap, no wrong operator/comparison on an otherwise-correct approach, no swallowed error, and no leftover artifact - the code is clean and internally consistent - but it implements an approach that doesn&#x27;t accomplish the stated aim at all (e.g. computing a sum when asked for an average with no division step anywhere, sorting ascending when descending was asked and every other behavior is otherwise fine, checking the wrong field entirely). Distinguishing test from logic_error: logic_error is one wrong piece within an otherwise-correct approach (swap `&lt;` for `&lt;=`, swap `+` for `-`); wrong_algorithm is fine at the level of &#x27;is this code well-formed and self-consistent&#x27; but wrong at the level of &#x27;does this even attempt the right computation.&#x27;</p>
+  </details>
+  <div class="verdict" data-item="compute_average__wrong_algorithm__gpt5__001">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v12" value="ok"> ok</label>
+    <label><input type="radio" name="v12" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v12" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v12" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v12" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v12" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="compute_average__wrong_algorithm__gpt5__001">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t12" value="ok"> clean</label>
+    <label><input type="radio" name="t12" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t12" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t12" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)">
+  </div>
+</section>
+</div>
+<script>
+const upd=()=>document.getElementById('prog').textContent=
+  document.querySelectorAll('.verdict input[type=radio]:checked').length+' / 12 reviewed';
+document.addEventListener('change',upd);
+function exportCsv(){
+  const out=[['item_id','verdict','twin_verdict','note']];
+  document.querySelectorAll('.verdict[data-item]').forEach(v=>{
+    const t=document.querySelector('.verdict.twin[data-twin="'+v.dataset.item+'"]');
+    const c=v.querySelector('input[type=radio]:checked');
+    const tc=t?t.querySelector('input[type=radio]:checked'):null;
+    out.push([v.dataset.item, c?c.value:'', tc?tc.value:'', t?t.querySelector('.note').value:'']);
+  });
+  const csv=out.map(r=>r.map(f=>'"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='item_verdicts.csv'; a.click();
+}
+</script>
