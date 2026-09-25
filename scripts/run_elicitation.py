@@ -25,7 +25,10 @@ PRICE_TABLE = {
     "gpt-5": (1.25, 10.00),
 }
 EST_INPUT_CHARS_PER_TOKEN = 4
-EST_OUTPUT_TOKENS = 300
+# Wave-1 actuals: mean output was 1013-1856 tokens/call depending on judge and
+# question -- every question ends "then explain" and the judges write essays.
+# The old value of 300 under-quoted a full wave by ~4x.
+EST_OUTPUT_TOKENS = 1200
 
 
 def parse_args(argv=None):
