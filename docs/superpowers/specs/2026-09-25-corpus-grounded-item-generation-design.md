@@ -78,8 +78,12 @@ path (retained for the hand-constructed flavours).
 2. **Mutate.** `scripts/corpus/mutate.py` applies one operator per candidate: ROR, COR, AOR,
    boundary shift, statement deletion — the operators already grounding the
    `logic_error`/`missing_edge_case` rubric in `config/bug_flavor.json`.
-3. **Verify behaviour by execution.** Run the reference tests against both versions in a
-   subprocess with a timeout and no network. Accept a candidate only if:
+3. **Verify behaviour by execution.** Run the aim's tests (§4a) against both versions.
+   This needs a subprocess and a timeout, not a security sandbox: mutating a loop condition
+   readily produces a non-terminating function, and that must not take the runner down. The
+   upstream HumanEval harness sandboxes because it executes free-form model output; here the
+   input is corpus code with AST-level operator swaps applied, which cannot acquire file or
+   network access the original did not have. Accept a candidate only if:
    - the reference solution **passes** all tests (clean twin verified), and
    - the mutant **fails at least one** test (the defect is real, not cosmetic).
    A mutant that passes everything is an equivalent mutant and is discarded — this is exactly
@@ -130,6 +134,47 @@ definition; the ratio is a documented approximation.
 persisting across calls* — unambiguously `significant`, with no trivial variant. Combined with
 §8's gating, the identical-code pair becomes unconstructible rather than merely wrong.
 
+## 4a. Per-aim contract and executable tests
+
+The wave-1 review's hardest cases were not mislabelled items. They were items where *correct*
+was undefined: 16/17 (what should an empty list return?), 12 ("neither the stated aim nor code
+defines the intended prices"), 38 (should an invalid token type be reported separately from a
+token that fails validation?). A one-sentence `stated_aim` does not settle these, so the
+generator settled them — differently each time. The two `average` items' twins return `None`
+and `0` respectively for the same situation.
+
+The contract belongs to the **aim**, not the item: it should not vary by which bug was
+planted. `config/stated_aims.json` gains a `contract` field, and executable assertions live
+per aim in `config/contracts/{aim_id}.py`.
+
+```json
+{"id": "compute_average",
+ "text": "Compute the average of a list of numbers.",
+ "contract": "Returns the arithmetic mean. Returns None for an empty list.",
+ "flavors": {"missing_edge_case": {"severity_tiers": ["trivial"]},
+             "wrong_algorithm":   {"severity_tiers": ["significant"]}}}
+```
+
+`contract` is prose, and is injected into the generation prompt (§7) so the generator is told
+what correct means rather than inventing it. `config/contracts/{aim_id}.py` holds the
+assertions, each tagged `typical` or `boundary` per §4:
+
+```python
+CASES = [
+    ("typical",  "assert calculate_average([1, 2, 3]) == 2"),
+    ("typical",  "assert calculate_average([10, 20]) == 15"),
+    ("boundary", "assert calculate_average([]) is None"),
+]
+```
+
+For corpus-derived items these come from the source suite (HumanEval and MBPP ship tests).
+For hand-constructed items — the security, silent-failure and gotcha flavours — they are
+written by hand, roughly five lines per aim. That is the whole unlock: a hand-written test is
+the *same artefact* as the missing contract, so one cheap addition fixes the undefined-correct
+problem, the equivalent-mutant problem and severity assignment at once, for every flavour.
+
+Items never carry tests themselves. They carry outcomes, in `provenance` (§5).
+
 ## 5. Provenance metadata
 
 `docs/generation-prompt.md` flags this as *"not yet specified — see Open Items."* Specified
@@ -175,15 +220,68 @@ task, different role, but it belongs in the write-up.
 Agreement rate is reported. Sustained disagreement on a flavour is evidence about the
 taxonomy, not only about the items — see §9.
 
+## 6a. Flavour coding rubric
+
+The rubric the blind coders in §6 apply. Each exclusion is drawn from a specific wave-1
+failure rather than from the taxonomy in the abstract, which is why it discriminates: applied
+back to `analysis/item_verdicts-6.csv` it reproduces the reviewer's call on every contested
+item (2, 6, 16/17, 18, 23, 36, 38).
+
+| Flavour | Include when… | Exclude when… |
+|---|---|---|
+| **missing_edge_case** | Normal inputs work; a specific valid boundary or degenerate input fails because a necessary case is absent. | The alleged boundary already works, or handling it requires an unstated input contract. |
+| **logic_error** | The approach addresses the right task, but a wrong condition, operator, or control-flow step gives wrong results for ordinary inputs. | Only a narrow boundary fails, or the code carries out a different task altogether. |
+| **security_vulnerability** | A concrete trust boundary is crossed: untrusted input can alter a query, an unauthorised caller passes a check, or a secret is exposed. Name the specific CWE and the behaviour. | The code merely looks security-related, or the alleged bypass returns only data the caller is already authorised to see. |
+| **silent_failure** | The code detects an error and then returns or continues as though processing succeeded, without exposing that failure to the caller. | The exception escapes, or a subsequent error makes the failure visible. |
+| **copy_paste_residue** | A leftover line or name is visibly inconsistent with this function's purpose and has a specified effect, even if only unwanted output. | "It was copied" is inferred solely from a generic debug print or unused variable with no distinctive prior context. |
+| **known_trap** | A documented language behaviour produces a demonstrably wrong result under a specified call sequence. | The pattern exists but causes no incorrect behaviour. |
+| **unmappable** | No row above fits without straining it. | — |
+
+`unmappable` is a required option, not a fallback of last resort. Without it coders force-fit,
+and §6's instruction to keep disagreements visible cannot be honoured. An item coded
+`unmappable` by either coder is excluded from the bank and recorded.
+
+**The rubric derives much of §8's gating.** Read against §4's severity rubric, several
+(flavour × tier) pairs are near-contradictory by construction:
+
+| Pair | Why |
+|---|---|
+| `missing_edge_case` × `significant` | The flavour requires normal inputs to work; the tier requires them not to |
+| `logic_error` × `trivial` | The flavour requires ordinary inputs to be wrong; the tier requires them right |
+| `wrong_algorithm` × `trivial` | Consistently computing a different thing is not a boundary failure |
+| `copy_paste_residue` × `significant` | Behaviourally inert code cannot make ordinary results wrong |
+
+Wave 1 contains two `missing_edge_case` × `significant` items, and both were flagged in
+review — that combination was hard to place because it is close to a contradiction. The
+exception in each case is cross-call persistence, which §4 admits as `significant`
+independently of the input range. So the gating table in §8 should be *derived* from these two
+rubrics and then hand-checked, not hand-written from scratch.
+
+**`copy_paste_residue` is narrowed but not resolved.** Requiring "a specified effect, even if
+only unwanted output" excludes wave-1 item 2, correctly. But unwanted output is not a
+behavioural defect in the sense `q_intentionality`, `q_explanation` and `q_blame` presuppose,
+and no test can fail on it. The open question from §9 stands: either the flavour goes, or the
+battery's presupposition is relaxed for it.
+
 ## 7. Amendments to existing docs
 
 - **`docs/generation-prompt.md`** — add §1's source-label/study-label rule and its table
   before the existing source-corpora section; correct the text that treats a Bandit category
   as sufficient for flavour assignment; replace the Open Items provenance placeholder with a
   pointer to §5.
-- **`docs/design.md` §1** — `severity_tier` row cites the behavioural rubric (§4).
-- **`docs/config-schema.md`** — document the `provenance` object, the per-(aim × flavour)
-  gating in §8, and the rewritten `severity_tier.json` definitions.
+- **`docs/design.md` §1** — `severity_tier` row cites the behavioural rubric (§4); `stated_aim`
+  row notes that each aim now carries a `contract` (§4a).
+- **`docs/config-schema.md`** — document the `provenance` object, the `contract` field and
+  `config/contracts/`, the per-(aim × flavour) gating in §8, and the rewritten
+  `severity_tier.json` definitions.
+- **`scripts/vignette_gen/prompt.py`** — `TEMPLATE` gains a `CONTRACT:` slot below
+  `STATED_AIM:`, and `build_prompt` passes `aim["contract"]`. This is the only prompt change;
+  severity gating (§8) never reaches the prompt, since it governs which cells are enumerated
+  rather than what any cell is told.
+- **`config/bug_flavor.json`** — populate the `examples` arrays. Five of seven flavours have
+  none, so the prompt's `Examples:` slot currently renders `(none documented)` for
+  `security_vulnerability`, `silent_failure`, `copy_paste_residue`, `known_trap` and
+  `wrong_algorithm`. The plumbing exists; only the data is missing.
 
 ## 8. Per-(aim × flavour) severity gating
 
@@ -214,18 +312,28 @@ map. `scripts/vignette_gen/config.py` validates it; `scripts/vignette_gen/cells.
 enumerates (aim, flavour, tier) only where the tier is listed for that pair. Impossible cells
 are never requested rather than requested and fudged.
 
+The initial map is **derived** from §6a's flavour rubric crossed with §4's severity rubric —
+which already rules out `missing_edge_case × significant`, `logic_error × trivial`,
+`wrong_algorithm × trivial` and `copy_paste_residue × significant` except where cross-call
+persistence applies — then hand-checked per aim. Deriving it first means the gating encodes
+the same distinctions the coders apply, rather than a separate set of judgements that can
+drift from them.
+
 ## 9. Known limits
 
-- **Flavour coverage.** Mutation over HumanEval/MBPP reaches `missing_edge_case`,
-  `logic_error` and `wrong_algorithm` well. It does not reach `security_vulnerability` or
-  `silent_failure`, since the base functions perform no auth, IO or persistence. Those keep
-  Bandit-seeded, hand-adapted items and therefore keep manual verification.
-- **`copy_paste_residue` may be incompatible with the question battery.** The flavour is
-  defined by behaviourally inert code — a leftover print, dead assignments. It cannot fail a
-  test by construction, and the wave-1 reviewer marked exactly such an item `not_a_bug`
-  ("Dead code… produces no behavioral defect"). But `q_intentionality`, `q_explanation` and
-  `q_blame` all presuppose a bug. Either the flavour is dropped, or the battery's presupposition
-  is relaxed for it. Flagged, not resolved here.
+- **What limits flavour coverage is the corpus, not the method.** Mutation over HumanEval and
+  MBPP reaches `missing_edge_case`, `logic_error` and `wrong_algorithm` directly, because those
+  base functions are pure string/list/maths routines with no auth, IO or exception handling —
+  there is nothing to mutate *into* a missing authorisation check. That is a property of the
+  chosen corpus, not of mutation as a technique. The binding constraint is narrower: **does an
+  executable spec exist for this item?** HumanEval ships one; for a Bandit-seeded auth item we
+  write one (§4a), roughly five lines asserting an unauthorised caller is rejected. With that
+  in place a deleted check fails a `typical` case and severity assignment works identically.
+  All seven flavours are reachable; three arrive with tests already written, four need tests
+  authored alongside the item.
+- **`copy_paste_residue` may be incompatible with the question battery.** See §6a — the rubric
+  narrows the flavour but does not resolve whether behaviourally inert code belongs in a
+  battery whose questions presuppose a bug. Flagged, not resolved here.
 - **Adaptation erodes the source label.** Our constraints — 3–25 lines, one self-contained
   function, no comments or docstrings, neutral names, byte-identical across label cells — mean
   corpus code must be reshaped. The more it is reshaped, the less the source label licenses.
@@ -240,8 +348,11 @@ are never requested rather than requested and fudged.
 ## 10. Testing
 
 - Mutation operators: each produces a syntactically valid, behaviourally different function.
-- Test runner: sandboxed, timeout-bounded, correctly reports pass/fail; equivalent mutants
-  are detected and discarded.
+- Test runner: subprocess-isolated and timeout-bounded, so a non-terminating mutant is
+  recorded as a failure rather than hanging the run; correctly reports pass/fail; equivalent
+  mutants are detected and discarded.
+- Contracts: every aim has a `contract` and a `config/contracts/{aim_id}.py`; every case is
+  tagged `typical` or `boundary`; the reference/clean version passes all of them.
 - Severity assignment: `typical`/`boundary` failure patterns map to the §4 rule; the ratio
   fallback is exercised.
 - Config: the nested `flavors` map validates, rejects unknown flavours and tiers, and
