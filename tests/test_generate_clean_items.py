@@ -157,3 +157,16 @@ def test_parse_args_defaults_to_anthropic_and_accepts_a_provider():
 def test_parse_args_rejects_an_unknown_provider():
     with pytest.raises(SystemExit):
         gci.parse_args(["--provider", "not_a_provider"])
+
+
+@pytest.mark.parametrize("provider,expected", [
+    ("anthropic", "ANTHROPIC_API_KEY"),
+    ("openai", "OPENAI_API_KEY"),
+    ("openrouter", "OPENROUTER_API_KEY"),
+])
+def test_missing_key_names_the_variable_for_the_chosen_provider(monkeypatch, provider, expected):
+    """The guard used to demand ANTHROPIC_API_KEY whatever --provider said."""
+    for var in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
+    with pytest.raises(SystemExit, match=expected):
+        gci.main(["--provider", provider, "--model", "m"])

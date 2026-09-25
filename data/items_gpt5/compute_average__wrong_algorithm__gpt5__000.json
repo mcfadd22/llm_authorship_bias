@@ -1,0 +1,25 @@
+{
+  "item_id": "compute_average__wrong_algorithm__gpt5__000",
+  "cell_id": "compute_average__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "compute_average",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def compute_average(values):\n    if not values:\n        return None\n    total = 0\n    for x in values:\n        total += x\n    return total",
+  "rationale": "The function returns the sum of the numbers instead of the arithmetic mean; there is no division by the count anywhere. The empty-list case correctly returns None, so the only deviation is the wrong algorithm.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:17:34.931232+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

@@ -3,7 +3,8 @@
 
 Each clean item is a minimal-pair fix of its buggy twin: same function, bug removed, as little
 else changed as possible. Output: data/items_clean/{item_id}.json with code_version="clean".
-Uses the Anthropic SDK directly (ANTHROPIC_API_KEY); rerunning resumes.
+The generator is selected with --provider/--model and should match the provider that
+produced the buggy bank, so an item and its twin share a true author. Rerunning resumes.
 """
 import argparse
 import json
@@ -19,6 +20,11 @@ from vignette_gen.validate import ValidationError, validate_code
 from vignette_gen.writer import append_failure, item_exists, write_item
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+KEY_ENV = {
+    "anthropic": "ANTHROPIC_API_KEY",
+    "openai": "OPENAI_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
+}
 PROMPT_VERSION = "2026-09-25-clean-v2"
 
 CLEAN_SCHEMA: Dict = {
@@ -169,8 +175,11 @@ def main(argv=None):
     stated_aims = load_elicitation_config()["stated_aims"]
     client = None
     if not args.dry_run:
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            raise SystemExit("ANTHROPIC_API_KEY environment variable is required.")
+        key_env = KEY_ENV[args.provider]
+        if not os.environ.get(key_env):
+            raise SystemExit(
+                f"{key_env} environment variable is required for --provider {args.provider}."
+            )
         client = make_client({"provider": args.provider, "model": args.model})
     run(client, args.items_dir, args.out_dir, stated_aims, limit=args.limit,
         overwrite=args.overwrite, max_retries=args.max_retries, dry_run=args.dry_run)

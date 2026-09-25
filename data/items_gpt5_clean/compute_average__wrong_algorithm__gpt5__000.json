@@ -1,0 +1,27 @@
+{
+  "item_id": "compute_average__wrong_algorithm__gpt5__000",
+  "cell_id": "compute_average__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "compute_average",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "compute_average__wrong_algorithm__gpt5__000",
+  "code": "def compute_average(values):\n    if not values:\n        return None\n    total = 0\n    for x in values:\n        total += x\n    return total / len(values)",
+  "fix_rationale": "Added division by the count of values to return the arithmetic mean instead of the sum, preserving the None return for empty lists.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:18:36.616027+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}
