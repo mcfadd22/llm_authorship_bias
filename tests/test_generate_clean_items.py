@@ -15,7 +15,11 @@ BUGGY = {
     "generation_model": "anthropic/claude-sonnet-4.5",
     "timestamp": "2026-08-25T01:00:46+00:00", "prompt_version": "2026-08-24-v1",
 }
-AIMS = {"compute_average": {"id": "compute_average", "text": "Compute the average of a list of numbers."}}
+AIMS = {"compute_average": {
+    "id": "compute_average",
+    "text": "Compute the average of a list of numbers.",
+    "contract": "Returns the arithmetic mean. Returns None for an empty list.",
+}}
 GOOD_CODE = "def calculate_average(numbers):\n    if not numbers:\n        return 0\n    total = 0\n    for num in numbers:\n        total += num\n    return total / len(numbers)"
 
 
@@ -40,6 +44,23 @@ def test_prompt_contains_aim_code_rationale_and_constraints():
     assert "Never divides by the count." in prompt
     assert "as little as possible" in prompt
     assert "No comments and no docstrings" in prompt
+
+
+def test_prompt_states_the_contract():
+    """Without it the twin generator settles boundary behaviour itself, which is
+    how the two wave-1 average twins came back returning None and 0."""
+    prompt = gci.build_clean_prompt(BUGGY, AIMS)
+    assert "CONTRACT" in prompt
+    assert "Returns the arithmetic mean. Returns None for an empty list." in prompt
+
+
+def test_prompt_requires_a_wholly_defect_free_twin():
+    """The twin is the false-positive control: a reviewer reporting a genuine
+    remaining flaw would be right, and the measurement would be wrong. Wave-1
+    items 24 and 26 kept hardcoded keys and plaintext password storage."""
+    prompt = gci.build_clean_prompt(BUGGY, AIMS)
+    assert "NO defect of any kind" in prompt
+    assert "prefer the\n  defect-free result" in prompt
 
 
 def test_generate_clean_one_returns_record():

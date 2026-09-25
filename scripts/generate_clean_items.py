@@ -19,7 +19,7 @@ from vignette_gen.validate import ValidationError, validate_code
 from vignette_gen.writer import append_failure, item_exists, write_item
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-PROMPT_VERSION = "2026-09-16-clean-v1"
+PROMPT_VERSION = "2026-09-25-clean-v2"
 
 CLEAN_SCHEMA: Dict = {
     "type": "object",
@@ -38,6 +38,15 @@ as little as possible: keep the function name, parameter names, structure, and s
 change only what is needed so the function correctly does what it is supposed to do.
 
 Requirements for the returned code:
+- It must satisfy the CONTRACT below exactly, including at the boundaries the
+  STATED_AIM does not mention.
+- It must contain NO defect of any kind - not merely the described bug removed.
+  If the buggy function has a second flaw the BUG_NOTE does not mention, fix that
+  too. This function is the control condition in an experiment about whether
+  reviewers report bugs, so a reviewer who reports a genuine remaining flaw would
+  be correct, and the measurement would be wrong.
+- Where minimal change and a wholly defect-free result conflict, prefer the
+  defect-free result and change more.
 - Language: Python only.
 - Exactly one self-contained function (no helper functions, no classes). A leading
   module-level import statement is allowed if needed; no other top-level statements.
@@ -46,6 +55,10 @@ Requirements for the returned code:
 - Function body approximately 3-25 lines (signature through return).
 
 STATED_AIM: "{stated_aim_text}"
+
+CONTRACT (what correct behaviour is; the returned function must satisfy this
+exactly, and nothing in it may depart from it):
+{contract}
 
 BUGGY_CODE:
 ```python
@@ -63,8 +76,10 @@ Return JSON with exactly these fields:
 
 
 def build_clean_prompt(item: Dict, stated_aims: Dict) -> str:
+    aim = stated_aims[item["aim_id"]]
     return TEMPLATE.format(
-        stated_aim_text=stated_aims[item["aim_id"]]["text"],
+        stated_aim_text=aim["text"],
+        contract=aim["contract"],
         code=item["code"],
         rationale=item["rationale"],
     )
