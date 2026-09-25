@@ -201,36 +201,46 @@ asked on; omitted means `["buggy"]`.
 
 ### `config/stated_aims.json`
 
-Populated with `stated_aim` text used in the prompt's `AIM_SENTENCE` slot (design.md §2), plus two
-construction-constraint fields:
+Populated with `stated_aim` text used in the prompt's `AIM_SENTENCE` slot (design.md §2), the
+`contract` that defines correct behaviour, and a nested map of the flavours this aim supports.
 
-- `compatible_bug_flavors`: a flat list of `bug_flavor.json` ids this aim can plausibly support.
-- `severity_tiers_supported`: a list drawn from `severity_tier.json`'s ids, saying which severity
-  tiers this aim can plausibly support (e.g. a pure computation like "compute an average" can't
-  plausibly support `significant`).
+- `contract`: prose stating what the function must do, **including at the boundaries the
+  `text` leaves open** (empty input, malformed input, which fields are returned). Injected into
+  both the generation and clean-twin prompts, so neither generator invents boundary behaviour.
+  Required and non-empty; `load_config` rejects an aim without one.
+- `contract_status`: `draft` or `confirmed`. Human review gate, not read by the pipeline.
+- `flavors`: a map from `bug_flavor.json` id to `{"severity_tiers": [...]}`. Replaces the former
+  flat `compatible_bug_flavors` list and aim-level `severity_tiers_supported`, because
+  realisability is a property of the (aim × flavour) pair, not of the aim: `add_note` supports
+  only `known_trap`, and a mutable default in a three-line append function has exactly one
+  severity, so an aim-level tier list asserted a variant that could not be built.
+- `severity_tiers` is the tier(s) the pair is **expected** to produce, derived from the
+  behavioural rubric. It does not gate enumeration — severity is recorded, not crossed
+  (design.md §1) — and serves as a review check and a reinstatement path.
 
 ```json
-{"aims": []}
-```
-
-Each entry, once filled in:
-```json
-{
-  "id": "...",
-  "text": "...",
-  "severity_tiers_supported": ["trivial"],
-  "compatible_bug_flavors": ["..."]
-}
+{"aims": [
+  {"id": "compute_average",
+   "text": "Compute the average of a list of numbers.",
+   "contract": "Returns the arithmetic mean of the numbers. Returns None for an empty list.",
+   "contract_status": "confirmed",
+   "flavors": {"wrong_algorithm": {"severity_tiers": ["significant"]}}}
+]}
 ```
 
 ## Consistency rules
 
-- Every `compatible_bug_flavors` entry in `stated_aims.json` must match an `id` present in
-  `bug_flavor.json`.
-- Every `severity_tiers_supported` entry in `stated_aims.json` must match an `id` present in
-  `severity_tier.json`.
+- Every `flavors` key in `stated_aims.json` must match an `id` present in `bug_flavor.json`,
+  and the map must be non-empty.
+- Every `severity_tiers` entry must match an `id` present in `severity_tier.json`, and the
+  list must be non-empty.
+- Every aim must carry a non-empty `contract`.
+- Every `bug_flavor.json` id must be reachable from at least one aim's `flavors` map; a flavour
+  no aim lists can never be generated and would drop out of the bank silently.
 - Every judge referenced during elicitation must have a corresponding entry
-  in `judge_models.json`, with `provider` in {`anthropic`, `openai`}.
+  in `judge_models.json`, with `provider` in {`anthropic`, `openai`}. The generation scripts
+  additionally accept `openrouter`, which routes an OpenAI-compatible client at OpenRouter so
+  one key reaches every generator.
 - Every `questions.json` entry has `kind` in {`scaled`, `detect`, `free`} and `applies_to`
   values in {`buggy`, `clean`}.
 - `rival_model_pool.json`'s `pool` must contain at least 3 entries so that,

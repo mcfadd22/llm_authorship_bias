@@ -19,12 +19,32 @@ confirmatory/exploratory pre-registration split.
 
 ## Pipeline
 
-1. **Generate items** — `scripts/generate_items.py` (OpenRouter, `OPENROUTER_API_KEY`). Output:
-   `data/items/*.json`, tracked in git. Already run: 41 items, one per cell.
-2. **Generate clean twins** (for the confirmatory wave) — `scripts/generate_clean_items.py`
-   (Anthropic SDK, `ANTHROPIC_API_KEY`). One bug-free, minimal-pair counterpart per item, same
-   `item_id`, `code_version: "clean"`. Output: `data/items_clean/*.json`, tracked in git.
-   Already run: 41 items. See `docs/superpowers/specs/2026-09-16-clean-code-control-design.md`.
+1. **Generate items** — `scripts/generate_items.py` (OpenRouter, `OPENROUTER_API_KEY`). One
+   call per (aim × flavour × sample); `severity_tier` is recorded, not crossed (design.md §1).
+   `--items-dir` selects the bank and `--generator-tag` (defaulting to a slug of `--model`)
+   goes into `item_id`, so banks from different generators never collide — the analysis
+   clusters on `item_id`. The script refuses to write into a directory already holding another
+   generator's items. Output tracked in git.
+
+   ```bash
+   python scripts/generate_items.py --dry-run --limit 1        # prints the prompt, no calls
+   python scripts/generate_items.py --samples-per-cell 2 \
+       --model openai/gpt-5 --items-dir data/items_gpt5
+   ```
+
+2. **Generate clean twins** — `scripts/generate_clean_items.py`. One bug-free, minimal-pair
+   counterpart per item, same `item_id`, `code_version: "clean"`. Use `--provider`/`--model` to
+   **match the generator that produced the buggy bank**, so an item and its twin share a true
+   author: `q_authorship_belief` is asked on clean items too. `--provider openrouter` reaches
+   any model on the one key.
+
+   ```bash
+   python scripts/generate_clean_items.py --provider openrouter --model openai/gpt-5 \
+       --items-dir data/items_gpt5 --out-dir data/items_gpt5_clean
+   ```
+
+   See `docs/superpowers/specs/2026-09-16-clean-code-control-design.md` and
+   `docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md`.
 3. **Elicit judgments** — `scripts/run_elicitation.py` (Anthropic + OpenAI SDKs,
    `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`). Crosses every item with every `author_label` and
    every applicable question in `config/questions.json` (5 on buggy items: bug-detection,
@@ -42,7 +62,17 @@ confirmatory/exploratory pre-registration split.
    python scripts/run_elicitation.py --out-dir data/elicitation_wave2/buggy --repeats 2
    python scripts/run_elicitation.py --out-dir data/elicitation_wave2/clean --items-dir data/items_clean --repeats 2
    ```
-4. **Analysis** — not yet written (`analysis/`).
+4. **Analysis** — `analysis/run_confirmatory.py` implements design.md §6.1: label contrasts
+   against `none` with `other_model_A/B` pooled, wild cluster bootstrap clustered by `item_id`,
+   Holm-corrected within each (hypothesis × judge_family × judge_tuning) family.
+
+   ```bash
+   python analysis/run_confirmatory.py                                  # as locked
+   python analysis/run_confirmatory.py --verdicts analysis/item_verdicts-6.csv
+   python analysis/run_confirmatory.py --item-fe                        # robustness variant
+   python analysis/run_truth_diagnostic.py    # generator-model confound probe (exploratory)
+   python analysis/build_item_review.py       # HTML sheet for vetting a bank
+   ```
 
 ## Wave 1 results (complete, 2026-09-13)
 

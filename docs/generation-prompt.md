@@ -72,6 +72,19 @@ the added rigor.
 
 ## Sourcing pre-vetted examples
 
+**A source's label is not our label.** A source's own category establishes that a snippet
+instantiates a *pattern*. It does not establish that the adapted item has the *behavioural
+effect* our flavour definition requires, and the two must be recorded separately. Wave-1 item
+36 is the worked example: a real swallowed exception (Bandit's `try_except_pass` pattern) that
+raised `UnboundLocalError` rather than silently returning a wrong result. The pattern label was
+right; the flavour assignment was wrong. So "Bandit example for an empty exception block" is
+strong evidence of a swallowed-exception pattern, and is *not* on its own evidence that the
+function silently returns a wrong result. Every adapted item is checked against the flavour's
+behavioural definition and against its clean twin, and coded blind by a second coder who does
+not see the assigned flavour, the generator rationale, or the provenance record. See
+`docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md` §1, §6, §6a.
+
+
 Rather than relying solely on hand-invented examples, mine real,
 permissively-licensed code as seed material — both to ground the
 `bug_flavor.json` rubric `examples` fields and, more importantly, to
@@ -138,6 +151,14 @@ publication or public release of the item bank.
   the base function supplied instead of generated from scratch), or with
   a dedicated mutation-testing tool (e.g. `MutPy`) - affects tooling but
   not the rubric/reference grounding already established.
-- Exact per-item metadata schema for recording provenance (source corpus,
-  original problem ID, license) - needed before adapting any external
-  code into the item bank, deferred until item bank construction begins.
+- ~~Exact per-item metadata schema for recording provenance (source corpus,
+  original problem ID, license)~~ — **resolved.** Every item carries a
+  `provenance` object: `source`, `source_id`, `source_label`,
+  `source_license`, `mutation_operator`, `modifications`. `source_label`
+  holds the source's *own* category where it has one and stays `null`
+  where the source labels nothing — the source-label/study-label
+  distinction above, made machine-readable. Items written from a flavour
+  definition rather than adapted record `source: "generated"` with the
+  rest null. Attribution for any public release is assembled from these
+  records against the licence table above. Specified in
+  `docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md` §5.

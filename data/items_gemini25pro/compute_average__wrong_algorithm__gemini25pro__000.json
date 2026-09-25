@@ -1,0 +1,25 @@
+{
+  "item_id": "compute_average__wrong_algorithm__gemini25pro__000",
+  "cell_id": "compute_average__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "compute_average",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def calculate_statistic(data_points):\n    if not data_points:\n        return None\n    \n    total = sum(data_points)\n\n    return total",
+  "rationale": "The function is intended to compute the average of a list of numbers. It correctly handles the empty list case by returning None. However, for a non-empty list, it calculates the sum of the elements but omits the final step of dividing by the number of elements. This results in the function returning the sum instead of the average, which is a 'wrong algorithm' defect.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:22:37.700211+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

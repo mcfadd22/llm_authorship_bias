@@ -1,0 +1,27 @@
+{
+  "item_id": "compute_average__wrong_algorithm__gemini25pro__000",
+  "cell_id": "compute_average__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "compute_average",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "compute_average__wrong_algorithm__gemini25pro__000",
+  "code": "def calculate_statistic(data_points):\n    if not data_points:\n        return None\n    \n    total = sum(data_points)\n\n    return total / len(data_points)",
+  "fix_rationale": "The original function returned the sum of the numbers, not the average. The return statement was changed to divide the sum by the number of elements to correctly compute the average.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:22:52.689329+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

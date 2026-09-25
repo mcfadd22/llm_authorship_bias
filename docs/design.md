@@ -1,10 +1,15 @@
 # Authorship-Label Folk-Psychology Ascription: Prompt Template
 
-**Status:** first full elicitation wave collected 2026-09-13 (see `docs/status-2026-09-13.md`);
-treat as pilot because the analysis was not locked before collection (§6.1). Designed to slot
-into the existing `analyze_sign_wcb.py`-style pipeline (WCB clustering by
-item, Holm correction per family/tuning/question) with `author_label_c` and
-`purpose_valence_c` replacing `sign_c` as the primary manipulated factors.
+**Status:** first elicitation wave collected 2026-09-13 (`docs/status-2026-09-13.md`); item
+bank being rebuilt since 2026-09-25 (`docs/status-2026-09-25.md`), after a review passed 13 of
+41 items. §6.1's confirmatory block was committed 2026-08-24, 18 days before the first
+elicitation call, and is byte-identical since; what did not exist at collection time was the
+implementing code rather than the preregistration itself. The analysis now lives in
+`analysis/` (WCB clustered by `item_id`, Holm per family/tuning/question) with
+`author_label_c` as the manipulated factor. `purpose_valence_c`, named in an earlier draft of
+this line, was never a factor here: §1 holds the stated aim fixed and does not manipulate its
+valence. It was vestigial text carried over from the moral-foundations pipeline this design
+was modelled on.
 No Knobe-style scripted mental-state clause — folk-psych ascriptions
 (intent, blame, ability-vs-diligence) are elicited from bare code + label,
 not seeded.
@@ -16,9 +21,24 @@ not seeded.
 | Factor | Levels | Notes |
 |---|---|---|
 | `author_label` | `none` (baseline), `self`, `other_model_A`, `other_model_B`, `generic_ai`, `human_developer` | `self` is resolved per judge model at elicitation time (e.g. judge=llama → label="Llama"). `other_model_A/B` should be named commercial models distinct from the judge, rotated so no single rival model is confounded with a specific bug/item. |
-| `stated_aim` | fixed per item, not manipulated | Plain functional description of what the code is supposed to do (e.g. "validate a password-reset token before allowing a password change," "sort a list of files by extension"). Held constant across all other-factor cells for a given item. |
-| `severity_tier` | `trivial`, `significant` | Property of the planted bug itself (technical consequence), held constant across all label cells for a given item. |
+| `stated_aim` | fixed per item, not manipulated | Plain functional description of what the code is supposed to do (e.g. "validate a password-reset token before allowing a password change," "sort a list of files by extension"). Held constant across all other-factor cells for a given item. Each aim also carries a `contract` stating what correct behaviour is at the boundaries the aim leaves open; the planted bug must be the only departure from it. |
 | `bug_flavor` | `missing_edge_case`, `logic_error`, `security_vulnerability`, `silent_failure` (core); `copy_paste_residue`, `known_trap`, `wrong_algorithm` (exploratory, optional) | Not a primary test factor, but should be balanced across items so competence/carelessness/malice narratives have room to differ; worth an exploratory `bug_flavor:author_label` interaction. See §1a for definitions, examples, and predicted folk-psych profile per flavor. |
+
+**Recorded properties (not manipulated).**
+
+`severity_tier` (`trivial`, `significant`) is recorded on every item and assigned from a
+behavioural rubric — does the defect make the primary result wrong across the input range the
+contract requires the function to handle, or is it confined to a boundary — but it is **not a
+crossed factor**. Applying that rubric alongside the `bug_flavor` definitions makes severity a
+near-deterministic function of flavour: five of the seven flavours admit exactly one tier, so a
+severity main effect is not separately estimable from flavour. Cells are enumerated as
+(aim × flavour). Any severity contrast reported is observational and confounded with flavour,
+and must be labelled as such. See
+`docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md` §4, §4a.
+
+`generator_tag` records which model produced each item and appears in `item_id`, so banks from
+different generators never collide — the analysis clusters on `item_id`. `provenance` records
+source corpus, identifier and modifications where an item was adapted rather than generated.
 
 Everything else — the actual code, the actual bug, prompt scaffolding
 outside the label/purpose slots — is held byte-identical across cells
@@ -240,8 +260,12 @@ explicitly stated)
 - `bug_flavor:author_label` — whether the label effect concentrates in
   particular flavors (e.g. `silent_failure`, `security_vulnerability`,
   `wrong_algorithm`) rather than appearing uniformly.
-- `severity_tier` main effects and its interactions with `author_label`
-  — useful diagnostics, not part of the headline claim.
+- ~~`severity_tier` main effects and its interactions with `author_label`~~ —
+  **removed.** `severity_tier` is no longer a crossed factor (§1), and is
+  near-collinear with `bug_flavor`, so neither a main effect nor an interaction
+  is separately estimable. The wave-1 severity moderation reported in
+  `analysis/` was in part measuring flavour composition. Any severity contrast
+  is observational and must be reported as such.
 - All NLP-derived measures (lexicon rates, blind-classifier-coded
   categories) regressed on the same confirmatory contrasts — treated as
   exploratory in this first wave specifically because the coding
