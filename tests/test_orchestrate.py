@@ -7,7 +7,12 @@ from vignette_gen.orchestrate import RunOptions, generate_one, run
 
 CONFIG = {
     "stated_aims": [
-        {"id": "aim_a", "text": "Compute the average of a list of numbers."}
+        {
+            "id": "aim_a",
+            "text": "Compute the average of a list of numbers.",
+            "contract": "Returns the arithmetic mean. Returns None for an empty list.",
+            "flavors": {"missing_edge_case": {"severity_tiers": ["trivial"]}},
+        }
     ],
     "bug_flavor": {
         "missing_edge_case": {
@@ -22,12 +27,15 @@ CONFIG = {
     },
 }
 
+TAG = "claudesonnet45"
 ITEM = {
-    "item_id": "aim_a__missing_edge_case__trivial__000",
-    "cell_id": "aim_a__missing_edge_case__trivial",
+    "item_id": f"aim_a__missing_edge_case__{TAG}__000",
+    "cell_id": "aim_a__missing_edge_case",
     "sample_idx": 0,
     "aim_id": "aim_a",
     "bug_flavor": "missing_edge_case",
+    "generator_tag": TAG,
+    "expected_severity_tiers": ["trivial"],
     "severity_tier": "trivial",
 }
 
@@ -110,7 +118,7 @@ def test_run_writes_item_and_reports_counts(tmp_path):
     def fake_load_config():
         return CONFIG
 
-    def fake_build_items(config, samples_per_cell, limit):
+    def fake_build_items(config, samples_per_cell, limit, tag):
         return [ITEM]
 
     counts = run(client, options, load_config_fn=fake_load_config, build_items_fn=fake_build_items)
@@ -143,7 +151,7 @@ def test_run_skips_existing_item_without_calling_client(tmp_path):
         client,
         options,
         load_config_fn=lambda: CONFIG,
-        build_items_fn=lambda config, samples_per_cell, limit: [ITEM],
+        build_items_fn=lambda config, samples_per_cell, limit, tag: [ITEM],
     )
 
     assert counts == {"generated": 0, "skipped": 1, "failed": 0}
@@ -166,7 +174,7 @@ def test_run_records_failure_and_continues(tmp_path):
         client,
         options,
         load_config_fn=lambda: CONFIG,
-        build_items_fn=lambda config, samples_per_cell, limit: [ITEM],
+        build_items_fn=lambda config, samples_per_cell, limit, tag: [ITEM],
     )
 
     assert counts == {"generated": 0, "skipped": 0, "failed": 1}
@@ -206,7 +214,7 @@ def test_run_logs_api_error_as_failure_and_continues(tmp_path):
         client,
         options,
         load_config_fn=lambda: CONFIG,
-        build_items_fn=lambda config, samples_per_cell, limit: [ITEM],
+        build_items_fn=lambda config, samples_per_cell, limit, tag: [ITEM],
     )
 
     assert counts == {"generated": 0, "skipped": 0, "failed": 1}
@@ -232,9 +240,59 @@ def test_run_logs_generation_error_as_failure_and_continues(tmp_path):
         client,
         options,
         load_config_fn=lambda: CONFIG,
-        build_items_fn=lambda config, samples_per_cell, limit: [ITEM],
+        build_items_fn=lambda config, samples_per_cell, limit, tag: [ITEM],
     )
 
     assert counts == {"generated": 0, "skipped": 0, "failed": 1}
     failures = (tmp_path / "failures.jsonl").read_text().splitlines()
     assert len(failures) == 1
+
+
+def test_run_records_provenance_on_every_item(tmp_path):
+    """Corpus-backed generation will fill these in; definition-only items must
+    still record that they have no source rather than leaving it ambiguous."""
+    client = _ScriptedClient([json.dumps({"code": GOOD_CODE, "rationale": "r"})])
+    options = RunOptions(
+        model="anthropic/claude-sonnet-4.5",
+        generator_tag=TAG,
+        samples_per_cell=1,
+        limit=None,
+        dry_run=False,
+        overwrite=False,
+        max_retries=1,
+        items_dir=tmp_path / "items",
+        failures_path=tmp_path / "failures.jsonl",
+    )
+    run(client, options,
+        load_config_fn=lambda: CONFIG,
+        build_items_fn=lambda config, samples_per_cell, limit, tag: [ITEM])
+
+    record = json.loads((tmp_path / "items" / f"{ITEM['item_id']}.json").read_text())
+    assert record["provenance"]["source"] == "generated"
+    assert record["provenance"]["source_label"] is None
+    assert record["generator_tag"] == TAG
+    assert record["expected_severity_tiers"] == ["trivial"]
+
+
+def test_run_refuses_to_write_into_another_generators_bank(tmp_path):
+    import pytest
+
+    items_dir = tmp_path / "items"
+    items_dir.mkdir()
+    (items_dir / "other.json").write_text(json.dumps({"generator_tag": "gpt5"}))
+
+    options = RunOptions(
+        model="anthropic/claude-sonnet-4.5",
+        generator_tag=TAG,
+        samples_per_cell=1,
+        limit=None,
+        dry_run=False,
+        overwrite=False,
+        max_retries=1,
+        items_dir=items_dir,
+        failures_path=tmp_path / "failures.jsonl",
+    )
+    with pytest.raises(ValueError, match="gpt5"):
+        run(_ScriptedClient([]), options,
+            load_config_fn=lambda: CONFIG,
+            build_items_fn=lambda config, samples_per_cell, limit, tag: [ITEM])

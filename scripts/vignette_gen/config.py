@@ -19,16 +19,29 @@ def load_config(config_dir: Optional[Path] = None) -> Dict:
     stated_aims = _load_json(config_dir, "stated_aims.json")["aims"]
 
     for aim in stated_aims:
-        for flavor_id in aim["compatible_bug_flavors"]:
+        if not aim.get("contract", "").strip():
+            raise ValueError(f"aim '{aim['id']}' has no contract")
+
+        flavors = aim.get("flavors")
+        if not isinstance(flavors, dict) or not flavors:
+            raise ValueError(f"aim '{aim['id']}' has no flavors map")
+
+        for flavor_id, spec in flavors.items():
             if flavor_id not in bug_flavor:
                 raise ValueError(
                     f"aim '{aim['id']}' references unknown bug_flavor '{flavor_id}'"
                 )
-        for tier in aim["severity_tiers_supported"]:
-            if tier not in severity_tier:
+            tiers = spec.get("severity_tiers")
+            if not tiers:
                 raise ValueError(
-                    f"aim '{aim['id']}' references unknown severity_tier '{tier}'"
+                    f"aim '{aim['id']}' flavor '{flavor_id}' has no severity_tiers"
                 )
+            for tier in tiers:
+                if tier not in severity_tier:
+                    raise ValueError(
+                        f"aim '{aim['id']}' flavor '{flavor_id}' references "
+                        f"unknown severity_tier '{tier}'"
+                    )
 
     return {
         "bug_flavor": bug_flavor,

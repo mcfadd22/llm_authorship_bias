@@ -11,9 +11,9 @@ from .client import GenerationError
 from .config import load_config as _default_load_config
 from .prompt import build_prompt
 from .validate import ValidationError, validate_code
-from .writer import append_failure, item_exists, write_item
+from .writer import append_failure, check_bank_generator, item_exists, write_item
 
-PROMPT_VERSION = "2026-08-24-v1"
+PROMPT_VERSION = "2026-09-25-v2"
 
 
 @dataclass
@@ -26,11 +26,14 @@ class RunOptions:
     max_retries: int
     items_dir: Path
     failures_path: Path
+    generator_tag: str = ""
 
 
-def _default_build_items(config: Dict, samples_per_cell: int, limit: Optional[int]):
+def _default_build_items(
+    config: Dict, samples_per_cell: int, limit: Optional[int], generator_tag: str
+):
     cells = enumerate_cells(config["stated_aims"])
-    items = expand_items(cells, samples_per_cell)
+    items = expand_items(cells, samples_per_cell, generator_tag)
     if limit is not None:
         items = items[:limit]
     return items
@@ -59,13 +62,17 @@ def run(
     build_items_fn: Callable = _default_build_items,
 ) -> Dict:
     config = load_config_fn()
-    items = build_items_fn(config, options.samples_per_cell, options.limit)
+    items = build_items_fn(
+        config, options.samples_per_cell, options.limit, options.generator_tag
+    )
 
     if options.dry_run:
         for item in items:
             print(f"=== {item['item_id']} ===")
             print(build_prompt(item, config))
         return {"generated": 0, "skipped": 0, "failed": 0}
+
+    check_bank_generator(options.items_dir, options.generator_tag)
 
     generated = skipped = failed = 0
     for item in items:
@@ -86,6 +93,16 @@ def run(
             "generation_model": options.model,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "prompt_version": PROMPT_VERSION,
+            # Corpus-backed generation will populate the source fields; items
+            # written from a flavour definition record that they have no source.
+            "provenance": {
+                "source": "generated",
+                "source_id": None,
+                "source_label": None,
+                "source_license": None,
+                "mutation_operator": None,
+                "modifications": None,
+            },
         }
         write_item(options.items_dir, item["item_id"], record)
         generated += 1

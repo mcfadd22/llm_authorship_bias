@@ -64,3 +64,28 @@ def test_write_item_uses_atomic_rename_not_direct_write(tmp_path, monkeypatch):
 def test_write_item_rejects_path_traversal_in_item_id(tmp_path):
     with pytest.raises(ValueError, match="unsafe item_id"):
         write_item(tmp_path, "../../evil", {"code": "x = 1"})
+
+
+def test_check_bank_generator_allows_a_matching_or_empty_bank(tmp_path):
+    from vignette_gen.writer import check_bank_generator
+
+    check_bank_generator(tmp_path / "missing", "gpt5")  # no directory yet
+    write_item(tmp_path, "a__b__gpt5__000", {"generator_tag": "gpt5"})
+    check_bank_generator(tmp_path, "gpt5")
+
+
+def test_check_bank_generator_refuses_to_mix_two_generators(tmp_path):
+    """Two banks in one directory would make provenance depend on parsing
+    filenames, and analysis clusters on item_id."""
+    from vignette_gen.writer import check_bank_generator
+
+    write_item(tmp_path, "a__b__claudesonnet45__000", {"generator_tag": "claudesonnet45"})
+    with pytest.raises(ValueError, match="claudesonnet45"):
+        check_bank_generator(tmp_path, "gpt5")
+
+
+def test_check_bank_generator_ignores_unreadable_files(tmp_path):
+    from vignette_gen.writer import check_bank_generator
+
+    (tmp_path / "junk.json").write_text("{not json")
+    check_bank_generator(tmp_path, "gpt5")

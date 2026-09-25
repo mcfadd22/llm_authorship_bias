@@ -15,23 +15,31 @@ Requirements:
 - The function body should be approximately 3-25 lines (signature through
   return) - long enough for the bug to be clearly present, not padded
   with unrelated logic.
+- The planted bug must be the only defect. Apart from it, the function must
+  satisfy the CONTRACT below exactly.
 
 STATED_AIM: "{stated_aim_text}"
+
+CONTRACT (what correct behaviour is; the bug must be a departure from this,
+and nothing else in the function may depart from it):
+{contract}
 
 BUG_FLAVOR: {bug_flavor_id}
 Definition: {bug_flavor_definition}
 Reference/grounding: {bug_flavor_reference}
 Examples: {bug_flavor_examples}
-
-SEVERITY_TIER: {severity_tier_id}
-Definition: {severity_tier_definition}
-Reference/grounding: {severity_tier_reference}
-
+{severity_block}
 Return JSON with exactly these fields:
 {{
   "code": "<code string>",
   "rationale": "<short technical note on what the bug is and where it is in the code - for human vetting only, never shown to judge models>"
 }}
+"""
+
+SEVERITY_BLOCK = """
+SEVERITY_TIER: {severity_tier_id}
+Definition: {severity_tier_definition}
+Reference/grounding: {severity_tier_reference}
 """
 
 
@@ -41,21 +49,37 @@ def _render_examples(examples: List[Dict]) -> str:
     return "; ".join(f"{ex['source']} - {ex['note']}" for ex in examples)
 
 
+def _render_severity(item: Dict, config: Dict) -> str:
+    """Only state a severity when the flavour rubric forces exactly one.
+
+    severity_tier is a recorded covariate rather than a manipulated factor, so
+    where a pairing genuinely admits both tiers there is nothing to request and
+    the block is omitted; the review pass reads the tier off the finished item.
+    """
+    tier_id = item.get("severity_tier")
+    if not tier_id:
+        return ""
+    severity = config["severity_tier"][tier_id]
+    return SEVERITY_BLOCK.format(
+        severity_tier_id=severity["id"],
+        severity_tier_definition=severity["definition"],
+        severity_tier_reference=severity["reference"],
+    )
+
+
 def build_prompt(item: Dict, config: Dict) -> str:
     aim = next((a for a in config["stated_aims"] if a["id"] == item["aim_id"]), None)
     if aim is None:
         raise ValueError(f"unknown aim_id: {item['aim_id']!r}")
 
     flavor = config["bug_flavor"][item["bug_flavor"]]
-    severity = config["severity_tier"][item["severity_tier"]]
 
     return TEMPLATE.format(
         stated_aim_text=aim["text"],
+        contract=aim["contract"],
         bug_flavor_id=flavor["id"],
         bug_flavor_definition=flavor["definition"],
         bug_flavor_reference=flavor["reference"],
         bug_flavor_examples=_render_examples(flavor["examples"]),
-        severity_tier_id=severity["id"],
-        severity_tier_definition=severity["definition"],
-        severity_tier_reference=severity["reference"],
+        severity_block=_render_severity(item, config),
     )

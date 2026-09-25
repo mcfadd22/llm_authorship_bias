@@ -3,350 +3,381 @@
     {
       "id": "compute_average",
       "text": "Compute the average of a list of numbers.",
-      "severity_tiers_supported": [
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "wrong_algorithm"
-      ],
       "contract": "Returns the arithmetic mean of the numbers. Returns None for an empty list.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "wrong_algorithm": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "parse_csv_header",
       "text": "Parse a CSV header line into a list of non-blank column names.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "missing_edge_case",
-        "logic_error"
-      ],
       "contract": "Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "missing_edge_case": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        },
+        "logic_error": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "discount_eligibility",
       "text": "Determine whether a user is eligible for a discount based on their account balance exceeding a threshold.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "logic_error"
-      ],
       "contract": "Returns True only when balance is strictly greater than threshold. A balance equal to the threshold is not eligible.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "logic_error": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "sort_students_by_grade",
       "text": "Sort a list of student records by grade in descending order, and report the number of tied grades in a stats dict.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "logic_error"
-      ],
       "contract": "Returns the records ordered by grade descending, with a stats dict whose tied_grades counts the number of distinct grade values shared by two or more students. Empty input returns an empty list and a count of 0.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "logic_error": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "authenticate_user",
       "text": "Authenticate a user by checking a submitted password against a stored password hash before granting access.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "security_vulnerability"
-      ],
       "contract": "Returns True only when the salted hash of the submitted password equals the stored hash for that username. Returns False for an unknown username and for any mismatch.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "security_vulnerability": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "catalog_lookup",
       "text": "Look up a product by ID in a catalog dictionary that also stores each product's owning seller, and return its details only if the requesting user is the owning seller.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "security_vulnerability"
-      ],
       "contract": "Returns the product record only when requesting_user equals the product's seller. Returns None both for an unknown product ID and for a requester who is not the owning seller; the two cases are not distinguished.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "security_vulnerability": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "reset_token_validation",
       "text": "Validate a password-reset token before allowing a password change.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "logic_error",
-        "security_vulnerability",
-        "missing_edge_case"
-      ],
       "contract": "Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "logic_error": {
+          "severity_tiers": [
+            "significant"
+          ]
+        },
+        "security_vulnerability": {
+          "severity_tiers": [
+            "significant"
+          ]
+        },
+        "missing_edge_case": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "average_temperature",
       "text": "Read a list of temperature readings and return their average.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "silent_failure",
-        "missing_edge_case"
-      ],
       "contract": "Returns the arithmetic mean of the readings. Returns None for an empty list. Raises ValueError if a reading cannot be interpreted as a number; it does not silently omit readings.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "silent_failure": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        },
+        "missing_edge_case": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "add_note",
       "text": "Append a new note to a user's list of notes, creating a fresh list if none was provided.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "known_trap"
-      ],
       "contract": "Appends the note and returns the resulting list. When no list is provided a new empty list is created for that call: successive calls that omit the argument must not share state.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "known_trap": {
+          "severity_tiers": [
+            "trivial",
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "cart_total",
       "text": "Calculate the total price of items in a cart after applying a fixed shipping fee.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "copy_paste_residue"
-      ],
       "contract": "Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "copy_paste_residue": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "process_order_batch",
       "text": "Process a batch of pending orders and return the list of order IDs that were successfully charged.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "missing_edge_case"
-      ],
       "contract": "Returns the IDs of orders that pass their payment method's validation with a positive amount, in input order. Returns an empty list for None or an empty batch.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "missing_edge_case": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "validate_username_length",
       "text": "Check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "missing_edge_case"
-      ],
       "contract": "Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "missing_edge_case": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "shipping_cost",
       "text": "Calculate the shipping cost for a package based on its weight tier.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "logic_error",
-        "wrong_algorithm"
-      ],
       "contract": "Returns 0 for weight <= 0, 5.00 for weight <= 5, 8.50 for weight <= 10, 12.00 for weight <= 20, and 18.00 above 20.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "logic_error": {
+          "severity_tiers": [
+            "significant"
+          ]
+        },
+        "wrong_algorithm": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "is_freezing",
       "text": "Determine whether a temperature reading in Celsius represents freezing conditions (at or below 0 degrees).",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "logic_error"
-      ],
       "contract": "Returns True when the temperature is less than or equal to 0, False otherwise.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "logic_error": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "job_status_auth",
       "text": "Check that the caller is an authorized internal service before returning the health-check status of a background job.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "security_vulnerability"
-      ],
       "contract": "Returns the job status only when the service name is known and its API key matches. Returns an error object for an unknown service and for a key mismatch, without distinguishing them. Credentials are supplied to the function, not embedded in it.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "security_vulnerability": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "public_profile_lookup",
       "text": "Look up a user's public profile information by username.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "security_vulnerability"
-      ],
       "contract": "Returns only username, bio, and created_at for the exact requested username, or None if no such user exists. Email is private and is never returned. The supplied username cannot change which record or fields the lookup retrieves.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "security_vulnerability": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "parse_config",
       "text": "Parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn't present.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "silent_failure"
-      ],
       "contract": "Returns the parsed dictionary with retry_count set to 3 when absent. Raises ValueError on malformed JSON rather than returning a partial or default configuration.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "silent_failure": {
+          "severity_tiers": [
+            "trivial",
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "process_orders_revenue",
       "text": "Process a batch of orders and calculate the total revenue.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "silent_failure"
-      ],
       "contract": "Returns the sum of amount times quantity for well-formed orders and the IDs of orders it could not process in failed_orders. Failed orders contribute nothing to revenue.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "silent_failure": {
+          "severity_tiers": [
+            "trivial",
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "rename_files",
       "text": "Produce new filenames by appending a given suffix before each file extension.",
-      "severity_tiers_supported": [
-        "trivial",
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "copy_paste_residue"
-      ],
       "contract": "For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations.",
-      "contract_status": "confirmed"
+      "contract_status": "confirmed",
+      "flavors": {
+        "copy_paste_residue": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "celsius_to_fahrenheit",
       "text": "Convert a temperature from Celsius to Fahrenheit.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "known_trap",
-        "wrong_algorithm"
-      ],
       "contract": "Returns celsius * 9 / 5 + 32. The result depends only on the input: any caching must not change the value returned for a given input.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: the last clause makes known_trap unconstructible for this aim, matching your not_a_bug call on wave-1 item 6. Drop the known_trap pairing here if you agree."
+      "contract_status": "confirmed",
+      "flavors": {
+        "wrong_algorithm": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "price_total_match",
       "text": "Check whether the sum of a list of item prices matches an expected total.",
-      "severity_tiers_supported": [
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "known_trap"
-      ],
-      "contract": "Returns True when the sum of the prices equals the expected total to within a tolerance of 0.01, and False otherwise. Accumulated floating-point representation error must not cause a correct total to be reported as unequal.",
-      "contract_status": "draft",
-      "contract_note": "NEW: added to give known_trap a third aim whose trap (float equality after accumulation, e.g. 0.1 + 0.2 != 0.3) demonstrably produces a wrong result. Confirm the 0.01 tolerance."
+      "contract": "Prices and the expected total are finite, nonnegative dollar amounts specified to the nearest cent. Returns True when the sum of the prices, rounded to cents, equals the expected total rounded to cents; otherwise returns False. Floating-point representation error alone must not turn a matching total into a mismatch.",
+      "contract_status": "confirmed",
+      "flavors": {
+        "known_trap": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "parse_timestamps",
       "text": "Parse a list of timestamp strings into parsed values, reporting any that could not be parsed.",
-      "severity_tiers_supported": [
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "silent_failure"
-      ],
-      "contract": "Returns a dict with 'parsed' (the successfully parsed values in input order) and 'failed' (the input strings that could not be parsed). Every input string appears in exactly one of the two lists; an unparseable string is never omitted from both.",
-      "contract_status": "draft",
-      "contract_note": "NEW: added to bring silent_failure up from 3 aims. The failure surface is an unparseable string vanishing from both lists."
+      "contract": "Accepts timestamp strings in YYYY-MM-DD HH:MM:SS format. Returns a dict with 'parsed' (successfully parsed datetime values in input order) and 'failed' (unparseable input strings in input order). Each occurrence of an input string is represented exactly once, in one of those lists, even when input strings repeat.",
+      "contract_status": "confirmed",
+      "flavors": {
+        "silent_failure": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "apply_discount_codes",
       "text": "Apply a list of discount codes to an order total and report any codes that were not valid.",
-      "severity_tiers_supported": [
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "silent_failure"
-      ],
       "contract": "Returns a dict with 'total' (the order total after applying every valid code) and 'rejected' (codes not found in the discount table). An unrecognised code appears in 'rejected' and leaves the total unchanged.",
-      "contract_status": "draft",
-      "contract_note": "NEW: added to bring silent_failure up from 3 aims. The failure surface is an unrecognised code silently ignored rather than reported."
+      "contract_status": "confirmed",
+      "flavors": {
+        "silent_failure": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "build_invoice_summary",
       "text": "Build a summary dictionary for an invoice containing its total, currency, and issue date.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "copy_paste_residue"
-      ],
       "contract": "Returns a dict with exactly the keys 'total', 'currency' and 'issued_at', populated from the invoice. No other keys are present, and the total is stored under 'total' rather than under any other name.",
-      "contract_status": "draft",
-      "contract_note": "NEW: copy_paste_residue had 2 aims. Naming the exact key set gives the residue a specified effect (a value written under a neighbouring function's key, so callers cannot find it) rather than an inert debug print, which the section 6a rubric excludes."
+      "contract_status": "confirmed",
+      "flavors": {
+        "copy_paste_residue": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "format_address_block",
       "text": "Format a recipient's shipping address into a multi-line address block.",
-      "severity_tiers_supported": [
-        "trivial"
-      ],
-      "compatible_bug_flavors": [
-        "copy_paste_residue"
-      ],
       "contract": "Returns the recipient name, street, and city with postcode as newline-separated lines in that order. Only shipping-address fields appear; no billing fields are included.",
-      "contract_status": "draft",
-      "contract_note": "NEW: copy_paste_residue had 2 aims. Excluding billing fields gives a residue line a specified, visible effect."
+      "contract_status": "confirmed",
+      "flavors": {
+        "copy_paste_residue": {
+          "severity_tiers": [
+            "trivial"
+          ]
+        }
+      }
     },
     {
       "id": "make_multipliers",
       "text": "Build a list of functions, one per factor, where each returned function multiplies its argument by its own factor.",
-      "severity_tiers_supported": [
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "known_trap"
-      ],
       "contract": "The function at index i, called with x, returns x multiplied by factors[i]. Each returned function is bound to its own factor and is unaffected by later iterations of the construction loop.",
-      "contract_status": "draft",
-      "contract_note": "NEW: late-binding closure capture, documented Python behaviour that produces a demonstrably wrong result under a specified call sequence."
+      "contract_status": "confirmed",
+      "flavors": {
+        "known_trap": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     },
     {
       "id": "median_response_time",
       "text": "Return the median of a list of response times.",
-      "severity_tiers_supported": [
-        "significant"
-      ],
-      "compatible_bug_flavors": [
-        "wrong_algorithm"
-      ],
       "contract": "Returns the middle value of the sorted times, or the mean of the two middle values when the count is even. Returns None for an empty list. The median is not approximated by the mean.",
-      "contract_status": "draft",
-      "contract_note": "NEW: wrong_algorithm had 3 aims. Mean-for-median is the cleanest 'computes a different quantity' case, and the final sentence makes it a contract violation rather than a judgement call."
+      "contract_status": "confirmed",
+      "flavors": {
+        "wrong_algorithm": {
+          "severity_tiers": [
+            "significant"
+          ]
+        }
+      }
     }
   ]
 }

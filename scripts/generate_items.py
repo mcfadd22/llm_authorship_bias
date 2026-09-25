@@ -3,6 +3,7 @@ import argparse
 import os
 from pathlib import Path
 
+from vignette_gen.cells import generator_tag
 from vignette_gen.client import GenerationClient
 from vignette_gen.orchestrate import RunOptions, run
 
@@ -19,20 +20,26 @@ def parse_args(argv=None):
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--max-retries", type=int, default=3)
+    parser.add_argument("--items-dir", type=Path, default=DATA_DIR / "items",
+                        help="output bank; use a separate directory per generator model")
+    parser.add_argument("--generator-tag", default=None,
+                        help="short tag embedded in item_id; defaults to a slug of --model")
     return parser.parse_args(argv)
 
 
 def main(argv=None):
     args = parse_args(argv)
+    tag = args.generator_tag or generator_tag(args.model)
     options = RunOptions(
         model=args.model,
+        generator_tag=tag,
         samples_per_cell=args.samples_per_cell,
         limit=args.limit,
         dry_run=args.dry_run,
         overwrite=args.overwrite,
         max_retries=args.max_retries,
-        items_dir=DATA_DIR / "items",
-        failures_path=DATA_DIR / "failures.jsonl",
+        items_dir=args.items_dir,
+        failures_path=args.items_dir / "failures.jsonl",
     )
     client = None
     if not args.dry_run:
