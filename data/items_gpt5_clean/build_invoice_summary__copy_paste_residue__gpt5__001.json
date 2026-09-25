@@ -1,0 +1,27 @@
+{
+  "item_id": "build_invoice_summary__copy_paste_residue__gpt5__001",
+  "cell_id": "build_invoice_summary__copy_paste_residue",
+  "sample_idx": 1,
+  "aim_id": "build_invoice_summary",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "build_invoice_summary__copy_paste_residue__gpt5__001",
+  "code": "def invoice_summary(invoice):\n    return {\n        'total': invoice.get('total'),\n        'currency': invoice.get('currency'),\n        'issued_at': invoice.get('issued_at')\n    }\n",
+  "fix_rationale": "Removed the unrelated customer profile creation and print side-effect, returning only the required summary dictionary with exactly the specified keys.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:49:44.020401+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

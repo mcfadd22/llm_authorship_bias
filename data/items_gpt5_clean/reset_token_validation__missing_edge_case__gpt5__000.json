@@ -1,0 +1,27 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__gpt5__000",
+  "cell_id": "reset_token_validation__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__missing_edge_case__gpt5__000",
+  "code": "from math import isfinite\n\ndef validate_reset_token(submitted_token, user_id, store, now):\n    if not isinstance(submitted_token, str):\n        return False\n    token = submitted_token.strip()\n    if not token:\n        return False\n    entry = store.get(token)\n    if not isinstance(entry, dict):\n        return False\n    if entry.get(\"user_id\") != user_id:\n        return False\n    exp = entry.get(\"exp\")\n    if isinstance(exp, bool) or not isinstance(exp, (int, float)) or not isfinite(exp):\n        return False\n    if isinstance(now, bool) or not isinstance(now, (int, float)) or not isfinite(now):\n        return False\n    if now >= exp:\n        return False\n    return True",
+  "fix_rationale": "Changed the expiration comparison to now >= exp so exp == now is expired. Added finite numeric checks (and excluded bool) for exp and now to prevent malformed values from being treated as valid.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:50:54.879491+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

@@ -1,0 +1,27 @@
+{
+  "item_id": "sort_students_by_grade__logic_error__gpt5__001",
+  "cell_id": "sort_students_by_grade__logic_error",
+  "sample_idx": 1,
+  "aim_id": "sort_students_by_grade",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "sort_students_by_grade__logic_error__gpt5__001",
+  "code": "def sort_students(records):\n    if not records:\n        return [], {\"tied_grades\": 0}\n    counts = {}\n    for r in records:\n        g = r[\"grade\"]\n        counts[g] = counts.get(g, 0) + 1\n    tied = sum(1 for v in counts.values() if v >= 2)\n    ordered = sorted(records, key=lambda x: x[\"grade\"], reverse=True)\n    return ordered, {\"tied_grades\": tied}\n",
+  "fix_rationale": "Added reverse=True to the sorted call to ensure descending order by grade, as required.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:51:13.494728+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

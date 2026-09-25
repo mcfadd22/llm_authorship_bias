@@ -1,0 +1,28 @@
+{
+  "item_id": "add_note__known_trap__gemini25pro__001",
+  "cell_id": "add_note__known_trap",
+  "sample_idx": 1,
+  "aim_id": "add_note",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "add_note__known_trap__gemini25pro__001",
+  "code": "def add_note(note, notes_list=None):\n    if notes_list is None:\n        notes_list = []\n    notes_list.append(note)\n    return notes_list",
+  "fix_rationale": "The mutable default argument `[]` was replaced with `None`, and a check was added to create a new empty list if no list is provided. This ensures that separate function calls do not share the same list object.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:51:52.474094+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

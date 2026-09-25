@@ -1,0 +1,27 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__gpt5__000",
+  "cell_id": "process_order_batch__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_order_batch__missing_edge_case__gpt5__000",
+  "code": "def process_orders(orders):\n    if not orders:\n        return []\n    out = []\n    for order in orders:\n        amount = order.get('amount', 0)\n        payment = order.get('payment')\n        validator = getattr(payment, 'validate', None)\n        if amount > 0 and callable(validator) and validator(order):\n            oid = order.get('id')\n            if oid is not None:\n                out.append(oid)\n    return out",
+  "fix_rationale": "Handled None input by returning an empty list instead of calling len. Also ensured the payment validate attribute is callable and only appended non-None IDs to strictly return valid IDs.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:50:35.479622+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

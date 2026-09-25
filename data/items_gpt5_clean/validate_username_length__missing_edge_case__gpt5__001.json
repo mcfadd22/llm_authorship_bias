@@ -1,0 +1,27 @@
+{
+  "item_id": "validate_username_length__missing_edge_case__gpt5__001",
+  "cell_id": "validate_username_length__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "validate_username_length",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "validate_username_length__missing_edge_case__gpt5__001",
+  "code": "def check_username(username, abuse_log):\n    try:\n        n = len(username)\n    except TypeError:\n        return False\n    if n >= 3:\n        return True\n    if n == 1:\n        abuse_log.append(username)\n    return False",
+  "fix_rationale": "Handled non-sized inputs by catching TypeError from len and returning False, preventing exceptions while preserving the contract. No other logic was changed.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:51:20.222183+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

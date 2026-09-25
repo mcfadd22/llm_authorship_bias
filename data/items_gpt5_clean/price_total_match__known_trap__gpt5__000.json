@@ -1,0 +1,27 @@
+{
+  "item_id": "price_total_match__known_trap__gpt5__000",
+  "cell_id": "price_total_match__known_trap",
+  "sample_idx": 0,
+  "aim_id": "price_total_match",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "price_total_match__known_trap__gpt5__000",
+  "code": "import decimal\n\ndef check_total(prices, expected):\n    t = decimal.Decimal('0')\n    for v in prices:\n        t += decimal.Decimal(str(v))\n    a = t.quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    b = decimal.Decimal(str(expected)).quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    x = int((a * 100).to_integral_exact())\n    y = int((b * 100).to_integral_exact())\n    return x == y\n",
+  "fix_rationale": "Replaced the identity comparison 'is' with equality '==' so numerically equal cent values compare correctly. No other logic was changed.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:50:33.066062+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

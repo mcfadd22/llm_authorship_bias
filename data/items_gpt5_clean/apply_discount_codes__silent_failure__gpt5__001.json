@@ -1,0 +1,27 @@
+{
+  "item_id": "apply_discount_codes__silent_failure__gpt5__001",
+  "cell_id": "apply_discount_codes__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "apply_discount_codes__silent_failure__gpt5__001",
+  "code": "def apply_discounts(total, codes, discounts):\n    rejected = []\n    current = total\n    for code in codes:\n        try:\n            current -= discounts[code]\n        except KeyError:\n            rejected.append(code)\n    return {'total': current, 'rejected': rejected}\n",
+  "fix_rationale": "On KeyError, the code now appends the unrecognized code to the rejected list instead of silently passing, ensuring unknown codes are reported while leaving the total unchanged.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:49:16.694648+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

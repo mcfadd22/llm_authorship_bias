@@ -1,0 +1,27 @@
+{
+  "item_id": "discount_eligibility__logic_error__gpt5__000",
+  "cell_id": "discount_eligibility__logic_error",
+  "sample_idx": 0,
+  "aim_id": "discount_eligibility",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "discount_eligibility__logic_error__gpt5__000",
+  "code": "def discount_eligible(balance, threshold):\n    result = balance > threshold\n    return result",
+  "fix_rationale": "Changed the comparison operator from <= to > so it returns True only when balance strictly exceeds the threshold.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:49:44.397667+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

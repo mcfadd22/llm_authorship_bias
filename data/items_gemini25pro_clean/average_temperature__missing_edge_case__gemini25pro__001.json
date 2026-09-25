@@ -1,0 +1,27 @@
+{
+  "item_id": "average_temperature__missing_edge_case__gemini25pro__001",
+  "cell_id": "average_temperature__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "average_temperature__missing_edge_case__gemini25pro__001",
+  "code": "def compute_mean_temperature(readings):\n    if not readings:\n        return None\n\n    converted_readings = []\n    for item in readings:\n        converted_readings.append(float(item))\n    \n    return sum(converted_readings) / len(converted_readings)",
+  "fix_rationale": "The original function caused a ZeroDivisionError when given an empty list, but the contract requires it to return None. An initial check for an empty list was added to return None in that case, preventing the error.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:52:11.868616+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

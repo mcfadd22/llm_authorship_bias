@@ -79,7 +79,7 @@ def card(it, n):
     changed = "" if it["clean_code"] else '<span class="warn">no clean twin</span>'
     iid = html.escape(it["item_id"])
     return f'''
-<section class="card" data-flavor="{html.escape(it['bug_flavor'])}" data-tier="{html.escape(it['severity_tier'])}" id="i{n}">
+<section class="card" data-flavor="{html.escape(it['bug_flavor'])}" data-tier="{html.escape(it.get('severity_tier') or 'open')}" id="i{n}">
   <header>
     <span class="num">{n}</span>
     <code class="iid">{iid}</code>
@@ -127,7 +127,7 @@ def main(argv=None):
 
     n, body = 0, []
     for flavor in sorted(by_flavor):
-        group = sorted(by_flavor[flavor], key=lambda r: (r["severity_tier"], r["item_id"]))
+        group = sorted(by_flavor[flavor], key=lambda r: (r.get("severity_tier") or "~open", r["item_id"]))
         body.append(f'<h2 class="fh">{html.escape(flavor)} <span class="cnt">{len(group)} items</span></h2>')
         for it in group:
             n += 1
@@ -135,7 +135,7 @@ def main(argv=None):
 
     tiers = defaultdict(int)
     for r in rows:
-        tiers[r["severity_tier"]] += 1
+        tiers[r.get("severity_tier") or "severity open"] += 1
     summary = " · ".join(f"{k}: {v}" for k, v in sorted(tiers.items()))
     missing = sum(1 for r in rows if not r["clean_code"])
 

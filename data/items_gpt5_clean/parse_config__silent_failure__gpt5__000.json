@@ -1,0 +1,28 @@
+{
+  "item_id": "parse_config__silent_failure__gpt5__000",
+  "cell_id": "parse_config__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "parse_config",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "parse_config__silent_failure__gpt5__000",
+  "code": "import json\n\ndef parse_config(s):\n    try:\n        obj = json.loads(s)\n    except (json.JSONDecodeError, TypeError):\n        raise ValueError(\"Malformed JSON\")\n    if not isinstance(obj, dict):\n        raise ValueError(\"Invalid configuration\")\n    if 'retry_count' not in obj:\n        obj['retry_count'] = 3\n    return obj",
+  "fix_rationale": "Raise ValueError on JSON parsing failures instead of defaulting to an empty dict, and also treat non-string inputs (TypeError) as malformed JSON. All other logic is preserved, including adding a default retry_count when absent.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:50:07.836689+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

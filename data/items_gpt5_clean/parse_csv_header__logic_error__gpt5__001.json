@@ -1,0 +1,27 @@
+{
+  "item_id": "parse_csv_header__logic_error__gpt5__001",
+  "cell_id": "parse_csv_header__logic_error",
+  "sample_idx": 1,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "parse_csv_header__logic_error__gpt5__001",
+  "code": "def parse_header(line):\n    parts = line.split(',')\n    trimmed = [p.strip() for p in parts]\n    result = [p for p in trimmed if p != '']\n    return result",
+  "fix_rationale": "Changed the filter condition to keep non-empty fields after stripping, so empty fields are omitted and blank lines yield an empty list.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:50:08.538694+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

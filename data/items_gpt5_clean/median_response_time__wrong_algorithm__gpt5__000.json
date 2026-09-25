@@ -1,0 +1,27 @@
+{
+  "item_id": "median_response_time__wrong_algorithm__gpt5__000",
+  "cell_id": "median_response_time__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "median_response_time",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "median_response_time__wrong_algorithm__gpt5__000",
+  "code": "def median_time(values):\n    if not values:\n        return None\n    s = sorted(values)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 1:\n        return s[mid]\n    return (s[mid - 1] + s[mid]) / 2",
+  "fix_rationale": "Compute the median by sorting and selecting the middle element(s); for even counts, return the mean of the two middle values instead of the overall arithmetic mean.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:49:59.196801+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

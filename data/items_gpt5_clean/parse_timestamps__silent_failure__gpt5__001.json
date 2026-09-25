@@ -1,0 +1,27 @@
+{
+  "item_id": "parse_timestamps__silent_failure__gpt5__001",
+  "cell_id": "parse_timestamps__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "parse_timestamps",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "parse_timestamps__silent_failure__gpt5__001",
+  "code": "from datetime import datetime\n\ndef parse_timestamps(values):\n    parsed = []\n    failed = []\n    for x in values:\n        try:\n            parsed.append(datetime.strptime(x, \"%Y-%m-%d %H:%M:%S\"))\n        except (ValueError, TypeError):\n            failed.append(x)\n    return {\"parsed\": parsed, \"failed\": failed}\n",
+  "fix_rationale": "Failures are now recorded by appending the original input to 'failed'; also catch TypeError to avoid crashing on non-string inputs.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:50:25.506735+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

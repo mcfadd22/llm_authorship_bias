@@ -1,0 +1,27 @@
+{
+  "item_id": "average_temperature__silent_failure__gpt5__000",
+  "cell_id": "average_temperature__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "average_temperature",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "average_temperature__silent_failure__gpt5__000",
+  "code": "def average_readings(readings):\n    total = 0.0\n    count = 0\n    for x in readings:\n        try:\n            v = float(x)\n        except (TypeError, ValueError) as e:\n            raise ValueError from e\n        total += v\n        count += 1\n    if count == 0:\n        return None\n    return total / count",
+  "fix_rationale": "Return None for empty input by checking count before division, instead of catching ZeroDivisionError and returning 0.0.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:49:24.183794+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

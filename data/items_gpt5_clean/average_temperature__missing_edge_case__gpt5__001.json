@@ -1,0 +1,27 @@
+{
+  "item_id": "average_temperature__missing_edge_case__gpt5__001",
+  "cell_id": "average_temperature__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "average_temperature__missing_edge_case__gpt5__001",
+  "code": "def average_readings(readings):\n    if len(readings) == 0:\n        return None\n    total = 0.0\n    for item in readings:\n        try:\n            value = float(item)\n        except (TypeError, ValueError):\n            raise ValueError(\"Invalid reading\")\n        total += value\n    return total / len(readings)\n",
+  "fix_rationale": "Added an explicit empty-list check to return None, preventing division by zero; other behavior unchanged.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:49:24.940372+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

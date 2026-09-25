@@ -1,0 +1,28 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gpt5__000",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_orders_revenue__silent_failure__gpt5__000",
+  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for order in orders:\n        oid = order.get('id') if isinstance(order, dict) else None\n        try:\n            subtotal = float(order['amount']) * int(order['quantity'])\n        except (KeyError, TypeError, ValueError):\n            failed.append(oid)\n            continue\n        total += subtotal\n    return {\"revenue\": total, \"failed_orders\": failed}",
+  "fix_rationale": "ValueError is now handled by recording the order ID in failed_orders. ID retrieval is made safe to avoid crashing when 'id' is missing or the order is not a dict.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:50:41.921478+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

@@ -1,0 +1,27 @@
+{
+  "item_id": "reset_token_validation__logic_error__gpt5__001",
+  "cell_id": "reset_token_validation__logic_error",
+  "sample_idx": 1,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__logic_error__gpt5__001",
+  "code": "import time\n\ndef check_token(token, user_id, data, now=None):\n    if not token or not isinstance(token, str):\n        return False\n    if data is None or not hasattr(data, 'get'):\n        return False\n    entry = data.get(token)\n    if not isinstance(entry, dict) or 'user_id' not in entry or 'expires_at' not in entry:\n        return False\n    if entry['user_id'] != user_id:\n        return False\n    if now is None or not isinstance(now, (int, float)):\n        now = time.time()\n    expires_at = entry['expires_at']\n    if not isinstance(expires_at, (int, float)):\n        try:\n            expires_at = float(expires_at)\n        except (TypeError, ValueError):\n            return False\n    if now < expires_at:\n        return True\n    return False",
+  "fix_rationale": "Corrected the expiration logic to return True only when now is before expires_at, and added minimal type/structure checks to avoid errors on malformed data, returning False as required.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:51:02.048906+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}
