@@ -58,10 +58,23 @@ confirmatory/exploratory pre-registration split.
    python scripts/run_elicitation.py --dry-run
    python scripts/run_elicitation.py --judge claude-sonnet-5 --limit 20   # pilot
    python scripts/run_elicitation.py                                       # full run, all judges
-   # confirmatory wave (after locking analysis): buggy + clean, 2 repeats
-   python scripts/run_elicitation.py --out-dir data/elicitation_wave2/buggy --repeats 2
-   python scripts/run_elicitation.py --out-dir data/elicitation_wave2/clean --items-dir data/items_clean --repeats 2
    ```
+
+   **Wave 2** runs two banks, each buggy and clean, two repeats. Four legs, each
+   resumable and each writing its own directory. `--items-dir` is required: the
+   default is the wave-1 bank.
+
+   ```bash
+   B=data/elicitation_wave2
+   python scripts/run_elicitation.py --repeats 2 --items-dir data/items_gpt5 --out-dir $B/gpt5_buggy
+   python scripts/run_elicitation.py --repeats 2 --items-dir data/items_gpt5_clean --out-dir $B/gpt5_clean
+   python scripts/run_elicitation.py --repeats 2 --items-dir data/items_gemini25pro --out-dir $B/gemini_buggy
+   python scripts/run_elicitation.py --repeats 2 --items-dir data/items_gemini25pro_clean --out-dir $B/gemini_clean
+   ```
+
+   Estimated cost at two repeats, from wave-1 token actuals: $212 + $85 per bank,
+   **~$593 total**. Run `--dry-run` on each leg first to confirm against current
+   prices. Needs `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`.
 4. **Analysis** — `analysis/run_confirmatory.py` implements design.md §6.1: label contrasts
    against `none` with `other_model_A/B` pooled, wild cluster bootstrap clustered by `item_id`,
    Holm-corrected within each (hypothesis × judge_family × judge_tuning) family.
