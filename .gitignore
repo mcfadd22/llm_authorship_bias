@@ -36,3 +36,5 @@ data/**/logs/
 # Analysis outputs (regenerate with analysis/*.py)
 analysis/*.csv
 analysis/item_review.html
+# ...but hand-entered item verdicts are input data, not regenerable output.
+!analysis/item_verdicts*.csv
