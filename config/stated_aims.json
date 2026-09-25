@@ -269,6 +269,84 @@
       "contract": "Returns True when the sum of the prices equals the expected total to within a tolerance of 0.01, and False otherwise. Accumulated floating-point representation error must not cause a correct total to be reported as unequal.",
       "contract_status": "draft",
       "contract_note": "NEW: added to give known_trap a third aim whose trap (float equality after accumulation, e.g. 0.1 + 0.2 != 0.3) demonstrably produces a wrong result. Confirm the 0.01 tolerance."
+    },
+    {
+      "id": "parse_timestamps",
+      "text": "Parse a list of timestamp strings into parsed values, reporting any that could not be parsed.",
+      "severity_tiers_supported": [
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "silent_failure"
+      ],
+      "contract": "Returns a dict with 'parsed' (the successfully parsed values in input order) and 'failed' (the input strings that could not be parsed). Every input string appears in exactly one of the two lists; an unparseable string is never omitted from both.",
+      "contract_status": "draft",
+      "contract_note": "NEW: added to bring silent_failure up from 3 aims. The failure surface is an unparseable string vanishing from both lists."
+    },
+    {
+      "id": "apply_discount_codes",
+      "text": "Apply a list of discount codes to an order total and report any codes that were not valid.",
+      "severity_tiers_supported": [
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "silent_failure"
+      ],
+      "contract": "Returns a dict with 'total' (the order total after applying every valid code) and 'rejected' (codes not found in the discount table). An unrecognised code appears in 'rejected' and leaves the total unchanged.",
+      "contract_status": "draft",
+      "contract_note": "NEW: added to bring silent_failure up from 3 aims. The failure surface is an unrecognised code silently ignored rather than reported."
+    },
+    {
+      "id": "build_invoice_summary",
+      "text": "Build a summary dictionary for an invoice containing its total, currency, and issue date.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "copy_paste_residue"
+      ],
+      "contract": "Returns a dict with exactly the keys 'total', 'currency' and 'issued_at', populated from the invoice. No other keys are present, and the total is stored under 'total' rather than under any other name.",
+      "contract_status": "draft",
+      "contract_note": "NEW: copy_paste_residue had 2 aims. Naming the exact key set gives the residue a specified effect (a value written under a neighbouring function's key, so callers cannot find it) rather than an inert debug print, which the section 6a rubric excludes."
+    },
+    {
+      "id": "format_address_block",
+      "text": "Format a recipient's shipping address into a multi-line address block.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "copy_paste_residue"
+      ],
+      "contract": "Returns the recipient name, street, and city with postcode as newline-separated lines in that order. Only shipping-address fields appear; no billing fields are included.",
+      "contract_status": "draft",
+      "contract_note": "NEW: copy_paste_residue had 2 aims. Excluding billing fields gives a residue line a specified, visible effect."
+    },
+    {
+      "id": "make_multipliers",
+      "text": "Build a list of functions, one per factor, where each returned function multiplies its argument by its own factor.",
+      "severity_tiers_supported": [
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "known_trap"
+      ],
+      "contract": "The function at index i, called with x, returns x multiplied by factors[i]. Each returned function is bound to its own factor and is unaffected by later iterations of the construction loop.",
+      "contract_status": "draft",
+      "contract_note": "NEW: late-binding closure capture, documented Python behaviour that produces a demonstrably wrong result under a specified call sequence."
+    },
+    {
+      "id": "median_response_time",
+      "text": "Return the median of a list of response times.",
+      "severity_tiers_supported": [
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "wrong_algorithm"
+      ],
+      "contract": "Returns the middle value of the sorted times, or the mean of the two middle values when the count is even. Returns None for an empty list. The median is not approximated by the mean.",
+      "contract_status": "draft",
+      "contract_note": "NEW: wrong_algorithm had 3 aims. Mean-for-median is the cleanest 'computes a different quantity' case, and the final sentence makes it a contract violation rather than a judgement call."
     }
   ]
 }

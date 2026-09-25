@@ -86,4 +86,28 @@ def test_real_config_loads_without_error():
     config = load_config()
     assert len(config["bug_flavor"]) == 7
     assert len(config["severity_tier"]) == 2
-    assert len(config["stated_aims"]) == 20
+    assert config["stated_aims"]
+
+
+def test_real_config_aim_ids_are_unique():
+    ids = [aim["id"] for aim in load_config()["stated_aims"]]
+    assert len(ids) == len(set(ids))
+
+
+def test_real_config_every_aim_has_a_contract():
+    """The contract is what makes 'correct' decidable; an aim without one
+    leaves the generator to invent boundary behaviour per item."""
+    missing = [
+        aim["id"] for aim in load_config()["stated_aims"]
+        if not aim.get("contract", "").strip()
+    ]
+    assert missing == []
+
+
+def test_real_config_every_bug_flavor_is_reachable():
+    """A flavour no aim lists can never be generated, so it would silently
+    drop out of the item bank rather than fail loudly."""
+    config = load_config()
+    used = {f for aim in config["stated_aims"] for f in aim["compatible_bug_flavors"]}
+    orphans = sorted(set(config["bug_flavor"]) - used)
+    assert orphans == []
