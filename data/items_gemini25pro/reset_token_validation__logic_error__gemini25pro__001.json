@@ -1,0 +1,25 @@
+{
+  "item_id": "reset_token_validation__logic_error__gemini25pro__001",
+  "cell_id": "reset_token_validation__logic_error",
+  "sample_idx": 1,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "import time\n\ndef validate_token(submitted_token, user_id, token_store, now):\n    record = token_store.get(user_id)\n\n    if not record or not submitted_token:\n        return False\n\n    stored_token_val = record.get('token')\n    expiration_time = record.get('expires')\n\n    if stored_token_val is None or expiration_time is None:\n        return False\n\n    token_matches = (submitted_token == stored_token_val)\n    is_unexpired = (now <= expiration_time)\n\n    if token_matches or is_unexpired:\n        return True\n\n    return False",
+  "rationale": "The bug is a logic error in the final conditional statement. It uses a logical OR (`or`) instead of the required logical AND (`and`). The condition `if token_matches or is_unexpired:` allows the function to return `True` in two incorrect scenarios: 1) if the token matches but is expired, or 2) if the token does not match but the user's legitimate token has not yet expired. This significantly undermines the security goal of the function.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:41:30.087483+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

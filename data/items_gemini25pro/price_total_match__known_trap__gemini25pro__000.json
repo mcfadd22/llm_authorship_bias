@@ -1,0 +1,25 @@
+{
+  "item_id": "price_total_match__known_trap__gemini25pro__000",
+  "cell_id": "price_total_match__known_trap",
+  "sample_idx": 0,
+  "aim_id": "price_total_match",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def check_total(item_prices, expected_value):\n    computed_sum = sum(item_prices)\n    return computed_sum == expected_value",
+  "rationale": "The function directly compares two floating-point numbers for equality using `==`. Due to inherent representation errors in binary floating-point arithmetic (e.g., `0.1 + 0.2` results in `0.30000000000000004`), this comparison will incorrectly return `False` for many inputs that should be considered equal. The contract requires rounding to avoid this, but the buggy implementation omits it, falling into a well-known floating-point comparison trap.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:44:19.677832+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

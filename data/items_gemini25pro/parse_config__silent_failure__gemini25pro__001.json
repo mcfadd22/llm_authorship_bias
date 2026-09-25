@@ -1,0 +1,26 @@
+{
+  "item_id": "parse_config__silent_failure__gemini25pro__001",
+  "cell_id": "parse_config__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "parse_config",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "code": "import json\n\ndef process_configuration(json_text):\n    config_data = {}\n    try:\n        config_data = json.loads(json_text)\n    except Exception:\n        pass\n\n    if \"retry_count\" not in config_data:\n        config_data[\"retry_count\"] = 3\n\n    return config_data\n",
+  "rationale": "The bug is the `except Exception: pass` block. It catches any exception raised during the `json.loads` operation (e.g., a `JSONDecodeError` for malformed input) and silently discards it. Instead of raising a `ValueError` as the contract requires, the function continues execution with an empty `config_data` dictionary. This results in the function returning a default configuration (`{'retry_count': 3}`) for invalid input, completely hiding the parsing failure from the caller.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:43:43.079480+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

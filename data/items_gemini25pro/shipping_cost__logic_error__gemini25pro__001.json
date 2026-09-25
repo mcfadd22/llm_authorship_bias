@@ -1,0 +1,25 @@
+{
+  "item_id": "shipping_cost__logic_error__gemini25pro__001",
+  "cell_id": "shipping_cost__logic_error",
+  "sample_idx": 1,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def calculate_rate(value):\n    if value <= 0:\n        return 0.0\n    elif value >= 5:\n        return 5.00\n    elif value <= 10:\n        return 8.50\n    elif value <= 20:\n        return 12.00\n    else:\n        return 18.00",
+  "rationale": "The bug is a swapped relational operator in the first `elif` condition. The check `value >= 5` should be `value <= 5`. As a result, items with values in the (0, 5) range fall through to the next condition and are incorrectly assigned a rate of 8.50 instead of 5.00. Conversely, all items with values greater than 5 are incorrectly captured by the buggy `elif value >= 5` condition and are assigned a rate of 5.00, when they should be assigned a higher rate based on their value.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:42:59.542371+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

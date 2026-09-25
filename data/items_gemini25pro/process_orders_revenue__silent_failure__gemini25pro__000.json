@@ -1,0 +1,26 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gemini25pro__000",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "code": "import json\n\ndef process_batch(order_data):\n    total_revenue = 0.0\n    unprocessed_ids = []\n\n    for entry in order_data:\n        try:\n            revenue = entry['amount'] * entry['quantity']\n            total_revenue += revenue\n        except (KeyError, TypeError):\n            pass\n\n    return total_revenue, unprocessed_ids",
+  "rationale": "The function is designed to process a list of orders, calculating total revenue and identifying failed orders. The bug is in the 'except' block. When a malformed order causes a KeyError (missing key) or TypeError (invalid data type for multiplication), the exception is caught, but the 'except' block simply contains 'pass'. This silently discards the error. Consequently, the malformed order does not contribute to revenue (correct), but its ID is never added to the 'unprocessed_ids' list (incorrect). The function thus fails to report the orders it could not process, returning an empty list for 'unprocessed_ids' even when failures have occurred.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:43:42.843472+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

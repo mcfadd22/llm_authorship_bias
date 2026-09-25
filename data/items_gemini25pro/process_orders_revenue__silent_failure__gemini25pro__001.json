@@ -1,0 +1,26 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gemini25pro__001",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "code": "def process_batch(order_list):\n    total_revenue = 0.0\n    failed_orders = []\n    for item in order_list:\n        try:\n            total_revenue += item['amount'] * item['quantity']\n        except (KeyError, TypeError):\n            pass\n    return (total_revenue, failed_orders)",
+  "rationale": "The bug is a 'silent failure' implemented using a `try...except pass` pattern. The function is supposed to identify orders it cannot process and return their IDs in the `failed_orders` list. The `try` block correctly attempts the revenue calculation. If an order is malformed (e.g., missing keys, non-numeric data), a `KeyError` or `TypeError` is caught by the `except` block. However, the `except` block simply executes `pass`, swallowing the error. It fails to add the problematic order's ID to the `failed_orders` list, thus silently ignoring the failure and incorrectly reporting to the caller that all orders were either processed successfully or were not present, as the returned `failed_orders` list is always empty.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:46:00.881292+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

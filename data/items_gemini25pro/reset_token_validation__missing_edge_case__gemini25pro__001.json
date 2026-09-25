@@ -1,0 +1,25 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__gemini25pro__001",
+  "cell_id": "reset_token_validation__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "import time\n\ndef validate_token(user_id, submitted_token, stored_token_record):\n    if stored_token_record['user_id'] != user_id:\n        return False\n\n    if stored_token_record['token'] != submitted_token:\n        return False\n\n    if time.time() > stored_token_record['expires_at']:\n        return False\n\n    return True",
+  "rationale": "The bug is a missing check to handle a `None` value for the `stored_token_record` parameter. If `stored_token_record` is `None` (a degenerate input representing a token not found for a user), the first line of the function, `stored_token_record['user_id']`, will raise a `TypeError` and crash. A correct implementation would first check if `stored_token_record` is `None` and return `False`. This is a missing edge case because the main validation logic is correct, but it fails to handle a specific, plausible boundary input.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:41:35.380385+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

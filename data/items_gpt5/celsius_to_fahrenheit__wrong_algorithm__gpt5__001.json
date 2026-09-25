@@ -1,0 +1,25 @@
+{
+  "item_id": "celsius_to_fahrenheit__wrong_algorithm__gpt5__001",
+  "cell_id": "celsius_to_fahrenheit__wrong_algorithm",
+  "sample_idx": 1,
+  "aim_id": "celsius_to_fahrenheit",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def convert_celsius_to_fahrenheit(x):\n    y = x - 32\n    z = y * 5 / 9\n    return z",
+  "rationale": "Instead of converting Celsius to Fahrenheit (x * 9 / 5 + 32), the function applies the inverse Fahrenheit-to-Celsius formula ((x - 32) * 5 / 9). This is a clean, consistent but wrong algorithm relative to the stated aim.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:41:36.230468+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

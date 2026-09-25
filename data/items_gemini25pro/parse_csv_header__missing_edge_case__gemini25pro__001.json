@@ -1,0 +1,25 @@
+{
+  "item_id": "parse_csv_header__missing_edge_case__gemini25pro__001",
+  "cell_id": "parse_csv_header__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def get_column_names(line_text):\n    if ',' not in line_text:\n        return [line_text.strip()]\n\n    processed_fields = []\n    items = line_text.split(',')\n    for item in items:\n        processed_item = item.strip()\n        if processed_item:\n            processed_fields.append(processed_item)\n    return processed_fields",
+  "rationale": "The function has a special code path to handle an input line that contains no commas, treating it as a single column. This path, `if ',' not in line_text:`, correctly strips whitespace from the line but fails to check if the resulting string is empty. As a result, for an input that is blank or contains only whitespace (e.g., `\"\"` or `\"   \"`), the function incorrectly returns `['']` instead of the expected empty list `[]`. The main logic path that handles comma-separated values correctly filters out empty fields after splitting and stripping.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:40:43.111236+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

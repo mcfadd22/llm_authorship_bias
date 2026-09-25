@@ -1,0 +1,25 @@
+{
+  "item_id": "sort_students_by_grade__logic_error__gemini25pro__001",
+  "cell_id": "sort_students_by_grade__logic_error",
+  "sample_idx": 1,
+  "aim_id": "sort_students_by_grade",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "import collections\n\ndef process_data(data):\n    output_list = sorted(data, key=lambda item: item['grade'])\n\n    freq_map = collections.Counter(item['grade'] for item in data)\n\n    t_count = 0\n    for v in freq_map.values():\n        if v > 1:\n            t_count += 1\n\n    result_stats = {'tied_grades': t_count}\n    return output_list, result_stats",
+  "rationale": "The function sorts the records in ascending order of grade, which is the default for `sorted()`. The stated aim requires descending order, so the `reverse=True` argument is missing from the `sorted()` call. This is a logic error that produces the wrong primary output (the sorted list) for all non-trivial inputs.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:40:47.381098+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

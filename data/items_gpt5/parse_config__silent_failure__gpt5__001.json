@@ -1,0 +1,26 @@
+{
+  "item_id": "parse_config__silent_failure__gpt5__001",
+  "cell_id": "parse_config__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "parse_config",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "code": "import json\n\ndef parse_config(text):\n    try:\n        data = json.loads(text)\n    except Exception:\n        data = {}\n    if not isinstance(data, dict):\n        raise ValueError(\"Invalid configuration\")\n    if 'retry_count' not in data:\n        data['retry_count'] = 3\n    return data\n",
+  "rationale": "The except block swallows any JSON parsing error and continues with an empty dict, returning a default configuration instead of raising ValueError as required. This is a silent failure in error handling.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:41:05.568745+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

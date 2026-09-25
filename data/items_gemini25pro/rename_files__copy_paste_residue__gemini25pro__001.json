@@ -1,0 +1,25 @@
+{
+  "item_id": "rename_files__copy_paste_residue__gemini25pro__001",
+  "cell_id": "rename_files__copy_paste_residue",
+  "sample_idx": 1,
+  "aim_id": "rename_files",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "import os\n\ndef create_tagged_filenames(source_paths, tag):\n    processed_list = []\n    path_mapping = {}\n\n    for path_item in source_paths:\n        base, extension = os.path.splitext(path_item)\n        new_path = f\"{base}{tag}{extension}\"\n        processed_list.append(new_path)\n        path_mapping[path_item] = new_path\n\n    return processed_list",
+  "rationale": "The bug is the creation and population of the `path_mapping` dictionary. This dictionary is built during the loop but is never used, returned, or referenced again. This suggests the code was adapted from a similar function that had a different purpose (e.g., returning a map of old to new paths), and the developer forgot to remove the now-superfluous logic. The function's primary return value remains correct.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:44:04.200938+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

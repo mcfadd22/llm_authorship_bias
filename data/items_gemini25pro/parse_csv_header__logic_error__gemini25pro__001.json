@@ -1,0 +1,25 @@
+{
+  "item_id": "parse_csv_header__logic_error__gemini25pro__001",
+  "cell_id": "parse_csv_header__logic_error",
+  "sample_idx": 1,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def get_column_names(header_line):\n    results = []\n    fields = header_line.split(',')\n    for f in fields:\n        processed_field = f.strip()\n        if not processed_field:\n            results.append(processed_field)\n    return results",
+  "rationale": "The bug is a logic error in the conditional statement that decides whether to include a parsed field in the output list. The condition `if not processed_field:` is the inverse of the correct logic (`if processed_field:`). As a result, the function collects only empty or all-whitespace fields and discards all fields with actual names, which is the opposite of the intended behavior.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:40:37.455129+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

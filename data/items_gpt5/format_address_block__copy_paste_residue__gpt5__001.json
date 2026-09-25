@@ -1,0 +1,25 @@
+{
+  "item_id": "format_address_block__copy_paste_residue__gpt5__001",
+  "cell_id": "format_address_block__copy_paste_residue",
+  "sample_idx": 1,
+  "aim_id": "format_address_block",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def format_shipping_address(data):\n    name = data.get('shipping_name', '')\n    street = data.get('shipping_street', '')\n    city = data.get('shipping_city', '')\n    postcode = data.get('shipping_postcode', '')\n    if 'billing_postcode' in data:\n        data['billing_postcode'] = postcode\n    return '\\n'.join([name, street, f\"{city} {postcode}\".strip()])",
+  "rationale": "Copy-paste residue: a leftover write to data['billing_postcode'] from billing-related code occurs if that key exists, mutating the input dict. The returned shipping address string remains correct and includes only shipping fields.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:42:52.767737+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

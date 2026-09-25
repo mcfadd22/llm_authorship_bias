@@ -1,0 +1,25 @@
+{
+  "item_id": "make_multipliers__known_trap__gemini25pro__000",
+  "cell_id": "make_multipliers__known_trap",
+  "sample_idx": 0,
+  "aim_id": "make_multipliers",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def make_processing_list(factors):\n    list_of_ops = []\n    for f in factors:\n        list_of_ops.append(lambda x: x * f)\n    return list_of_ops",
+  "rationale": "This function falls into the 'late-binding closure' trap. The variable `f` in the lambda is not bound at the time of the lambda's creation but when it is executed. By the time any function from the returned list is called, the loop has completed, and `f` will hold the last value from the `factors` iterable. Consequently, all functions in `list_of_ops` will multiply by the final factor, not by their respective factors as intended by the contract.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:45:28.069109+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

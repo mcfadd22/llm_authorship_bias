@@ -1,0 +1,25 @@
+{
+  "item_id": "rename_files__copy_paste_residue__gpt5__001",
+  "cell_id": "rename_files__copy_paste_residue",
+  "sample_idx": 1,
+  "aim_id": "rename_files",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def apply_suffix(filenames, suffix):\n    result = []\n    renamed_pairs = []\n    for name in filenames:\n        idx = name.rfind('.')\n        if idx > 0:\n            base = name[:idx]\n            ext = name[idx:]\n        else:\n            base = name\n            ext = \"\"\n        new_name = base + suffix + ext\n        renamed_pairs.append((name, new_name))\n        result.append(new_name)\n    return result",
+  "rationale": "A leftover variable renamed_pairs collects (old,new) tuples as if for a renaming routine but is never used. This copy-paste residue causes minor unnecessary work without affecting the returned list of suffixed filenames.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:41:46.842134+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

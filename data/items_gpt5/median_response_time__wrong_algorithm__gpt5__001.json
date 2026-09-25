@@ -1,0 +1,25 @@
+{
+  "item_id": "median_response_time__wrong_algorithm__gpt5__001",
+  "cell_id": "median_response_time__wrong_algorithm",
+  "sample_idx": 1,
+  "aim_id": "median_response_time",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def median_time(values):\n    if not values:\n        return None\n    s = 0\n    for v in values:\n        s += v\n    return s / len(values)\n",
+  "rationale": "Instead of selecting the middle of the sorted list (or averaging the two middles), the function computes the arithmetic mean by summing all values and dividing by the count. This is a clean but wrong algorithm relative to the stated aim.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:42:41.076741+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

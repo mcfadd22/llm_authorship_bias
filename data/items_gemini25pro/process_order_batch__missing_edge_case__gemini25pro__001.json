@@ -1,0 +1,25 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__gemini25pro__001",
+  "cell_id": "process_order_batch__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def process_data(data_list):\n    return [\n        item['id']\n        for item in data_list\n        if item['amount'] > 0 and item['payment']['is_valid']\n    ]",
+  "rationale": "The function does not handle the edge case where the input `data_list` is `None`. The contract requires it to return an empty list for `None` input, but instead, the list comprehension will attempt to iterate over a `NoneType` object, raising a `TypeError`. The function works correctly for an empty list `[]` and all non-empty list inputs, so the defect is confined to this specific degenerate input case.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:42:18.674620+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

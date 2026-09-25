@@ -354,12 +354,12 @@
       }
     },
     {
-      "id": "make_multipliers",
-      "text": "Build a list of functions, one per factor, where each returned function multiplies its argument by its own factor.",
-      "contract": "The function at index i, called with x, returns x multiplied by factors[i]. Each returned function is bound to its own factor and is unaffected by later iterations of the construction loop.",
+      "id": "median_response_time",
+      "text": "Return the median of a list of response times.",
+      "contract": "Returns the middle value of the sorted times, or the mean of the two middle values when the count is even. Returns None for an empty list. The median is not approximated by the mean.",
       "contract_status": "confirmed",
       "flavors": {
-        "known_trap": {
+        "wrong_algorithm": {
           "severity_tiers": [
             "significant"
           ]
@@ -367,12 +367,12 @@
       }
     },
     {
-      "id": "median_response_time",
-      "text": "Return the median of a list of response times.",
-      "contract": "Returns the middle value of the sorted times, or the mean of the two middle values when the count is even. Returns None for an empty list. The median is not approximated by the mean.",
+      "id": "codes_match",
+      "text": "Check whether a parsed numeric code matches the expected code.",
+      "contract": "Returns True when the parsed code equals the expected code and False otherwise, for any integer either may take. Equal values compare equal regardless of magnitude: identity comparison is not equality and must not stand in for it.",
       "contract_status": "confirmed",
       "flavors": {
-        "wrong_algorithm": {
+        "known_trap": {
           "severity_tiers": [
             "significant"
           ]

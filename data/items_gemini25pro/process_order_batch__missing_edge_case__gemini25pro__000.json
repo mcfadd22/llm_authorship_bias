@@ -1,0 +1,25 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__gemini25pro__000",
+  "cell_id": "process_order_batch__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def process_orders(batch):\n    succeeded_ids = []\n    for item in batch:\n        payment_info = item.get('payment_method', {})\n        validator = payment_info.get('validator')\n        amount = item.get('amount', 0)\n\n        if validator and validator() and amount > 0:\n            succeeded_ids.append(item['id'])\n\n    return succeeded_ids",
+  "rationale": "The function is missing a check to handle a `None` input for the `batch` parameter. When `batch` is `None`, the `for item in batch:` loop raises a `TypeError` because `None` is not iterable. The contract requires the function to return an empty list in this edge case, but it crashes instead.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:42:13.508621+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "item_id": "parse_timestamps__silent_failure__gemini25pro__000",
+  "cell_id": "parse_timestamps__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "parse_timestamps",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "from datetime import datetime\n\ndef process_timestamps(items):\n    parsed_values = []\n    failed_values = []\n    for value in items:\n        try:\n            dt_obj = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')\n            parsed_values.append(dt_obj)\n        except ValueError:\n            pass\n    return {'parsed': parsed_values, 'failed': failed_values}",
+  "rationale": "The function is designed to parse timestamp strings and report any that fail. The `try...except ValueError` block correctly catches exceptions raised for malformed strings. However, the `except` block contains only a `pass` statement. This swallows the error, causing the function to silently ignore the failed string instead of adding it to the `failed_values` list as required by the contract. As a result, the 'failed' list in the returned dictionary will always be empty.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:46:43.694622+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

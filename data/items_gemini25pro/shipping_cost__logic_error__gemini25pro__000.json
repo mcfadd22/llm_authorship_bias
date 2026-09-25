@@ -1,0 +1,25 @@
+{
+  "item_id": "shipping_cost__logic_error__gemini25pro__000",
+  "cell_id": "shipping_cost__logic_error",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def process_item(value):\n    if value <= 0:\n        return 0.0\n    elif value <= 5:\n        return 5.00\n    elif value > 10:\n        return 8.50\n    elif value <= 20:\n        return 12.00\n    else:\n        return 18.00",
+  "rationale": "The third condition `elif value > 10:` uses a swapped relational operator. The correct condition to check for the 8.50 tier is `elif value <= 10:`. This error causes incorrect costs to be returned for all input values greater than 5.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:42:33.736995+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

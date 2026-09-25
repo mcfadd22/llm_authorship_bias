@@ -1,0 +1,25 @@
+{
+  "item_id": "average_temperature__silent_failure__gemini25pro__001",
+  "cell_id": "average_temperature__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "average_temperature",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def process_temperatures(entries):\n    total = 0.0\n    n = 0\n    for entry in entries:\n        total += float(entry)\n        n += 1\n\n    try:\n        return total / n\n    except ZeroDivisionError:\n        pass",
+  "rationale": "The function uses a `try...except ZeroDivisionError: pass` block to handle the case of an empty list. When `entries` is empty, `n` is 0, and the division `total / n` raises a `ZeroDivisionError`. The `except` block catches this exception and silently ignores it with `pass`. The function then finishes and implicitly returns `None`. Although returning `None` for an empty list is the contractually correct behavior, it is achieved here by silently swallowing an exception rather than by an explicit conditional check, which constitutes a silent failure bug. The bug is trivial because it only affects the degenerate empty list case, and its observable output happens to align with the contract.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:41:44.002614+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

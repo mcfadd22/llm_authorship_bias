@@ -1,0 +1,25 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__gemini25pro__000",
+  "cell_id": "reset_token_validation__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "import hmac\nimport time\n\ndef validate_token(user_id, submitted_token, stored_data):\n    user_record = stored_data.get(user_id)\n    if not user_record:\n        return False\n\n    expected_token = user_record.get('token')\n    expiry_time = user_record.get('expiry')\n\n    if not expected_token or not expiry_time:\n        return False\n\n    is_match = hmac.compare_digest(submitted_token, expected_token)\n    is_expired = time.time() > expiry_time\n\n    return is_match and not is_expired",
+  "rationale": "The bug is a missing edge case check that leads to an unhandled exception. The function uses `hmac.compare_digest` for a secure token comparison. However, this function raises a `TypeError` if one of its arguments is `None`. The code does not check if `submitted_token` is `None` before passing it to `hmac.compare_digest`. According to the contract, a malformed token (which includes `None`) should result in `False`, but instead, the function crashes. This represents a failure to handle a degenerate input.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:41:47.495173+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

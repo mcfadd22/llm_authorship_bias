@@ -1,0 +1,25 @@
+{
+  "item_id": "shipping_cost__wrong_algorithm__gpt5__000",
+  "cell_id": "shipping_cost__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def calculate_shipping_cost(weight):\n    if weight <= 0:\n        return 0.0\n    if weight <= 5:\n        unit = 1.0\n    elif weight <= 10:\n        unit = 0.85\n    elif weight <= 20:\n        unit = 0.6\n    else:\n        unit = 0.45\n    return round(weight * unit, 2)\n",
+  "rationale": "Instead of returning fixed flat fees per tier, the function chooses a per-weight rate by tier and multiplies by the weight, producing a linear cost within each tier. This is a wrong_algorithm bug relative to the contract's fixed tier prices.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:40:34.442028+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

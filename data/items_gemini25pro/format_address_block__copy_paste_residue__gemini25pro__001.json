@@ -1,0 +1,25 @@
+{
+  "item_id": "format_address_block__copy_paste_residue__gemini25pro__001",
+  "cell_id": "format_address_block__copy_paste_residue",
+  "sample_idx": 1,
+  "aim_id": "format_address_block",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def format_shipping_label(record):\n    shipping_details = record['shipping']\n\n    record['billing']['postcode'] = shipping_details['postcode']\n\n    recipient = shipping_details['name']\n    line_1 = shipping_details['street']\n    line_2 = f\"{shipping_details['city']} {shipping_details['postcode']}\"\n\n    return f\"{recipient}\\n{line_1}\\n{line_2}\"",
+  "rationale": "The function correctly formats the shipping address string as per the contract. However, it contains a line, `record['billing']['postcode'] = shipping_details['postcode']`, that modifies the input dictionary. This is a side-effect irrelevant to the stated aim of formatting a shipping label and appears to be a remnant of a copy-paste from a different function, such as one that syncs billing and shipping information. Because the function's primary return value is always correct, the bug is trivial.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:45:25.326082+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

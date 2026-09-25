@@ -1,0 +1,25 @@
+{
+  "item_id": "parse_timestamps__silent_failure__gpt5__000",
+  "cell_id": "parse_timestamps__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "parse_timestamps",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "from datetime import datetime\n\ndef parse_timestamps(values):\n    p = []\n    f = []\n    for s in values:\n        try:\n            p.append(datetime.strptime(s, \"%Y-%m-%d %H:%M:%S\"))\n        except ValueError:\n            pass\n    return {\"parsed\": p, \"failed\": f}\n",
+  "rationale": "On parse failure (ValueError), the exception is caught and ignored with pass, and the input is not added to 'failed'. This silently drops unparseable entries instead of reporting them, violating the contract.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:41:47.294610+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

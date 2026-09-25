@@ -1,0 +1,25 @@
+{
+  "item_id": "format_address_block__copy_paste_residue__gemini25pro__000",
+  "cell_id": "format_address_block__copy_paste_residue",
+  "sample_idx": 0,
+  "aim_id": "format_address_block",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "import json\n\ndef create_address_label(record):\n    info = record['shipping_details']\n    line_1 = info['name']\n    line_2 = info['street']\n    line_3 = f\"{info['city']} {info['postcode']}\"\n    record['billing_details_processed'] = True\n    return f\"{line_1}\\n{line_2}\\n{line_3}\"",
+  "rationale": "The bug is the line `record['billing_details_processed'] = True`. The function's purpose is to process the `shipping_details` part of the input, but it sets a flag related to `billing_details`. This is a plausible copy-paste residue from a similar function that processes billing information, where the developer forgot to update this line for the new context. The function's primary return value is correct, but it produces an erroneous side-effect on its input.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:45:13.425225+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

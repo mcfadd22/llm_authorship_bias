@@ -1,0 +1,25 @@
+{
+  "item_id": "apply_discount_codes__silent_failure__gemini25pro__001",
+  "cell_id": "apply_discount_codes__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def compute_result(base_amount, applied_codes, all_discounts):\n    final_amount = base_amount\n    invalid_codes = []\n\n    for code in applied_codes:\n        try:\n            final_amount -= all_discounts[code]\n        except KeyError:\n            pass\n\n    return {'total': final_amount, 'rejected': invalid_codes}",
+  "rationale": "The function uses a `try...except KeyError: pass` block. When a discount code is not found in the `all_discounts` dictionary, the `KeyError` is caught and silently ignored. This prevents the invalid code from being appended to the `invalid_codes` list, causing the function to silently fail to report rejected codes as required by its contract. The 'rejected' list in the return value will thus always be empty.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:44:52.192170+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

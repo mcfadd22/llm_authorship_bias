@@ -1,0 +1,25 @@
+{
+  "item_id": "median_response_time__wrong_algorithm__gemini25pro__000",
+  "cell_id": "median_response_time__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "median_response_time",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def get_center_value(time_series):\n    if not time_series:\n        return None\n\n    list_sum = sum(time_series)\n    list_count = len(time_series)\n\n    return list_sum / list_count",
+  "rationale": "The function is contracted to return the median of a list of numbers. The implemented code, however, calculates and returns the arithmetic mean (average) of the list. This is a 'wrong algorithm' defect because the entire computational approach is incorrect for the stated goal, rather than being a minor error within an otherwise correct median-finding procedure.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:45:43.017455+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

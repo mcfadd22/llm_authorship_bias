@@ -1,0 +1,25 @@
+{
+  "item_id": "apply_discount_codes__silent_failure__gpt5__001",
+  "cell_id": "apply_discount_codes__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def apply_discounts(total, codes, discounts):\n    rejected = []\n    current = total\n    for code in codes:\n        try:\n            current -= discounts[code]\n        except KeyError:\n            pass\n    return {'total': current, 'rejected': rejected}\n",
+  "rationale": "Unknown codes trigger a KeyError that is caught and ignored in the except KeyError: pass block, so such codes are neither added to 'rejected' nor reported in any way. This swallows the error condition, violating the contract while leaving totals unchanged for unrecognized codes.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:42:22.413878+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

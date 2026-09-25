@@ -1,0 +1,25 @@
+{
+  "item_id": "format_address_block__copy_paste_residue__gpt5__000",
+  "cell_id": "format_address_block__copy_paste_residue",
+  "sample_idx": 0,
+  "aim_id": "format_address_block",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def format_shipping_address(name, street, city, postcode):\n    a = str(name).strip()\n    b = str(street).strip()\n    c = f\"{str(city).strip()} {str(postcode).strip()}\"\n    print(\"Billing address:\\n\" + a + \"\\n\" + b + \"\\n\" + c)\n    return a + \"\\n\" + b + \"\\n\" + c\n",
+  "rationale": "Copy-paste residue: a stray print labeled 'Billing address' remains from a similar billing formatter. It performs side-effect output but the returned multi-line shipping address string is correct.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:42:25.070752+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

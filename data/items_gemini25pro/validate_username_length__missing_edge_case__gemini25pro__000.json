@@ -1,0 +1,25 @@
+{
+  "item_id": "validate_username_length__missing_edge_case__gemini25pro__000",
+  "cell_id": "validate_username_length__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "validate_username_length",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def process_new_user(user_string, log_data):\n    name_length = len(user_string)\n    if name_length < 2:\n        log_data.append(user_string)\n    return name_length >= 3",
+  "rationale": "The function is supposed to log usernames of exactly one character for abuse monitoring. The condition `if name_length < 2:` incorrectly causes it to also log empty strings (where length is 0), which is an unhandled degenerate edge case. The correct condition for the logging logic is `if name_length == 1:`. The function's primary result (the boolean return value) is correct for all inputs.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:42:31.937748+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

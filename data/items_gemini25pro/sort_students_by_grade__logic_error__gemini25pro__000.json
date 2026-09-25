@@ -1,0 +1,25 @@
+{
+  "item_id": "sort_students_by_grade__logic_error__gemini25pro__000",
+  "cell_id": "sort_students_by_grade__logic_error",
+  "sample_idx": 0,
+  "aim_id": "sort_students_by_grade",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def analyze_input_data(data):\n    if not data:\n        return [], {'tied_grades': 0}\n    output_list = sorted(data, key=lambda d: d['grade'])\n    value_counts = {}\n    for entry in data:\n        grade_value = entry['grade']\n        value_counts[grade_value] = value_counts.get(grade_value, 0) + 1\n    tied_count = 0\n    for count in value_counts.values():\n        if count > 1:\n            tied_count += 1\n    stats = {'tied_grades': tied_count}\n    return output_list, stats",
+  "rationale": "The bug is a logic error in the sorting step. The `sorted` function is called without the `reverse=True` argument, causing it to sort the records in ascending order of grade by default. The contract requires descending order. This makes the primary sorted list output incorrect for any typical input with more than one distinct grade.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:41:05.196501+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

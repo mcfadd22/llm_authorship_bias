@@ -1,0 +1,25 @@
+{
+  "item_id": "is_freezing__logic_error__gemini25pro__001",
+  "cell_id": "is_freezing__logic_error",
+  "sample_idx": 1,
+  "aim_id": "is_freezing",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def check_condition(value):\n    if value > 0:\n        return True\n    else:\n        return False",
+  "rationale": "The function uses the `>` operator in its conditional check instead of the correct `<=` operator. As a result, it returns `True` for positive temperatures (non-freezing) and `False` for zero or negative temperatures (freezing), which is the inverse of the behavior required by the contract.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:44:45.163638+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

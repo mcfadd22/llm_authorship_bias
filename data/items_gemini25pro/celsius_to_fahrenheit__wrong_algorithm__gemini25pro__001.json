@@ -1,0 +1,25 @@
+{
+  "item_id": "celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001",
+  "cell_id": "celsius_to_fahrenheit__wrong_algorithm",
+  "sample_idx": 1,
+  "aim_id": "celsius_to_fahrenheit",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def calculate_target_temp(source_val):\n    result = (source_val - 32) * 5 / 9\n    return result",
+  "rationale": "The function is stated to convert Celsius to Fahrenheit, but the code implements the reverse conversion from Fahrenheit to Celsius. The correct formula is `celsius * 9 / 5 + 32`, but the function implements `(celsius - 32) * 5 / 9`. This is a 'wrong algorithm' bug because the implemented logic is a coherent but incorrect procedure for the stated goal, rather than a minor error within the correct procedure.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:44:02.444806+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "item_id": "shipping_cost__wrong_algorithm__gemini25pro__000",
+  "cell_id": "shipping_cost__wrong_algorithm",
+  "sample_idx": 0,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def calculate_shipping_cost(weight):\n    if weight <= 0:\n        return 0.0\n\n    base_cost = 5.0\n    multiplier = 0.35\n\n    final_cost = base_cost + (weight * multiplier)\n\n    return round(final_cost, 2)",
+  "rationale": "The function implements a linear pricing model (a base cost plus a multiplier times the weight) instead of the tiered pricing structure required by the contract. The correct implementation would use a series of conditional statements (if/elif/else) to map weight ranges to fixed prices.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:42:34.324557+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

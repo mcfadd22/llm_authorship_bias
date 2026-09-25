@@ -1,0 +1,25 @@
+{
+  "item_id": "is_freezing__logic_error__gemini25pro__000",
+  "cell_id": "is_freezing__logic_error",
+  "sample_idx": 0,
+  "aim_id": "is_freezing",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def process_value(reading):\n    is_cold = False\n    if reading >= 0:\n        is_cold = True\n    return is_cold",
+  "rationale": "The bug is a logic error in the conditional `if reading >= 0:`. The relational operator `>=` is used instead of the correct `<=`. This causes the function to incorrectly return `True` for all positive temperatures (e.g., 10) and `False` for all negative temperatures (e.g., -5), the opposite of the intended logic for those ranges. It only produces the correct result for the single boundary value of 0.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:43:00.877426+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

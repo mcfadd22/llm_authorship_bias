@@ -1,0 +1,25 @@
+{
+  "item_id": "parse_timestamps__silent_failure__gemini25pro__001",
+  "cell_id": "parse_timestamps__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "parse_timestamps",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "import datetime\n\ndef process_timestamps(records):\n    parsed_list = []\n    failed_list = []\n    date_format = \"%Y-%m-%d %H:%M:%S\"\n\n    for item in records:\n        try:\n            dt_obj = datetime.datetime.strptime(item, date_format)\n            parsed_list.append(dt_obj)\n        except ValueError:\n            pass\n\n    return {\"parsed\": parsed_list, \"failed\": failed_list}",
+  "rationale": "The function is designed to parse timestamps and report failures. The bug is in the `except ValueError:` block. When `strptime` fails for an invalidly formatted string, the exception is caught, but the block contains only `pass`. This silences the error. As a result, the invalid input string is not added to the `failed_list` as required by the contract, and it effectively vanishes from the output, leading to incorrect results for any input list containing unparseable strings.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:44:39.589441+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

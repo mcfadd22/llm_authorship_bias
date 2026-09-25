@@ -1,0 +1,25 @@
+{
+  "item_id": "parse_csv_header__logic_error__gemini25pro__000",
+  "cell_id": "parse_csv_header__logic_error",
+  "sample_idx": 0,
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def get_column_info(data_line):\n    items = data_line.split(',')\n    result = []\n    for item in items:\n        processed_item = item.strip()\n        if not processed_item:\n            result.append(processed_item)\n    return result",
+  "rationale": "The bug is a classic logic error where a conditional is inverted. The line `if not processed_item:` should be `if processed_item:`. Because of the inversion, the function incorrectly collects fields that are empty after stripping and discards all non-empty fields, which is the opposite of the intended behavior for typical CSV header lines.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:40:24.981340+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}
