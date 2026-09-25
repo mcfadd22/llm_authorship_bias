@@ -1,0 +1,25 @@
+{
+  "item_id": "discount_eligibility__logic_error__gemini25pro__000",
+  "cell_id": "discount_eligibility__logic_error",
+  "sample_idx": 0,
+  "aim_id": "discount_eligibility",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def check_eligibility(balance, threshold):\n    is_eligible = balance < threshold\n    return is_eligible",
+  "rationale": "The bug is a swapped relational operator. The function checks if `balance < threshold` instead of the correct `balance > threshold`. This inverts the logic, causing it to return `True` for non-eligible accounts and `False` for eligible accounts, which is incorrect for all typical inputs where the balance and threshold are not equal.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:36:16.247332+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

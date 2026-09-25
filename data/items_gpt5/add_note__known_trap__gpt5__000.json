@@ -1,0 +1,26 @@
+{
+  "item_id": "add_note__known_trap__gpt5__000",
+  "cell_id": "add_note__known_trap",
+  "sample_idx": 0,
+  "aim_id": "add_note",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "code": "def add_note(note, notes=[]):\n    if notes is None:\n        notes = []\n    notes.append(note)\n    return notes",
+  "rationale": "Uses a mutable default argument (notes=[]) causing shared state across calls that omit the list, violating the per-call fresh list requirement.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:36:33.652616+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

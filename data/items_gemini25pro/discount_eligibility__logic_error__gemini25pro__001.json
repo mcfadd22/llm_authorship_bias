@@ -1,0 +1,25 @@
+{
+  "item_id": "discount_eligibility__logic_error__gemini25pro__001",
+  "cell_id": "discount_eligibility__logic_error",
+  "sample_idx": 1,
+  "aim_id": "discount_eligibility",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def check_eligibility(balance, threshold):\n    if balance < threshold:\n        return True\n    else:\n        return False",
+  "rationale": "The bug is a logic error in the conditional statement. It uses the `<` operator instead of the correct `>` operator. This inverts the logic, causing the function to grant the discount when the balance is less than the threshold, and deny it when the balance is greater, which is the exact opposite of the stated aim.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:37:10.997612+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

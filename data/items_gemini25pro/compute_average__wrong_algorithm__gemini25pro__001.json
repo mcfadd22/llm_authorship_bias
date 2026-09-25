@@ -1,0 +1,25 @@
+{
+  "item_id": "compute_average__wrong_algorithm__gemini25pro__001",
+  "cell_id": "compute_average__wrong_algorithm",
+  "sample_idx": 1,
+  "aim_id": "compute_average",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def calculate_value(data_points):\n    if not data_points:\n        return None\n\n    items = sorted(data_points)\n    n = len(items)\n    mid_index = n // 2\n\n    if n % 2 == 1:\n        return items[mid_index]\n    else:\n        return (items[mid_index - 1] + items[mid_index]) / 2.0",
+  "rationale": "The function is stated to compute the average (arithmetic mean) of a list of numbers. Instead, it correctly implements the algorithm to compute the median. The code sorts the list and then finds the middle element, which is a valid but entirely different statistical measure than the one required by the stated aim. This constitutes a 'wrong algorithm' defect.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:36:13.997739+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

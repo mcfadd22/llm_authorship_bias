@@ -1,0 +1,25 @@
+{
+  "item_id": "shipping_cost__logic_error__gpt5__001",
+  "cell_id": "shipping_cost__logic_error",
+  "sample_idx": 1,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def shipping_cost(weight):\n    if weight <= 0:\n        return 0\n    if weight <= 5:\n        return 5.00\n    if weight <= 10:\n        return 12.00\n    if weight <= 20:\n        return 8.50\n    return 18.00",
+  "rationale": "The tiers for weights <=10 and <=20 have their rates swapped: it returns 12.00 for <=10 and 8.50 for <=20 instead of the opposite. This is a logic error in the main conditional flow affecting ordinary inputs.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:38:45.433179+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

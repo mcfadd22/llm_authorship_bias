@@ -1,0 +1,25 @@
+{
+  "item_id": "process_order_batch__missing_edge_case__gpt5__000",
+  "cell_id": "process_order_batch__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def process_orders(orders):\n    if len(orders) == 0:\n        return []\n    out = []\n    for order in orders:\n        amount = order.get('amount', 0)\n        payment = order.get('payment')\n        if amount > 0 and hasattr(payment, 'validate') and payment.validate(order):\n            out.append(order.get('id'))\n    return out",
+  "rationale": "Missing edge case: the function calls len(orders) without handling orders is None. This raises a TypeError instead of returning an empty list, violating the contract only for the None boundary input.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:37:40.648548+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

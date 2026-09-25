@@ -1,0 +1,25 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__gpt5__000",
+  "cell_id": "reset_token_validation__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def validate_reset_token(submitted_token, user_id, store, now):\n    if not isinstance(submitted_token, str):\n        return False\n    token = submitted_token.strip()\n    if not token:\n        return False\n    entry = store.get(token)\n    if not isinstance(entry, dict):\n        return False\n    if entry.get(\"user_id\") != user_id:\n        return False\n    exp = entry.get(\"exp\")\n    if not isinstance(exp, (int, float)):\n        return False\n    if now > exp:\n        return False\n    return True",
+  "rationale": "Boundary bug on expiration: the check uses now > exp, allowing tokens with exp equal to now to be treated as valid. The missing edge-case is exp == now, which should be expired per the contract.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:36:11.677533+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

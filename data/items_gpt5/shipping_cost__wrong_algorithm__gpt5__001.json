@@ -1,0 +1,25 @@
+{
+  "item_id": "shipping_cost__wrong_algorithm__gpt5__001",
+  "cell_id": "shipping_cost__wrong_algorithm",
+  "sample_idx": 1,
+  "aim_id": "shipping_cost",
+  "bug_flavor": "wrong_algorithm",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def calculate_shipping_cost(weight):\n    if weight <= 0:\n        return 0.0\n    rate = 0.9\n    base = 2.0\n    total = base + weight * rate\n    return float(round(total, 2))",
+  "rationale": "Instead of applying tiered thresholds, the function uses a linear formula (base + rate * weight) to compute cost. This is a wrong_algorithm bug because it implements a different approach altogether than the specified tiered pricing.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:38:59.203575+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

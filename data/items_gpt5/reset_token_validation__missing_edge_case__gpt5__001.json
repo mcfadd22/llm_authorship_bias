@@ -1,0 +1,25 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__gpt5__001",
+  "cell_id": "reset_token_validation__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "import time, hmac, hashlib\n\ndef check_token(submitted_token, user_id, key):\n    if not submitted_token or not isinstance(submitted_token, str):\n        return False\n    parts = submitted_token.split(\".\")\n    if len(parts) != 3:\n        return False\n    tok_user, exp_s, sig = parts\n    if tok_user != user_id:\n        return False\n    try:\n        exp = int(exp_s)\n    except:\n        return False\n    expected = hmac.new(key.encode(\"utf-8\"), f\"{tok_user}.{exp_s}\".encode(\"utf-8\"), hashlib.sha256).hexdigest()\n    if not hmac.compare_digest(sig, expected):\n        return False\n    now = int(time.time())\n    return now <= exp\n",
+  "rationale": "Boundary check bug: the expiration comparison uses now <= exp, so a token whose exp exactly equals the current time is incorrectly treated as valid. It should require now < exp.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:36:48.695441+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}
