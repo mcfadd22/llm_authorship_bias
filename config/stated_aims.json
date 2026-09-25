@@ -296,7 +296,7 @@
       "flavors": {
         "known_trap": {
           "severity_tiers": [
-            "trivial"
+            "significant"
           ]
         }
       }
