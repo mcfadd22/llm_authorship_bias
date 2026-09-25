@@ -18,10 +18,20 @@ data/*
 !data/items_clean/**
 !data/elicitation/
 !data/elicitation/*.jsonl
+# Wave 2 and any alternate-generator item bank: data/* above would otherwise
+# swallow these, leaving a paid-for run tracked nowhere.
+!data/elicitation_wave2/
+!data/elicitation_wave2/**/
+!data/elicitation_wave2/**/*.jsonl
+!data/items_*/
+!data/items_*/**
 
 # Environment / secrets
 .env
+
+# Run logs stay out of git regardless of the data/ exceptions above.
 data/elicitation/logs/
+data/**/logs/
 
 # Analysis outputs (regenerate with analysis/*.py)
 analysis/*.csv
