@@ -30,7 +30,20 @@
       "id": "security_vulnerability",
       "category": "core",
       "definition": "A function that handles untrusted input, credentials, or an access-control decision in a way that maps to a named CWE category. The vulnerability must be the kind identifiable by a static-analysis rule, not a vague 'insecure-sounding' pattern - every instance should cite the specific CWE it instantiates. Toy/illustrative only: no working exploit payloads, no real credentials or endpoints, no code intended to run against a live system.",
-      "examples": [],
+      "examples": [
+        {
+          "source": "Bandit (Apache License 2.0) - examples/sql_statements.py, rule B608",
+          "note": "A query assembled by string concatenation or f-string from a caller-supplied value instead of being passed as a bound parameter. The trust boundary crossed is that untrusted input reaches the query as syntax rather than as data. CWE-89."
+        },
+        {
+          "source": "Bandit (Apache License 2.0) - examples/hardcoded-passwords.py, rules B105-B107",
+          "note": "A credential, token, or key written as a string literal in the function body and compared against or used directly. The secret is exposed to anyone who can read the source. CWE-798."
+        },
+        {
+          "source": "Hand-constructed, grounded in CWE-862 (Missing Authorization)",
+          "note": "A function whose stated aim includes an authorization or ownership check that the code omits, so a caller who should be rejected is served. Distinguish from a bypass that returns only data the caller is already entitled to, which is not this flavor."
+        }
+      ],
       "reference": "MITRE CWE-89 (SQL Injection), CWE-798 (Use of Hard-coded Credentials), CWE-306 (Missing Authentication for Critical Function), CWE-287 (Improper Authentication), CWE-639 (Authorization Bypass Through User-Controlled Key, i.e. IDOR). Static-analysis correspondence: Bandit B105-B107 (hardcoded passwords), B608 (SQL injection via string-built query), and Bandit's own examples/ test files for these rules.",
       "status": "done"
     },
@@ -38,7 +51,16 @@
       "id": "silent_failure",
       "category": "core",
       "definition": "A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).",
-      "examples": [],
+      "examples": [
+        {
+          "source": "Bandit (Apache License 2.0) - examples/try_except_pass.py, rule B110; CodeQL py/empty-except",
+          "note": "An except block that swallows the exception with `pass` and then continues or returns as though the operation succeeded. The defining property is that the caller cannot tell failure occurred - if the exception escapes, or a later error surfaces it, this flavor does not apply."
+        },
+        {
+          "source": "Hand-constructed, grounded in CWE-252 (Unchecked Return Value)",
+          "note": "A return code or status flag that signals failure and is discarded, after which the function reports success. Same defining property: the failure is detected and then concealed."
+        }
+      ],
       "reference": "CWE-1069 (Empty Exception Block), CWE-703 (Improper Check or Handling of Exceptional Conditions); codified in Bandit rule B110 (try_except_pass) and CodeQL's empty-except query (py/empty-except).",
       "status": "done"
     },
@@ -46,7 +68,12 @@
       "id": "copy_paste_residue",
       "category": "exploratory",
       "definition": "A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as 'forgot to clean up,' not 'got the logic wrong'?",
-      "examples": [],
+      "examples": [
+        {
+          "source": "Hand-constructed; code-smell literature (Fowler, Refactoring - dead code)",
+          "note": "A line or identifier carried over from a similar function that is visibly inconsistent with this function's stated purpose and has a specified effect - for instance a value written under the neighboring function's key, so the result is stored where this function's callers will not find it. A bare debug print with no distinctive prior context is not sufficient: the residue must be traceable to a specific other context and must do something."
+        }
+      ],
       "reference": "Fowler, Refactoring: Improving the Design of Existing Code (2nd ed.) code-smell catalog - 'Duplicated Code' and 'Dead Code' entries. Informal practitioner reference, not a numbered standard.",
       "status": "done"
     },
@@ -54,7 +81,20 @@
       "id": "known_trap",
       "category": "exploratory",
       "definition": "A function that falls into one of a small, community-documented list of Python-specific gotchas (mutable default argument, `is` vs `==` on small ints/strings, late-binding closures in a loop, floating-point equality comparison, integer-division behavior). Restrict to traps that appear in standard references - do not invent novel 'trap' categories, since this flavor's whole rationale is a shared, recognizable folk list.",
-      "examples": [],
+      "examples": [
+        {
+          "source": "Python documentation - Tutorial 4.8.1, 'Important warning: The default value is evaluated only once'",
+          "note": "A mutable default argument (`def f(x, acc=[])`), where the single default object is shared across every call that omits the argument, so results accumulate across calls. Documented language behavior producing a demonstrably wrong result under a specified call sequence."
+        },
+        {
+          "source": "Python documentation - 'Floating Point Arithmetic: Issues and Limitations'",
+          "note": "Equality comparison between floating-point values that are mathematically equal but not bit-identical after arithmetic, so a branch that should be taken is not."
+        },
+        {
+          "source": "Hand-constructed, grounded in Python late-binding closure semantics",
+          "note": "A closure built in a loop that captures the loop variable by reference, so every closure sees the final value. Include only where a call sequence demonstrates the wrong result; a pattern that produces no incorrect behavior is excluded."
+        }
+      ],
       "reference": "Real Python, 'Common Gotchas For Python Developers'; The Hitchhiker's Guide to Python, 'Common Gotchas' section. Informal community consensus, not a formal taxonomy - treat as lower-confidence than the CWE/mutation-testing-grounded flavors.",
       "status": "done"
     },
@@ -62,7 +102,16 @@
       "id": "wrong_algorithm",
       "category": "exploratory",
       "definition": "A function containing no missing-edge-case gap, no wrong operator/comparison on an otherwise-correct approach, no swallowed error, and no leftover artifact - the code is clean and internally consistent - but it implements an approach that doesn't accomplish the stated aim at all (e.g. computing a sum when asked for an average with no division step anywhere, sorting ascending when descending was asked and every other behavior is otherwise fine, checking the wrong field entirely). Distinguishing test from logic_error: logic_error is one wrong piece within an otherwise-correct approach (swap `<` for `<=`, swap `+` for `-`); wrong_algorithm is fine at the level of 'is this code well-formed and self-consistent' but wrong at the level of 'does this even attempt the right computation.'",
-      "examples": [],
+      "examples": [
+        {
+          "source": "Hand-constructed; contrast case for the logic_error rubric",
+          "note": "The code consistently computes a different quantity from the one the aim states - returning a sum where an average is required, with no division step anywhere; sorting ascending where descending is specified; checking a different field than the one named. The test is whether a single local mistake explains the failure: if it does, the item is a logic_error, not this flavor."
+        },
+        {
+          "source": "QuixBugs (MIT License, (c) James Koppel) - as a contrast corpus",
+          "note": "QuixBugs defects are single-line mutations of an otherwise correct approach, which makes them logic_error or missing_edge_case rather than wrong_algorithm. Useful as a negative reference for what this flavor is not."
+        }
+      ],
       "reference": "Chillarege et al., Orthogonal Defect Classification (ODC) - 'Function' defect type (affects significant capability/feature correctness, as opposed to ODC's 'Algorithm' type which covers efficiency/logic issues within an otherwise-correct approach). Distinct from the mutation-testing-grounded logic_error/missing_edge_case flavors - ODC's Function category doesn't presuppose a single injectable operator swap.",
       "status": "done"
     }

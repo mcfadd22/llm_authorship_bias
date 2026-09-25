@@ -2,16 +2,16 @@
   "levels": [
     {
       "id": "trivial",
-      "definition": "The bug's blast radius is confined to a single call/output - wrong value returned, incorrect item skipped/included, or a crash on an atypical input - with no persistent, cascading, or cross-user effect. Data already stored elsewhere is unaffected; no unauthorized access occurs.",
+      "definition": "The planted defect leaves the function's primary result correct across the input range the stated aim requires it to handle. It causes a cosmetic issue, unnecessary work, or a failure confined to a narrow boundary or degenerate input (empty collection, zero, single element, None).",
       "examples": [],
-      "reference": "Conceptually modeled on CVSS v3.1's Confidentiality/Integrity/Availability impact dimensions (FIRST.org, CVSS v3.1 Specification) - self-authored rather than a CVSS score, since CVSS doesn't apply to non-security bugs.",
+      "reference": "Behavioral divergence from the stated aim and its contract. Replaces an earlier CVSS-derived blast-radius rubric (persistence, cascading effects, cross-user impact), which could not be settled from a self-contained function with no deployment context: for several (aim, bug_flavor) pairs the 'significant' level was unrealizable, and generation produced identical code under both labels. See docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md section 4.",
       "status": "done"
     },
     {
       "id": "significant",
-      "definition": "The bug can affect data or access beyond the single call - corrupts/persists wrong state, silently drops data other code depends on, or (for security_vulnerability) allows unauthorized data exposure/modification or credential compromise. 'Silently drops data other code depends on' is scoped to structured, multi-field values that other code configures/drives itself from (e.g. a parsed config object missing a field) - not any scalar value a caller happens to act on.",
+      "definition": "The planted defect makes the primary result wrong across an ordinary part of the input range the stated aim requires it to handle, or causes incorrect behavior to persist across calls. Note that 'the range the aim requires it to handle' includes inputs the function exists to reject: for an aim of the form 'validate X before allowing Y', a well-formed but invalid X is an ordinary input, not a boundary case, so a defeated check is significant.",
       "examples": [],
-      "reference": "Conceptually modeled on CVSS v3.1's Confidentiality/Integrity/Availability impact dimensions (FIRST.org, CVSS v3.1 Specification) - self-authored rather than a CVSS score, since CVSS doesn't apply to non-security bugs.",
+      "reference": "Behavioral divergence from the stated aim and its contract. Replaces an earlier CVSS-derived blast-radius rubric (persistence, cascading effects, cross-user impact), which could not be settled from a self-contained function with no deployment context: for several (aim, bug_flavor) pairs the 'significant' level was unrealizable, and generation produced identical code under both labels. See docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md section 4.",
       "status": "done"
     }
   ]
