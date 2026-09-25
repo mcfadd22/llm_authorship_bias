@@ -78,7 +78,7 @@ path (retained for the hand-constructed flavours).
 2. **Mutate.** `scripts/corpus/mutate.py` applies one operator per candidate: ROR, COR, AOR,
    boundary shift, statement deletion — the operators already grounding the
    `logic_error`/`missing_edge_case` rubric in `config/bug_flavor.json`.
-3. **Verify behaviour by execution.** Run the aim's tests (§4a) against both versions.
+3. **Verify behaviour by execution.** Run the aim's tests (§4b) against both versions.
    This needs a subprocess and a timeout, not a security sandbox: mutating a loop condition
    readily produces a non-terminating function, and that must not take the runner down. The
    upstream HumanEval harness sandboxes because it executes free-form model output; here the
@@ -134,7 +134,54 @@ definition; the ratio is a documented approximation.
 persisting across calls* — unambiguously `significant`, with no trivial variant. Combined with
 §8's gating, the identical-code pair becomes unconstructible rather than merely wrong.
 
-## 4a. Per-aim contract and executable tests
+## 4a. `severity_tier` demoted from manipulated factor to recorded covariate
+
+**Decision: `severity_tier` is no longer a crossed experimental factor.** It stays on every
+item as a recorded field, assigned from §4's rubric, and is available for post-hoc
+exploration — but it is not manipulated, and cells are enumerated as (aim × flavour) only.
+
+The reason is that §4's severity rubric and §6a's flavour rubric, applied consistently, make
+severity a near-deterministic function of flavour. Five of seven flavours admit exactly one
+tier:
+
+| Flavour | Permitted tier | Why the other is empty |
+|---|---|---|
+| `missing_edge_case` | `trivial` | Flavour requires normal inputs to work; `significant` requires them not to |
+| `logic_error` | `significant` | Flavour requires ordinary inputs wrong |
+| `wrong_algorithm` | `significant` | Computing a different quantity is not a boundary failure |
+| `security_vulnerability` | `significant` | A defeated check is an ordinary input handled wrongly |
+| `copy_paste_residue` | `trivial` | Behaviourally inert code cannot make ordinary results wrong |
+| `known_trap` | either | `significant` iff the trap persists across calls |
+| `silent_failure` | either | `significant` iff it conceals a wrong primary result |
+
+This is not an artefact of the new rubrics. `missing_edge_case × significant` was never
+constructible — "normal inputs work, a boundary fails" and "ordinary inputs are wrong" are
+direct negations — and both wave-1 items in that cell were flagged in review. The old
+blast-radius definition concealed the contradiction by making severity a deployment-context
+property that the artefact could not settle either way.
+
+Keeping a factor that is collinear with another factor would mean `severity_tier` main effects
+and `severity_tier:author_label` interactions are not separately estimable from `bug_flavor`.
+The wave-1 severity moderation reported in `analysis/` (Opus +1.38 significant vs +1.18
+trivial) was in part measuring flavour composition.
+
+Consequences:
+
+- `docs/design.md` §1 — `severity_tier` moves out of the manipulated-factors table into a
+  recorded-properties note, alongside `stated_aim`.
+- `docs/design.md` §6.2 — the `severity_tier` main effect and its `author_label` interaction
+  are removed as planned analyses. Any severity contrast reported later is **observational**,
+  confounded with flavour, and must be labelled as such.
+- §6.1 is untouched. H1–H3 are label contrasts within item; they never used severity.
+- Cell enumeration becomes (aim × flavour), 28 pairs rather than 41 triples. **This buys back
+  power**: the freed budget goes to `samples_per_cell`, so 28 cells at 3 samples is 84 items
+  against wave 1's 41, on the same factor structure.
+
+If a later exploratory pass finds something that makes severity worth manipulating again, the
+field is already recorded on every item and the rubric is already written; reinstating it means
+re-crossing the factor, not reconstructing the definition.
+
+## 4b. Per-aim contract and executable tests
 
 The wave-1 review's hardest cases were not mislabelled items. They were items where *correct*
 was undefined: 16/17 (what should an empty list return?), 12 ("neither the stated aim nor code
@@ -270,7 +317,7 @@ battery's presupposition is relaxed for it.
   as sufficient for flavour assignment; replace the Open Items provenance placeholder with a
   pointer to §5.
 - **`docs/design.md` §1** — `severity_tier` row cites the behavioural rubric (§4); `stated_aim`
-  row notes that each aim now carries a `contract` (§4a).
+  row notes that each aim now carries a `contract` (§4b).
 - **`docs/config-schema.md`** — document the `provenance` object, the `contract` field and
   `config/contracts/`, the per-(aim × flavour) gating in §8, and the rewritten
   `severity_tier.json` definitions.
@@ -283,7 +330,7 @@ battery's presupposition is relaxed for it.
   `security_vulnerability`, `silent_failure`, `copy_paste_residue`, `known_trap` and
   `wrong_algorithm`. The plumbing exists; only the data is missing.
 
-## 8. Per-(aim × flavour) severity gating
+## 8. Per-(aim × flavour) schema
 
 Independent of corpus grounding, and required regardless.
 
@@ -308,16 +355,25 @@ Schema becomes:
 ```
 
 `compatible_bug_flavors` and `severity_tiers_supported` are replaced by this single nested
-map. `scripts/vignette_gen/config.py` validates it; `scripts/vignette_gen/cells.py`
-enumerates (aim, flavour, tier) only where the tier is listed for that pair. Impossible cells
-are never requested rather than requested and fudged.
+map. `scripts/vignette_gen/config.py` validates it.
 
-The initial map is **derived** from §6a's flavour rubric crossed with §4's severity rubric —
-which already rules out `missing_edge_case × significant`, `logic_error × trivial`,
-`wrong_algorithm × trivial` and `copy_paste_residue × significant` except where cross-call
-persistence applies — then hand-checked per aim. Deriving it first means the gating encodes
-the same distinctions the coders apply, rather than a separate set of judgements that can
-drift from them.
+**With §4a's demotion, this map no longer gates enumeration.**
+`scripts/vignette_gen/cells.py` enumerates (aim × flavour) pairs, and `severity_tiers` is read
+as the tier or tiers a given pair is *expected* to produce — derived from §6a's flavour rubric
+crossed with §4's severity rubric, then hand-checked per aim. Its two uses are:
+
+1. **A review check.** An item whose reviewed severity falls outside its pair's expected set is
+   a signal that either the item or the rubric is wrong. `add_note × known_trap` expects
+   `["significant"]` only, so a `trivial` item under it is flagged rather than silently
+   accepted — which is precisely the wave-1 failure.
+2. **A reinstatement path.** If a later exploratory pass makes severity worth manipulating
+   again (§4a), the pairs that genuinely support both tiers are already identified and
+   enumeration can re-cross them without rebuilding the analysis.
+
+Deriving the map from the two rubrics rather than writing it by hand means it encodes the same
+distinctions the coders apply, instead of a parallel set of judgements that can drift. Of the
+28 (aim × flavour) pairs, 22 are settled by the rubrics alone; the remaining six are all
+`known_trap` or `silent_failure`, the two flavours §4a leaves genuinely variable.
 
 ## 9. Known limits
 
@@ -327,7 +383,7 @@ drift from them.
   there is nothing to mutate *into* a missing authorisation check. That is a property of the
   chosen corpus, not of mutation as a technique. The binding constraint is narrower: **does an
   executable spec exist for this item?** HumanEval ships one; for a Bandit-seeded auth item we
-  write one (§4a), roughly five lines asserting an unauthorised caller is rejected. With that
+  write one (§4b), roughly five lines asserting an unauthorised caller is rejected. With that
   in place a deleted check fails a `typical` case and severity assignment works identically.
   All seven flavours are reachable; three arrive with tests already written, four need tests
   authored alongside the item.
