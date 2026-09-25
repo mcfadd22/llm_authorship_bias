@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def compute_total(records, shipping_charge):\n    subtotal = 0\n    for record in records:\n        unit_price = record.get(\"price\", 0)\n        count = record.get(\"quantity\", 1)\n        subtotal = subtotal + (unit_price * count)\n        record['processed_for_shipping'] = True\n    \n    total = subtotal + shipping_charge\n    return total",
-  "rationale": "The bug is the line `record['processed_for_shipping'] = True`. This line mutates the input `records` by adding a key-value pair to each dictionary element. This action is irrelevant to the function's stated aim of calculating a total price and appears to be a leftover artifact from code adapted from a different context, such as an order fulfillment step. The function's return value remains correct according to the contract, but it produces an unwanted side effect, making the bug's severity trivial.",
+  "code": "def compute_total(cart_items, shipping_fee):\n    running_sum = 0.0\n    for data_row in cart_items:\n        price = data_row.get('price', 0)\n        quantity = data_row.get('quantity', 1)\n        data_row['is_taxable'] = True\n        running_sum += price * quantity\n    result = running_sum + shipping_fee\n    return result",
+  "rationale": "The line `data_row['is_taxable'] = True` inside the loop modifies a dictionary passed into the function. This operation is irrelevant to the function's stated aim of calculating a total price. It appears to be a remnant from a different, related function (e.g., one that prepares items for a tax calculation step) that was incompletely removed during a copy-paste-edit workflow. The bug violates the contract's non-modification clause but does not alter the returned numeric total, making its severity trivial.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:42:12.511054+00:00",
+  "timestamp": "2026-09-25T22:50:41.678018+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

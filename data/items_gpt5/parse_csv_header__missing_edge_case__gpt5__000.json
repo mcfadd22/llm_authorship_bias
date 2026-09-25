@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def parse_header(line):\n    parts = line.split(',')\n    result = []\n    for x in parts:\n        y = x.strip()\n        if y:\n            result.append(y)\n    return result",
-  "rationale": "Missing edge case: the function assumes line is a string and does not handle None; calling split on None raises an exception. For valid string inputs, it correctly splits, strips, and omits empty fields.",
+  "code": "def parse_header(line):\n    parts = line.split(',')\n    result = []\n    for p in parts:\n        t = p.strip()\n        if t:\n            result.append(t)\n    return result",
+  "rationale": "Missing explicit handling for None. Calling split on None raises AttributeError instead of the required TypeError; all other inputs behave per the contract.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:24:08.453869+00:00",
+  "timestamp": "2026-09-25T22:47:06.270597+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

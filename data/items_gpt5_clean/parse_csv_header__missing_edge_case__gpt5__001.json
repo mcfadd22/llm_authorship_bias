@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "parse_csv_header__missing_edge_case__gpt5__001",
-  "code": "def parse_header(line):\n    if line is None:\n        return []\n    parts = line.split(',')\n    result = []\n    for part in parts:\n        name = part.strip()\n        if name:\n            result.append(name)\n    return result",
-  "fix_rationale": "Added a guard to treat None input as a blank line by returning an empty list, preventing an exception from calling split on None.",
+  "code": "def parse_header(line):\n    if line is None:\n        raise TypeError(\"line must not be None\")\n    parts = line.split(\",\")\n    out = []\n    for x in parts:\n        y = x.strip()\n        if y:\n            out.append(y)\n    return out",
+  "fix_rationale": "Added an explicit None check to raise TypeError as required; normal string processing remains unchanged.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:50:15.135104+00:00",
+  "timestamp": "2026-09-25T22:51:25.009914+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

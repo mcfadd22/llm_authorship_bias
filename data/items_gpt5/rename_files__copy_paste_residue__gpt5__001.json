@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def apply_suffix(filenames, suffix):\n    result = []\n    renamed_pairs = []\n    for name in filenames:\n        idx = name.rfind('.')\n        if idx > 0:\n            base = name[:idx]\n            ext = name[idx:]\n        else:\n            base = name\n            ext = \"\"\n        new_name = base + suffix + ext\n        renamed_pairs.append((name, new_name))\n        result.append(new_name)\n    return result",
-  "rationale": "A leftover variable renamed_pairs collects (old,new) tuples as if for a renaming routine but is never used. This copy-paste residue causes minor unnecessary work without affecting the returned list of suffixed filenames.",
+  "code": "def insert_suffix_before_extension(names, suffix):\n    result = []\n    renamed_count = 0\n    for name in names:\n        idx = name.rfind('.')\n        if idx > 0:\n            result.append(name[:idx] + suffix + name[idx:])\n        else:\n            result.append(name)\n        renamed_count += 1\n    return result",
+  "rationale": "A copy-paste residue variable named 'renamed_count' is incremented each loop iteration but never used. It appears to be left over from a related function that tracked how many items were processed. This adds dead code without affecting the primary result, fitting the trivial copy_paste_residue bug flavor.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:41:46.842134+00:00",
+  "timestamp": "2026-09-25T22:47:37.497910+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

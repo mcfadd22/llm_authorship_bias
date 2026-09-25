@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "format_address_block__copy_paste_residue__gpt5__000",
-  "code": "def format_shipping_address(name, street, city, postcode):\n    a = str(name).strip()\n    b = str(street).strip()\n    c = f\"{str(city).strip()} {str(postcode).strip()}\"\n    return a + \"\\n\" + b + \"\\n\" + c\n",
-  "fix_rationale": "Removed the stray print statement to avoid side effects and ensure only the formatted shipping address is returned as specified.",
+  "code": "def format_shipping_address(data):\n    name = data.get('shipping_name', '') or ''\n    street = data.get('shipping_street', '') or ''\n    city = data.get('shipping_city', '') or ''\n    postcode = data.get('shipping_postcode', '') or ''\n    line3 = \"{} {}\".format(city, postcode).strip()\n    return \"\\n\".join([str(name), str(street), line3])",
+  "fix_rationale": "Removed the unused billing_line that referenced billing fields. Also normalized field values to safe strings to prevent type errors and ensure only the shipping fields appear in the output.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:49:53.291824+00:00",
+  "timestamp": "2026-09-25T22:51:27.753818+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

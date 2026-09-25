@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "build_invoice_summary__copy_paste_residue__gemini25pro__001",
-  "code": "def build_summary(input_doc):\n    record = {}\n    record['total'] = input_doc['total_amount']\n    record['currency'] = input_doc['currency_code']\n    record['issued_at'] = input_doc['date_of_issue']\n    return record",
-  "fix_rationale": "The extraneous line adding the 'payment_total' key to the dictionary was removed. This ensures the function returns a dictionary with exactly the three keys required by the contract.",
+  "code": "def create_invoice_summary(invoice_data):\n    summary = {\n        'total': invoice_data['total'],\n        'currency': invoice_data['currency'],\n        'issued_at': invoice_data['issue_date']\n    }\n    return summary",
+  "fix_rationale": "The line that added the extra 'customer_id' key to the summary dictionary was removed. This change ensures that the returned dictionary strictly adheres to the contract by containing only the specified 'total', 'currency', and 'issued_at' keys.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:52:24.114375+00:00",
+  "timestamp": "2026-09-25T22:52:17.405251+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

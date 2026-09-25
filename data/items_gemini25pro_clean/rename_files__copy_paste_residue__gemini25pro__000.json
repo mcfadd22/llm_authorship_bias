@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "rename_files__copy_paste_residue__gemini25pro__000",
-  "code": "import os\n\ndef process_entries(items, tag):\n    output_list = []\n    for entry in items:\n        base, extension = os.path.splitext(entry)\n        new_entry = f\"{base}{tag}{extension}\"\n        output_list.append(new_entry)\n    return output_list",
-  "fix_rationale": "The fix removes the creation and population of the `entry_mapping` dictionary, which was unused and served no purpose in the function's logic.",
+  "code": "import os\n\ndef process_filenames(filenames, append_str):\n    processed_names = []\n    for name in filenames:\n        base, ext = os.path.splitext(name)\n        new_name = f\"{base}{append_str}{ext}\"\n        processed_names.append(new_name)\n    return processed_names",
+  "fix_rationale": "The unused dictionary `name_map` and the code that populated it were removed, as they performed unnecessary work and consumed memory without affecting the function's output.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:54:52.095388+00:00",
+  "timestamp": "2026-09-25T22:52:28.173105+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

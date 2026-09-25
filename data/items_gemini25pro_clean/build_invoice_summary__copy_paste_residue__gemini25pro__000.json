@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "build_invoice_summary__copy_paste_residue__gemini25pro__000",
-  "code": "def generate_invoice_report(invoice_details):\n    report = {}\n    report['total'] = invoice_details['total']\n    report['currency'] = invoice_details['currency']\n    report['issued_at'] = invoice_details['issue_date']\n    return report",
-  "fix_rationale": "The two lines that unnecessarily added and then immediately deleted the `shipping_id` key were removed, as this operation was redundant and did not conform to the function's contract.",
+  "code": "def format_invoice_data(invoice_details):\n    summary = {}\n    summary['total'] = invoice_details['amount']\n    summary['currency'] = invoice_details['currency_code']\n    summary['issued_at'] = invoice_details['date']\n    return summary",
+  "fix_rationale": "The line that added the superfluous 'order_ref' key to the dictionary has been removed. This ensures the returned dictionary contains only the three keys specified by the contract.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:52:17.373570+00:00",
+  "timestamp": "2026-09-25T22:52:16.670125+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

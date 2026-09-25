@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def extract_fields(csv_header):\n    components = csv_header.split(',')\n    final_list = []\n    for c in components:\n        processed_c = c.strip()\n        if processed_c:\n            final_list.append(processed_c)\n    return final_list",
-  "rationale": "The function is correct for all string inputs, including empty or whitespace-only strings. However, it fails to handle the degenerate input `None`. If `csv_header` is `None`, the first line `csv_header.split(',')` will raise an `AttributeError`, causing a crash. This represents a missing edge case check for a non-string, null-type input that a robust implementation should handle gracefully (e.g., by returning an empty list).",
+  "code": "def process_header(header_line):\n    return [\n        field.strip()\n        for field in header_line.split(',')\n        if field.strip()\n    ]",
+  "rationale": "The function does not handle the edge case of a `None` input as specified by the contract. The contract requires a `TypeError` to be raised for `None` input, but the code proceeds to call `header_line.split(',')` which results in an `AttributeError`. This is a missing edge case check, as the core logic for processing valid string inputs is correct.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:40:43.095340+00:00",
+  "timestamp": "2026-09-25T22:48:23.456164+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "cart_total__copy_paste_residue__gpt5__000",
-  "code": "def total_price_with_shipping(cart, shipping_fee):\n    total = 0\n    if cart:\n        for item in cart:\n            price = item.get('price', 0)\n            qty = item.get('quantity', 1)\n            total += (0 if price is None else price) * (1 if qty is None else qty)\n    return total + shipping_fee\n",
-  "fix_rationale": "Removed the stray print statement to eliminate the unrelated console side effect while preserving correct calculation and handling of missing or None values.",
+  "code": "def total_price_with_shipping(cart, shipping_fee):\n    total = 0.0\n    for item in cart:\n        price = item.get('price', 0)\n        qty = item.get('quantity', 1)\n        try:\n            p = float(price)\n        except (TypeError, ValueError):\n            p = 0.0\n        try:\n            q = int(qty)\n        except (TypeError, ValueError):\n            q = 1\n        total += p * q\n    return total + shipping_fee",
+  "fix_rationale": "Removed the stray print statement to ensure no console output, preserving all other logic so the function returns only the computed total plus shipping.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:49:31.695758+00:00",
+  "timestamp": "2026-09-25T22:51:22.693852+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

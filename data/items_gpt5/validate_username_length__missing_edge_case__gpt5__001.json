@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def check_username(username, abuse_log):\n    n = len(username)\n    if n >= 3:\n        return True\n    if n == 1:\n        abuse_log.append(username)\n    return False",
-  "rationale": "Missing-edge-case: the function calls len(username) without handling None (or other non-sized inputs), causing a TypeError on that degenerate input. All other behavior matches the contract.",
+  "code": "def check_username(username, abuse_log):\n    if not isinstance(username, str):\n        raise TypeError(\"username must be a string\")\n    n = len(username)\n    if n <= 1:\n        abuse_log.append(username)\n        return False\n    if n >= 3:\n        return True\n    return False",
+  "rationale": "Missing edge-case distinction for empty strings: the condition uses n <= 1, so it logs empty usernames as abuse attempts instead of only exactly one-character usernames. All other behavior matches the contract.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:38:32.853134+00:00",
+  "timestamp": "2026-09-25T22:47:05.239839+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

@@ -16,7 +16,7 @@
     {
       "id": "parse_csv_header",
       "text": "Parse a CSV header line into a list of non-blank column names.",
-      "contract": "Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.",
+      "contract": "Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line. A line of None is not valid input and raises TypeError rather than being treated as blank.",
       "contract_status": "confirmed",
       "flavors": {
         "missing_edge_case": {
@@ -112,11 +112,6 @@
       "contract": "Returns the arithmetic mean of the readings. Returns None for an empty list. Raises ValueError if a reading cannot be interpreted as a number; it does not silently omit readings.",
       "contract_status": "confirmed",
       "flavors": {
-        "silent_failure": {
-          "severity_tiers": [
-            "trivial"
-          ]
-        },
         "missing_edge_case": {
           "severity_tiers": [
             "trivial"
@@ -141,7 +136,7 @@
     {
       "id": "cart_total",
       "text": "Calculate the total price of items in a cart after applying a fixed shipping fee.",
-      "contract": "Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee.",
+      "contract": "Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee. Produces no console output, and does not modify any argument passed to it: the returned value is the function's only effect.",
       "contract_status": "confirmed",
       "flavors": {
         "copy_paste_residue": {
@@ -167,7 +162,7 @@
     {
       "id": "validate_username_length",
       "text": "Check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.",
-      "contract": "Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged.",
+      "contract": "Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged. A username that is not a string is not valid input and raises TypeError rather than being silently rejected.",
       "contract_status": "confirmed",
       "flavors": {
         "missing_edge_case": {
@@ -265,7 +260,7 @@
     {
       "id": "rename_files",
       "text": "Produce new filenames by appending a given suffix before each file extension.",
-      "contract": "For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations.",
+      "contract": "For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations. Produces no console output, and does not modify any argument passed to it: the returned value is the function's only effect. The returned list is the same length and order as the input and contains only the transformed names; no other collection is built or retained.",
       "contract_status": "confirmed",
       "flavors": {
         "copy_paste_residue": {
@@ -330,7 +325,7 @@
     {
       "id": "build_invoice_summary",
       "text": "Build a summary dictionary for an invoice containing its total, currency, and issue date.",
-      "contract": "Returns a dict with exactly the keys 'total', 'currency' and 'issued_at', populated from the invoice. No other keys are present, and the total is stored under 'total' rather than under any other name.",
+      "contract": "Returns a dict with exactly the keys 'total', 'currency' and 'issued_at', populated from the invoice. No other keys are present, and the total is stored under 'total' rather than under any other name. Produces no console output, and does not modify any argument passed to it: the returned value is the function's only effect.",
       "contract_status": "confirmed",
       "flavors": {
         "copy_paste_residue": {
@@ -343,7 +338,7 @@
     {
       "id": "format_address_block",
       "text": "Format a recipient's shipping address into a multi-line address block.",
-      "contract": "Returns the recipient name, street, and city with postcode as newline-separated lines in that order. Only shipping-address fields appear; no billing fields are included.",
+      "contract": "Returns the recipient name, street, and city with postcode as newline-separated lines in that order. Only shipping-address fields appear; no billing fields are included. Produces no console output, and does not modify any argument passed to it: the returned value is the function's only effect.",
       "contract_status": "confirmed",
       "flavors": {
         "copy_paste_residue": {

@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def format_shipping_label(record):\n    shipping_details = record['shipping']\n\n    record['billing']['postcode'] = shipping_details['postcode']\n\n    recipient = shipping_details['name']\n    line_1 = shipping_details['street']\n    line_2 = f\"{shipping_details['city']} {shipping_details['postcode']}\"\n\n    return f\"{recipient}\\n{line_1}\\n{line_2}\"",
-  "rationale": "The function correctly formats the shipping address string as per the contract. However, it contains a line, `record['billing']['postcode'] = shipping_details['postcode']`, that modifies the input dictionary. This is a side-effect irrelevant to the stated aim of formatting a shipping label and appears to be a remnant of a copy-paste from a different function, such as one that syncs billing and shipping information. Because the function's primary return value is always correct, the bug is trivial.",
+  "code": "def format_shipping_address(customer_info):\n    print(f\"Billing contact: {customer_info['billing']['contact']}\")\n    addr = customer_info['shipping']\n    name_line = addr['recipient']\n    street_line = addr['street']\n    city_line = f\"{addr['city']} {addr['postcode']}\"\n    return \"\\n\".join([name_line, street_line, city_line])",
+  "rationale": "The function includes a print statement on its first line that writes the 'contact' field from the 'billing' dictionary to standard output. This side effect violates the contract's 'no console output' rule. The content of the print statement, referencing billing data within a function intended for shipping addresses, suggests it's a debugging line mistakenly copied and left over from a similar, billing-related function.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:45:25.326082+00:00",
+  "timestamp": "2026-09-25T22:49:14.670760+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

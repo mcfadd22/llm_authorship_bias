@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def invoice_summary(invoice):\n    profile = {'name': invoice.get('customer_name'), 'email': invoice.get('customer_email')}\n    print('customer_profile:', profile)\n    return {'total': invoice.get('total'), 'currency': invoice.get('currency'), 'issued_at': invoice.get('issued_at')}\n",
-  "rationale": "Copy-paste residue: the function prints a 'customer_profile' built from name/email, clearly from a different context (customer profiling) and unrelated to invoice summarization. This side-effect is extraneous but does not affect the returned dict, so the primary result remains correct.",
+  "code": "def build_invoice_summary(invoice):\n    t = invoice.get('total')\n    c = invoice.get('currency')\n    i = invoice.get('issued_at')\n    print(\"order updated:\", invoice.get('order_id'))\n    return {'total': t, 'currency': c, 'issued_at': i}\n",
+  "rationale": "There is a leftover print statement referencing an 'order' context (print('order updated:', ...)), likely copied from an order-related function. This causes unintended console output, violating the contract\u2019s side-effect constraint, while the returned dict remains correct.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:42:19.856012+00:00",
+  "timestamp": "2026-09-25T22:47:21.720664+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

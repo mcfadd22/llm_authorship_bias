@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "build_invoice_summary__copy_paste_residue__gpt5__000",
-  "code": "def build_invoice_summary(invoice):\n    if invoice is None:\n        invoice = {}\n    t = invoice.get('total')\n    c = invoice.get('currency')\n    i = invoice.get('issued_at')\n    result = {'total': t, 'currency': c, 'issued_at': i}\n    return result",
-  "fix_rationale": "Removed the conditional that added a 'created_at' key so the result always contains exactly 'total', 'currency', and 'issued_at' as required.",
+  "code": "def invoice_summary(invoice):\n    total = invoice.get('total')\n    currency = invoice.get('currency')\n    issued = invoice.get('issued_at')\n    return {'total': total, 'currency': currency, 'issued_at': issued}\n",
+  "fix_rationale": "Removed the unused retrieval of 'order_id' to eliminate dead code while preserving the exact returned keys and behavior.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:49:27.011376+00:00",
+  "timestamp": "2026-09-25T22:51:11.455203+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

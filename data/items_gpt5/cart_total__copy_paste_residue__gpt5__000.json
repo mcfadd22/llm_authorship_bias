@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def total_price_with_shipping(cart, shipping_fee):\n    total = 0\n    if cart:\n        for item in cart:\n            price = item.get('price', 0)\n            qty = item.get('quantity', 1)\n            total += (0 if price is None else price) * (1 if qty is None else qty)\n    print(\"Wrote order subtotal to invoices table:\", total)\n    return total + shipping_fee\n",
-  "rationale": "There is a stray print line referencing an invoices table, evidently copied from invoicing code. It produces an unrelated console side effect but does not alter the returned total. This is copy-paste residue and a trivial defect.",
+  "code": "def total_price_with_shipping(cart, shipping_fee):\n    total = 0.0\n    for item in cart:\n        price = item.get('price', 0)\n        qty = item.get('quantity', 1)\n        try:\n            p = float(price)\n        except (TypeError, ValueError):\n            p = 0.0\n        try:\n            q = int(qty)\n        except (TypeError, ValueError):\n            q = 1\n        total += p * q\n    print(\"Exported CSV: wrote rows for orders\")\n    return total + shipping_fee",
+  "rationale": "Copy-paste residue: a stray print(\"Exported CSV: wrote rows for orders\") remains from a CSV export routine. It violates the contract\u2019s no-console-output rule, but the returned total is correct.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:38:35.162653+00:00",
+  "timestamp": "2026-09-25T22:47:09.471502+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

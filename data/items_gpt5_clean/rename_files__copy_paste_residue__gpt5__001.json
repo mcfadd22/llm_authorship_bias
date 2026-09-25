@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "rename_files__copy_paste_residue__gpt5__001",
-  "code": "def apply_suffix(filenames, suffix):\n    result = []\n    for name in filenames:\n        idx = name.rfind('.')\n        if idx > 0:\n            base = name[:idx]\n            ext = name[idx:]\n        else:\n            base = name\n            ext = \"\"\n        result.append(base + suffix + ext)\n    return result",
-  "fix_rationale": "Removed the unused renamed_pairs variable and its appends to eliminate unnecessary work without changing behavior.",
+  "code": "def insert_suffix_before_extension(names, suffix):\n    result = []\n    for name in names:\n        sep_idx = max(name.rfind('/'), name.rfind('\\\\'))\n        tail = name[sep_idx + 1:] if sep_idx != -1 else name\n        dot_idx = tail.rfind('.')\n        if dot_idx > 0:\n            new_tail = tail[:dot_idx] + suffix + tail[dot_idx:]\n            result.append((name[:sep_idx + 1] + new_tail) if sep_idx != -1 else new_tail)\n        else:\n            result.append(name)\n    return result",
+  "fix_rationale": "Removed the unused renamed_count variable. Also ensured the suffix is inserted only in the final path component so dots in directory names do not cause incorrect modifications.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:50:47.052598+00:00",
+  "timestamp": "2026-09-25T22:52:01.660699+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

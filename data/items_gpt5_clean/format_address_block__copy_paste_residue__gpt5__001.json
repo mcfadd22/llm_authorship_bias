@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "format_address_block__copy_paste_residue__gpt5__001",
-  "code": "def format_shipping_address(data):\n    name = str(data.get('shipping_name', '') or '')\n    street = str(data.get('shipping_street', '') or '')\n    city = str(data.get('shipping_city', '') or '')\n    postcode = str(data.get('shipping_postcode', '') or '')\n    return '\\n'.join([name, street, f\"{city} {postcode}\".strip()])",
-  "fix_rationale": "Removed the unintended mutation of data['billing_postcode'] and ensured all fields are coerced to strings to prevent join errors when values are None or non-strings.",
+  "code": "def format_shipping_address(shipping):\n    name = shipping.get('name', '')\n    street = shipping.get('street', '')\n    city = shipping.get('city', '')\n    postcode = shipping.get('postcode', '')\n    name = '' if name is None else str(name)\n    street = '' if street is None else str(street)\n    city = '' if city is None else str(city)\n    postcode = '' if postcode is None else str(postcode)\n    return \"\\n\".join([name, street, f\"{city} {postcode}\".strip()])",
+  "fix_rationale": "Removed the stray print that referenced billing fields to eliminate side effects, and coerced fields to strings treating None as empty to avoid type errors and ensure consistent output.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:49:55.850945+00:00",
+  "timestamp": "2026-09-25T22:51:29.531790+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

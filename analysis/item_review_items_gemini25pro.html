@@ -1,5 +1,5 @@
 <!doctype html><meta charset="utf-8">
-<title>Item bank review — 64 items</title>
+<title>Item bank review — 62 items</title>
 <style>
  :root { --bg:#fbfaf8; --fg:#1c1a17; --mut:#6b6560; --line:#e3ded7;
           --bug:#fdf0ed; --bugl:#c2410c; --fix:#eef6ef; --fixl:#15803d; }
@@ -53,9 +53,9 @@
 <div class="wrap">
 <header class="top">
   <h1>Item bank review</h1>
-  <span class="meta">64 items · severity open: 6 · significant: 38 · trivial: 20</span>
+  <span class="meta">62 items · severity open: 6 · significant: 38 · trivial: 18</span>
   <button onclick="exportCsv()">Export verdicts CSV</button>
-  <span id="prog">0 / 64 reviewed</span>
+  <span id="prog">0 / 62 reviewed</span>
 </header>
 <p class="meta">Lines marked <span style="color:var(--bugl)">−</span> are the planted bug; <span style="color:var(--fixl)">+</span> is the clean twin's fix.
 Check each item against its declared flavor and tier. Verdicts stay in this page until exported.</p>
@@ -69,11 +69,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
-  <p class="contract"><strong>Contract:</strong> Returns a dict with exactly the keys &#x27;total&#x27;, &#x27;currency&#x27; and &#x27;issued_at&#x27;, populated from the invoice. No other keys are present, and the total is stored under &#x27;total&#x27; rather than under any other name.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def generate_invoice_report(invoice_details):</div><div class="ln"><span class="g">  </span>    report = {}</div><div class="ln"><span class="g">  </span>    report[&#x27;total&#x27;] = invoice_details[&#x27;total&#x27;]</div><div class="ln"><span class="g">  </span>    report[&#x27;currency&#x27;] = invoice_details[&#x27;currency&#x27;]</div><div class="ln"><span class="g">  </span>    report[&#x27;issued_at&#x27;] = invoice_details[&#x27;issue_date&#x27;]</div><div class="ln bug"><span class="g">- </span>    report[&#x27;shipping_id&#x27;] = invoice_details[&#x27;tracking_number&#x27;]</div><div class="ln bug"><span class="g">- </span>    del report[&#x27;shipping_id&#x27;]</div><div class="ln"><span class="g">  </span>    return report</div></div>
+  <p class="contract"><strong>Contract:</strong> Returns a dict with exactly the keys &#x27;total&#x27;, &#x27;currency&#x27; and &#x27;issued_at&#x27;, populated from the invoice. No other keys are present, and the total is stored under &#x27;total&#x27; rather than under any other name. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def format_invoice_data(invoice_details):</div><div class="ln"><span class="g">  </span>    summary = {}</div><div class="ln"><span class="g">  </span>    summary[&#x27;total&#x27;] = invoice_details[&#x27;amount&#x27;]</div><div class="ln"><span class="g">  </span>    summary[&#x27;currency&#x27;] = invoice_details[&#x27;currency_code&#x27;]</div><div class="ln"><span class="g">  </span>    summary[&#x27;issued_at&#x27;] = invoice_details[&#x27;date&#x27;]</div><div class="ln bug"><span class="g">- </span>    summary[&#x27;order_ref&#x27;] = invoice_details[&#x27;id&#x27;]</div><div class="ln"><span class="g">  </span>    return summary</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The bug consists of the two lines that add and then immediately delete the `shipping_id` key. This is a classic copy-paste artifact, likely left over from adapting a function that summarized shipping data. The code unnecessarily accesses `invoice_details[&#x27;tracking_number&#x27;]` and performs a dictionary write and delete. Because the incorrect key is removed before the return, the function&#x27;s output is correct, making the bug&#x27;s severity trivial. A reviewer would identify this as leftover code to be cleaned up.</p>
-    <p class="fix"><strong>Twin fix:</strong> The two lines that unnecessarily added and then immediately deleted the `shipping_id` key were removed, as this operation was redundant and did not conform to the function&#x27;s contract.</p>
+    <p class="rat">The function correctly populates the &#x27;total&#x27;, &#x27;currency&#x27;, and &#x27;issued_at&#x27; fields as required by the contract. The bug is the inclusion of the line `summary[&#x27;order_ref&#x27;] = invoice_details[&#x27;id&#x27;]`. This adds a key, &#x27;order_ref&#x27;, to the returned dictionary, which violates the contract&#x27;s requirement for exactly three specific keys. The key&#x27;s name suggests it was copied from a function for processing a related but different data structure (an &#x27;order&#x27;), and the developer failed to remove it, making it a classic copy-paste residue. Since the contractually required data is present and correct, the bug is trivial.</p>
+    <p class="fix"><strong>Twin fix:</strong> The line that added the superfluous &#x27;order_ref&#x27; key to the dictionary has been removed. This ensures the returned dictionary contains only the three keys specified by the contract.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
   </details>
   <div class="verdict" data-item="build_invoice_summary__copy_paste_residue__gemini25pro__000">
@@ -91,7 +91,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t1" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t1" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t1" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i2">
@@ -103,11 +103,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
-  <p class="contract"><strong>Contract:</strong> Returns a dict with exactly the keys &#x27;total&#x27;, &#x27;currency&#x27; and &#x27;issued_at&#x27;, populated from the invoice. No other keys are present, and the total is stored under &#x27;total&#x27; rather than under any other name.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def build_summary(input_doc):</div><div class="ln"><span class="g">  </span>    record = {}</div><div class="ln"><span class="g">  </span>    record[&#x27;total&#x27;] = input_doc[&#x27;total_amount&#x27;]</div><div class="ln"><span class="g">  </span>    record[&#x27;currency&#x27;] = input_doc[&#x27;currency_code&#x27;]</div><div class="ln"><span class="g">  </span>    record[&#x27;issued_at&#x27;] = input_doc[&#x27;date_of_issue&#x27;]</div><div class="ln bug"><span class="g">- </span>    record[&#x27;payment_total&#x27;] = input_doc[&#x27;total_amount&#x27;]</div><div class="ln"><span class="g">  </span>    return record</div></div>
+  <p class="contract"><strong>Contract:</strong> Returns a dict with exactly the keys &#x27;total&#x27;, &#x27;currency&#x27; and &#x27;issued_at&#x27;, populated from the invoice. No other keys are present, and the total is stored under &#x27;total&#x27; rather than under any other name. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def create_invoice_summary(invoice_data):</div><div class="ln"><span class="g">  </span>    summary = {</div><div class="ln"><span class="g">  </span>        &#x27;total&#x27;: invoice_data[&#x27;total&#x27;],</div><div class="ln"><span class="g">  </span>        &#x27;currency&#x27;: invoice_data[&#x27;currency&#x27;],</div><div class="ln"><span class="g">  </span>        &#x27;issued_at&#x27;: invoice_data[&#x27;issue_date&#x27;]</div><div class="ln"><span class="g">  </span>    }</div><div class="ln bug"><span class="g">- </span>    summary[&#x27;customer_id&#x27;] = invoice_data[&#x27;account_number&#x27;]</div><div class="ln"><span class="g">  </span>    return summary</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The function correctly populates the required keys &#x27;total&#x27;, &#x27;currency&#x27;, and &#x27;issued_at&#x27;. However, it also populates an extraneous key, &#x27;payment_total&#x27;. This is a copy-paste residue error, where a line from a similar function (e.g., for processing payments) was left in, violating the contract&#x27;s requirement for exactly three keys. The primary result is correct, but the returned dictionary contains unnecessary data, making the bug&#x27;s severity trivial.</p>
-    <p class="fix"><strong>Twin fix:</strong> The extraneous line adding the &#x27;payment_total&#x27; key to the dictionary was removed. This ensures the function returns a dictionary with exactly the three keys required by the contract.</p>
+    <p class="rat">The function correctly populates the required &#x27;total&#x27;, &#x27;currency&#x27;, and &#x27;issued_at&#x27; fields. However, it also adds a &#x27;customer_id&#x27; key to the summary dictionary. This violates the contract which specifies that *only* the three required keys should be present. The presence of this extra key, which is plausible in a broader context but not in the specified summary, is a classic copy-paste residue error where a line from a different, related function (e.g., creating a full customer record) was erroneously included.</p>
+    <p class="fix"><strong>Twin fix:</strong> The line that added the extra &#x27;customer_id&#x27; key to the summary dictionary was removed. This change ensures that the returned dictionary strictly adheres to the contract by containing only the specified &#x27;total&#x27;, &#x27;currency&#x27;, and &#x27;issued_at&#x27; keys.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
   </details>
   <div class="verdict" data-item="build_invoice_summary__copy_paste_residue__gemini25pro__001">
@@ -125,7 +125,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t2" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t2" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t2" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i3">
@@ -137,11 +137,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Calculate the total price of items in a cart after applying a fixed shipping fee.</p>
-  <p class="contract"><strong>Contract:</strong> Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def process_order(cart_data, fee):</div><div class="ln"><span class="g">  </span>    total_value = 0</div><div class="ln bug"><span class="g">- </span>    total_weight = 0</div><div class="ln"><span class="g">  </span>    for item in cart_data:</div><div class="ln"><span class="g">  </span>        price = item.get(&#x27;price&#x27;, 0)</div><div class="ln"><span class="g">  </span>        quantity = item.get(&#x27;quantity&#x27;, 1)</div><div class="ln bug"><span class="g">- </span>        weight = item.get(&#x27;weight&#x27;, 0)</div><div class="ln"><span class="g">  </span>        total_value += price * quantity</div><div class="ln bug"><span class="g">- </span>        total_weight += weight * quantity</div><div class="ln"><span class="g">  </span>    return total_value + fee</div></div>
+  <p class="contract"><strong>Contract:</strong> Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_total(cart_items, shipping_fee):</div><div class="ln"><span class="g">  </span>    subtotal = 0.0</div><div class="ln bug"><span class="g">- </span>    num_items = 0</div><div class="ln"><span class="g">  </span>    for entry in cart_items:</div><div class="ln"><span class="g">  </span>        price = entry.get(&#x27;price&#x27;, 0)</div><div class="ln"><span class="g">  </span>        qty = entry.get(&#x27;quantity&#x27;, 1)</div><div class="ln bug"><span class="g">- </span>        num_items += qty</div><div class="ln"><span class="g">  </span>        subtotal += price * qty</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>    final_total = subtotal + shipping_fee</div><div class="ln"><span class="g">  </span>    return final_total</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The function correctly calculates the total price plus the fee. However, it also initializes, fetches data for, and computes a `total_weight` variable which is then never used. This is a classic copy-paste residue bug, where logic from a similar but different function (e.g., one for calculating shipping weight) was left in. The bug causes unnecessary computation but does not affect the correctness of the final returned value, making its severity trivial.</p>
-    <p class="fix"><strong>Twin fix:</strong> The unused `total_weight` variable and all associated calculations were removed. This eliminates the dead code without altering the function&#x27;s output or behavior.</p>
+    <p class="rat">The bug is the initialization and incrementing of the `num_items` variable. This variable is calculated within the loop but is never used in the final result or returned. This is a copy-paste residue artifact, where logic for counting the total number of items was likely copied from a related function (e.g., one that reports both price and item count) and was not removed. The function&#x27;s primary result (the total price) is calculated correctly, so the bug is trivial.</p>
+    <p class="fix"><strong>Twin fix:</strong> The initialization and incrementing of the `num_items` variable were removed as it was calculated but never used. This dead code did not affect the function&#x27;s output.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
   </details>
   <div class="verdict" data-item="cart_total__copy_paste_residue__gemini25pro__000">
@@ -159,7 +159,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t3" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t3" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t3" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i4">
@@ -171,11 +171,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Calculate the total price of items in a cart after applying a fixed shipping fee.</p>
-  <p class="contract"><strong>Contract:</strong> Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def compute_total(records, shipping_charge):</div><div class="ln"><span class="g">  </span>    subtotal = 0</div><div class="ln"><span class="g">  </span>    for record in records:</div><div class="ln"><span class="g">  </span>        unit_price = record.get(&quot;price&quot;, 0)</div><div class="ln"><span class="g">  </span>        count = record.get(&quot;quantity&quot;, 1)</div><div class="ln"><span class="g">  </span>        subtotal = subtotal + (unit_price * count)</div><div class="ln bug"><span class="g">- </span>        record[&#x27;processed_for_shipping&#x27;] = True</div><div class="ln"><span class="g">  </span>    </div><div class="ln"><span class="g">  </span>    total = subtotal + shipping_charge</div><div class="ln"><span class="g">  </span>    return total</div></div>
+  <p class="contract"><strong>Contract:</strong> Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def compute_total(cart_items, shipping_fee):</div><div class="ln"><span class="g">  </span>    running_sum = 0.0</div><div class="ln"><span class="g">  </span>    for data_row in cart_items:</div><div class="ln"><span class="g">  </span>        price = data_row.get(&#x27;price&#x27;, 0)</div><div class="ln"><span class="g">  </span>        quantity = data_row.get(&#x27;quantity&#x27;, 1)</div><div class="ln bug"><span class="g">- </span>        data_row[&#x27;is_taxable&#x27;] = True</div><div class="ln"><span class="g">  </span>        running_sum += price * quantity</div><div class="ln"><span class="g">  </span>    result = running_sum + shipping_fee</div><div class="ln"><span class="g">  </span>    return result</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The bug is the line `record[&#x27;processed_for_shipping&#x27;] = True`. This line mutates the input `records` by adding a key-value pair to each dictionary element. This action is irrelevant to the function&#x27;s stated aim of calculating a total price and appears to be a leftover artifact from code adapted from a different context, such as an order fulfillment step. The function&#x27;s return value remains correct according to the contract, but it produces an unwanted side effect, making the bug&#x27;s severity trivial.</p>
-    <p class="fix"><strong>Twin fix:</strong> The line that added a &#x27;processed_for_shipping&#x27; key to each input record was removed. This change prevents the function from mutating its input arguments, which was an unintended side effect.</p>
+    <p class="rat">The line `data_row[&#x27;is_taxable&#x27;] = True` inside the loop modifies a dictionary passed into the function. This operation is irrelevant to the function&#x27;s stated aim of calculating a total price. It appears to be a remnant from a different, related function (e.g., one that prepares items for a tax calculation step) that was incompletely removed during a copy-paste-edit workflow. The bug violates the contract&#x27;s non-modification clause but does not alter the returned numeric total, making its severity trivial.</p>
+    <p class="fix"><strong>Twin fix:</strong> The line `data_row[&#x27;is_taxable&#x27;] = True` was removed because it modified one of the function&#x27;s arguments, creating a side effect that violates the contract&#x27;s non-modification clause.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
   </details>
   <div class="verdict" data-item="cart_total__copy_paste_residue__gemini25pro__001">
@@ -193,7 +193,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t4" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t4" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t4" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i5">
@@ -205,11 +205,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Format a recipient&#x27;s shipping address into a multi-line address block.</p>
-  <p class="contract"><strong>Contract:</strong> Returns the recipient name, street, and city with postcode as newline-separated lines in that order. Only shipping-address fields appear; no billing fields are included.</p>
-  <div class="code"><div class="ln bug"><span class="g">- </span>import json</div><div class="ln bug"><span class="g">- </span>&nbsp;</div><div class="ln"><span class="g">  </span>def create_address_label(record):</div><div class="ln"><span class="g">  </span>    info = record[&#x27;shipping_details&#x27;]</div><div class="ln"><span class="g">  </span>    line_1 = info[&#x27;name&#x27;]</div><div class="ln"><span class="g">  </span>    line_2 = info[&#x27;street&#x27;]</div><div class="ln"><span class="g">  </span>    line_3 = f&quot;{info[&#x27;city&#x27;]} {info[&#x27;postcode&#x27;]}&quot;</div><div class="ln bug"><span class="g">- </span>    record[&#x27;billing_details_processed&#x27;] = True</div><div class="ln"><span class="g">  </span>    return f&quot;{line_1}\n{line_2}\n{line_3}&quot;</div></div>
+  <p class="contract"><strong>Contract:</strong> Returns the recipient name, street, and city with postcode as newline-separated lines in that order. Only shipping-address fields appear; no billing fields are included. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_record(record_data):</div><div class="ln"><span class="g">  </span>    name = record_data[&#x27;shipping&#x27;][&#x27;recipient&#x27;]</div><div class="ln"><span class="g">  </span>    address_line_1 = record_data[&#x27;shipping&#x27;][&#x27;street&#x27;]</div><div class="ln"><span class="g">  </span>    locality = record_data[&#x27;shipping&#x27;][&#x27;city&#x27;]</div><div class="ln"><span class="g">  </span>    postal_code = record_data[&#x27;shipping&#x27;][&#x27;postcode&#x27;]</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln bug"><span class="g">- </span>    record_data[&#x27;billing&#x27;][&#x27;status_code&#x27;] = 1</div><div class="ln bug"><span class="g">- </span>&nbsp;</div><div class="ln"><span class="g">  </span>    result_string = f&quot;{name}\n{address_line_1}\n{locality} {postal_code}&quot;</div><div class="ln"><span class="g">  </span>    return result_string</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The bug is the line `record[&#x27;billing_details_processed&#x27;] = True`. The function&#x27;s purpose is to process the `shipping_details` part of the input, but it sets a flag related to `billing_details`. This is a plausible copy-paste residue from a similar function that processes billing information, where the developer forgot to update this line for the new context. The function&#x27;s primary return value is correct, but it produces an erroneous side-effect on its input.</p>
-    <p class="fix"><strong>Twin fix:</strong> The line that modified the input dictionary by setting a &#x27;billing_details_processed&#x27; flag was removed. This change eliminates the incorrect side-effect, as the function should only format shipping details, not alter unrelated data.</p>
+    <p class="rat">The bug is the line `record_data[&#x27;billing&#x27;][&#x27;status_code&#x27;] = 1`. This line modifies the input dictionary, which violates the contract&#x27;s requirement that the function &#x27;does not modify any argument passed to it&#x27;. The operation itself—setting a status code on the &#x27;billing&#x27; portion of the data—is completely unrelated to formatting a shipping address and is a clear artifact of code being copied from a different context (e.g., a function that processes billing information) without being fully cleaned up. Because the function&#x27;s primary return value (the formatted address string) is correct, the bug&#x27;s severity is trivial.</p>
+    <p class="fix"><strong>Twin fix:</strong> The line that modified the input dictionary `record_data` was removed. This change ensures the function adheres to the contract, which forbids modifying arguments, and removes the unintended side effect.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
   </details>
   <div class="verdict" data-item="format_address_block__copy_paste_residue__gemini25pro__000">
@@ -227,7 +227,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t5" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t5" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t5" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i6">
@@ -239,11 +239,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Format a recipient&#x27;s shipping address into a multi-line address block.</p>
-  <p class="contract"><strong>Contract:</strong> Returns the recipient name, street, and city with postcode as newline-separated lines in that order. Only shipping-address fields appear; no billing fields are included.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def format_shipping_label(record):</div><div class="ln"><span class="g">  </span>    shipping_details = record[&#x27;shipping&#x27;]</div><div class="ln bug"><span class="g">- </span>&nbsp;</div><div class="ln bug"><span class="g">- </span>    record[&#x27;billing&#x27;][&#x27;postcode&#x27;] = shipping_details[&#x27;postcode&#x27;]</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>    recipient = shipping_details[&#x27;name&#x27;]</div><div class="ln"><span class="g">  </span>    line_1 = shipping_details[&#x27;street&#x27;]</div><div class="ln"><span class="g">  </span>    line_2 = f&quot;{shipping_details[&#x27;city&#x27;]} {shipping_details[&#x27;postcode&#x27;]}&quot;</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>    return f&quot;{recipient}\n{line_1}\n{line_2}&quot;</div></div>
+  <p class="contract"><strong>Contract:</strong> Returns the recipient name, street, and city with postcode as newline-separated lines in that order. Only shipping-address fields appear; no billing fields are included. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def format_shipping_address(customer_info):</div><div class="ln bug"><span class="g">- </span>    print(f&quot;Billing contact: {customer_info[&#x27;billing&#x27;][&#x27;contact&#x27;]}&quot;)</div><div class="ln"><span class="g">  </span>    addr = customer_info[&#x27;shipping&#x27;]</div><div class="ln"><span class="g">  </span>    name_line = addr[&#x27;recipient&#x27;]</div><div class="ln"><span class="g">  </span>    street_line = addr[&#x27;street&#x27;]</div><div class="ln"><span class="g">  </span>    city_line = f&quot;{addr[&#x27;city&#x27;]} {addr[&#x27;postcode&#x27;]}&quot;</div><div class="ln"><span class="g">  </span>    return &quot;\n&quot;.join([name_line, street_line, city_line])</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The function correctly formats the shipping address string as per the contract. However, it contains a line, `record[&#x27;billing&#x27;][&#x27;postcode&#x27;] = shipping_details[&#x27;postcode&#x27;]`, that modifies the input dictionary. This is a side-effect irrelevant to the stated aim of formatting a shipping label and appears to be a remnant of a copy-paste from a different function, such as one that syncs billing and shipping information. Because the function&#x27;s primary return value is always correct, the bug is trivial.</p>
-    <p class="fix"><strong>Twin fix:</strong> The line that caused an unintended side-effect by modifying the input dictionary was removed. The function now correctly adheres to its contract, which is only to format and return the shipping address.</p>
+    <p class="rat">The function includes a print statement on its first line that writes the &#x27;contact&#x27; field from the &#x27;billing&#x27; dictionary to standard output. This side effect violates the contract&#x27;s &#x27;no console output&#x27; rule. The content of the print statement, referencing billing data within a function intended for shipping addresses, suggests it&#x27;s a debugging line mistakenly copied and left over from a similar, billing-related function.</p>
+    <p class="fix"><strong>Twin fix:</strong> The print statement that wrote billing information to the console was removed. This side effect violated the contract&#x27;s requirements for no console output and to only use shipping address fields.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
   </details>
   <div class="verdict" data-item="format_address_block__copy_paste_residue__gemini25pro__001">
@@ -261,7 +261,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t6" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t6" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t6" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i7">
@@ -273,11 +273,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Produce new filenames by appending a given suffix before each file extension.</p>
-  <p class="contract"><strong>Contract:</strong> For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>import os</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def process_entries(items, tag):</div><div class="ln"><span class="g">  </span>    output_list = []</div><div class="ln bug"><span class="g">- </span>    entry_mapping = {}</div><div class="ln"><span class="g">  </span>    for entry in items:</div><div class="ln"><span class="g">  </span>        base, extension = os.path.splitext(entry)</div><div class="ln"><span class="g">  </span>        new_entry = f&quot;{base}{tag}{extension}&quot;</div><div class="ln"><span class="g">  </span>        output_list.append(new_entry)</div><div class="ln bug"><span class="g">- </span>        entry_mapping[entry] = new_entry</div><div class="ln"><span class="g">  </span>    return output_list</div></div>
+  <p class="contract"><strong>Contract:</strong> For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect. The returned list is the same length and order as the input and contains only the transformed names; no other collection is built or retained.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import os</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def process_filenames(filenames, append_str):</div><div class="ln"><span class="g">  </span>    processed_names = []</div><div class="ln bug"><span class="g">- </span>    name_map = {}</div><div class="ln"><span class="g">  </span>    for name in filenames:</div><div class="ln"><span class="g">  </span>        base, ext = os.path.splitext(name)</div><div class="ln"><span class="g">  </span>        new_name = f&quot;{base}{append_str}{ext}&quot;</div><div class="ln"><span class="g">  </span>        processed_names.append(new_name)</div><div class="ln bug"><span class="g">- </span>        name_map[name] = new_name</div><div class="ln"><span class="g">  </span>    return processed_names</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The bug is the creation and population of the `entry_mapping` dictionary. This dictionary is built inside the loop but is never used, returned, or has any other side effect, as the function only returns `output_list`. This is a classic copy-paste residue, where logic from a function that was supposed to return a key-value map was left behind when it was adapted to only return a list. The function&#x27;s primary result is correct, but it performs unnecessary work.</p>
-    <p class="fix"><strong>Twin fix:</strong> The fix removes the creation and population of the `entry_mapping` dictionary, which was unused and served no purpose in the function&#x27;s logic.</p>
+    <p class="rat">The bug consists of the initialization of the `name_map` dictionary and its subsequent population inside the loop. This dictionary is never used, returned, or inspected again, so its creation and the assignments to it are unnecessary work. This is a classic &#x27;copy_paste_residue&#x27; artifact, where logic to build a mapping was likely copied from a related function and not removed. The bug is &#x27;trivial&#x27; because the function&#x27;s primary return value (`processed_names`) is entirely correct and unaffected; the only side effect is wasted computation and memory.</p>
+    <p class="fix"><strong>Twin fix:</strong> The unused dictionary `name_map` and the code that populated it were removed, as they performed unnecessary work and consumed memory without affecting the function&#x27;s output.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
   </details>
   <div class="verdict" data-item="rename_files__copy_paste_residue__gemini25pro__000">
@@ -295,7 +295,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t7" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t7" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t7" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i8">
@@ -307,11 +307,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Produce new filenames by appending a given suffix before each file extension.</p>
-  <p class="contract"><strong>Contract:</strong> For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>import os</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def create_tagged_filenames(source_paths, tag):</div><div class="ln"><span class="g">  </span>    processed_list = []</div><div class="ln bug"><span class="g">- </span>    path_mapping = {}</div><div class="ln bug"><span class="g">- </span>&nbsp;</div><div class="ln"><span class="g">  </span>    for path_item in source_paths:</div><div class="ln"><span class="g">  </span>        base, extension = os.path.splitext(path_item)</div><div class="ln"><span class="g">  </span>        new_path = f&quot;{base}{tag}{extension}&quot;</div><div class="ln"><span class="g">  </span>        processed_list.append(new_path)</div><div class="ln bug"><span class="g">- </span>        path_mapping[path_item] = new_path</div><div class="ln bug"><span class="g">- </span>&nbsp;</div><div class="ln"><span class="g">  </span>    return processed_list</div></div>
+  <p class="contract"><strong>Contract:</strong> For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect. The returned list is the same length and order as the input and contains only the transformed names; no other collection is built or retained.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>import os</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>def generate_new_paths(items, tag):</div><div class="ln"><span class="g">  </span>    results = []</div><div class="ln bug"><span class="g">- </span>    processing_record = {}</div><div class="ln"><span class="g">  </span>    for path in items:</div><div class="ln"><span class="g">  </span>        root, extension = os.path.splitext(path)</div><div class="ln"><span class="g">  </span>        new_path = f&quot;{root}{tag}{extension}&quot;</div><div class="ln"><span class="g">  </span>        results.append(new_path)</div><div class="ln bug"><span class="g">- </span>        processing_record[path] = new_path</div><div class="ln"><span class="g">  </span>    return results</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The bug is the creation and population of the `path_mapping` dictionary. This dictionary is built during the loop but is never used, returned, or referenced again. This suggests the code was adapted from a similar function that had a different purpose (e.g., returning a map of old to new paths), and the developer forgot to remove the now-superfluous logic. The function&#x27;s primary return value remains correct.</p>
-    <p class="fix"><strong>Twin fix:</strong> The unused `path_mapping` dictionary and the logic to populate it were removed. This code was superfluous and had no effect on the function&#x27;s output.</p>
+    <p class="rat">The bug is the creation and population of the `processing_record` dictionary. This dictionary is built inside the loop but is never used, read, or returned; it goes out of scope when the function returns. This is characteristic of a copy-paste error where code from a function that caches or logs its results was adapted, but the unneeded caching/logging lines were not removed. The function&#x27;s primary return value is correct, making the bug&#x27;s effect trivial (unnecessary computation and memory allocation).</p>
+    <p class="fix"><strong>Twin fix:</strong> The unused `processing_record` dictionary was removed, as it was created and populated but never read or returned, performing unnecessary computation and memory allocation.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;?</p>
   </details>
   <div class="verdict" data-item="rename_files__copy_paste_residue__gemini25pro__001">
@@ -329,7 +329,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t8" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t8" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t8" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section><h2 class="fh">known_trap <span class="cnt">6 items</span></h2>
 <section class="card" data-flavor="known_trap" data-tier="significant" id="i9">
@@ -363,7 +363,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t9" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t9" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t9" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="known_trap" data-tier="significant" id="i10">
@@ -397,7 +397,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t10" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t10" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t10" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="known_trap" data-tier="significant" id="i11">
@@ -431,7 +431,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t11" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t11" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t11" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="known_trap" data-tier="significant" id="i12">
@@ -465,7 +465,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t12" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t12" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t12" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="known_trap" data-tier="open" id="i13">
@@ -499,7 +499,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t13" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t13" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t13" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="known_trap" data-tier="open" id="i14">
@@ -533,7 +533,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t14" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t14" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t14" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section><h2 class="fh">logic_error <span class="cnt">12 items</span></h2>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i15">
@@ -567,7 +567,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t15" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t15" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t15" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i16">
@@ -601,7 +601,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t16" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t16" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t16" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i17">
@@ -635,7 +635,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t17" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t17" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t17" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i18">
@@ -669,7 +669,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t18" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t18" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t18" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i19">
@@ -681,7 +681,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
-  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line. A line of None is not valid input and raises TypeError rather than being treated as blank.</p>
   <div class="code"><div class="ln"><span class="g">  </span>def get_column_info(data_line):</div><div class="ln"><span class="g">  </span>    items = data_line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    result = []</div><div class="ln"><span class="g">  </span>    for item in items:</div><div class="ln"><span class="g">  </span>        processed_item = item.strip()</div><div class="ln bug"><span class="g">- </span>        if not processed_item:</div><div class="ln fix"><span class="g">+ </span>        if processed_item:</div><div class="ln"><span class="g">  </span>            result.append(processed_item)</div><div class="ln"><span class="g">  </span>    return result</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
     <p class="rat">The bug is a classic logic error where a conditional is inverted. The line `if not processed_item:` should be `if processed_item:`. Because of the inversion, the function incorrectly collects fields that are empty after stripping and discards all non-empty fields, which is the opposite of the intended behavior for typical CSV header lines.</p>
@@ -703,7 +703,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t19" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t19" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t19" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i20">
@@ -715,7 +715,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
-  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line. A line of None is not valid input and raises TypeError rather than being treated as blank.</p>
   <div class="code"><div class="ln"><span class="g">  </span>def get_column_names(header_line):</div><div class="ln"><span class="g">  </span>    results = []</div><div class="ln"><span class="g">  </span>    fields = header_line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    for f in fields:</div><div class="ln"><span class="g">  </span>        processed_field = f.strip()</div><div class="ln bug"><span class="g">- </span>        if not processed_field:</div><div class="ln fix"><span class="g">+ </span>        if processed_field:</div><div class="ln"><span class="g">  </span>            results.append(processed_field)</div><div class="ln"><span class="g">  </span>    return results</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
     <p class="rat">The bug is a logic error in the conditional statement that decides whether to include a parsed field in the output list. The condition `if not processed_field:` is the inverse of the correct logic (`if processed_field:`). As a result, the function collects only empty or all-whitespace fields and discards all fields with actual names, which is the opposite of the intended behavior.</p>
@@ -737,7 +737,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t20" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t20" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t20" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i21">
@@ -771,7 +771,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t21" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t21" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t21" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i22">
@@ -805,7 +805,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t22" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t22" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t22" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i23">
@@ -839,7 +839,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t23" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t23" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t23" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i24">
@@ -873,7 +873,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t24" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t24" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t24" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i25">
@@ -907,7 +907,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t25" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t25" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t25" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="logic_error" data-tier="significant" id="i26">
@@ -941,7 +941,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t26" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t26" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t26" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section><h2 class="fh">missing_edge_case <span class="cnt">10 items</span></h2>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i27">
@@ -975,7 +975,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t27" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t27" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t27" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i28">
@@ -1009,7 +1009,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t28" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t28" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t28" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i29">
@@ -1021,11 +1021,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
-  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def extract_fields(csv_header):</div><div class="ln fix"><span class="g">+ </span>    if csv_header is None:</div><div class="ln fix"><span class="g">+ </span>        return []</div><div class="ln"><span class="g">  </span>    components = csv_header.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    final_list = []</div><div class="ln"><span class="g">  </span>    for c in components:</div><div class="ln"><span class="g">  </span>        processed_c = c.strip()</div><div class="ln"><span class="g">  </span>        if processed_c:</div><div class="ln"><span class="g">  </span>            final_list.append(processed_c)</div><div class="ln"><span class="g">  </span>    return final_list</div></div>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line. A line of None is not valid input and raises TypeError rather than being treated as blank.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_header(header_line):</div><div class="ln fix"><span class="g">+ </span>    if not isinstance(header_line, str):</div><div class="ln fix"><span class="g">+ </span>        raise TypeError(&quot;Input must be a string&quot;)</div><div class="ln"><span class="g">  </span>    return [</div><div class="ln"><span class="g">  </span>        field.strip()</div><div class="ln"><span class="g">  </span>        for field in header_line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>        if field.strip()</div><div class="ln"><span class="g">  </span>    ]</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The function is correct for all string inputs, including empty or whitespace-only strings. However, it fails to handle the degenerate input `None`. If `csv_header` is `None`, the first line `csv_header.split(&#x27;,&#x27;)` will raise an `AttributeError`, causing a crash. This represents a missing edge case check for a non-string, null-type input that a robust implementation should handle gracefully (e.g., by returning an empty list).</p>
-    <p class="fix"><strong>Twin fix:</strong> The original function crashed with an `AttributeError` if the input was `None`. A check was added at the start of the function to handle this case by returning an empty list.</p>
+    <p class="rat">The function does not handle the edge case of a `None` input as specified by the contract. The contract requires a `TypeError` to be raised for `None` input, but the code proceeds to call `header_line.split(&#x27;,&#x27;)` which results in an `AttributeError`. This is a missing edge case check, as the core logic for processing valid string inputs is correct.</p>
+    <p class="fix"><strong>Twin fix:</strong> The original function raised an AttributeError on None input instead of the required TypeError. A type check was added to validate that the input is a string, raising a TypeError for any invalid type, including None.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
   </details>
   <div class="verdict" data-item="parse_csv_header__missing_edge_case__gemini25pro__000">
@@ -1043,7 +1043,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t29" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t29" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t29" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i30">
@@ -1055,11 +1055,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Parse a CSV header line into a list of non-blank column names.</p>
-  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def get_column_names(line_text):</div><div class="ln bug"><span class="g">- </span>    if &#x27;,&#x27; not in line_text:</div><div class="ln bug"><span class="g">- </span>        return [line_text.strip()]</div><div class="ln bug"><span class="g">- </span>&nbsp;</div><div class="ln"><span class="g">  </span>    processed_fields = []</div><div class="ln"><span class="g">  </span>    items = line_text.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    for item in items:</div><div class="ln"><span class="g">  </span>        processed_item = item.strip()</div><div class="ln"><span class="g">  </span>        if processed_item:</div><div class="ln"><span class="g">  </span>            processed_fields.append(processed_item)</div><div class="ln"><span class="g">  </span>    return processed_fields</div></div>
+  <p class="contract"><strong>Contract:</strong> Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line. A line of None is not valid input and raises TypeError rather than being treated as blank.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_items(csv_line):</div><div class="ln fix"><span class="g">+ </span>    if not isinstance(csv_line, str):</div><div class="ln fix"><span class="g">+ </span>        raise TypeError</div><div class="ln"><span class="g">  </span>    items = csv_line.split(&#x27;,&#x27;)</div><div class="ln"><span class="g">  </span>    results = []</div><div class="ln"><span class="g">  </span>    for item in items:</div><div class="ln"><span class="g">  </span>        processed = item.strip()</div><div class="ln"><span class="g">  </span>        if processed:</div><div class="ln"><span class="g">  </span>            results.append(processed)</div><div class="ln"><span class="g">  </span>    return results</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The function has a special code path to handle an input line that contains no commas, treating it as a single column. This path, `if &#x27;,&#x27; not in line_text:`, correctly strips whitespace from the line but fails to check if the resulting string is empty. As a result, for an input that is blank or contains only whitespace (e.g., `&quot;&quot;` or `&quot;   &quot;`), the function incorrectly returns `[&#x27;&#x27;]` instead of the expected empty list `[]`. The main logic path that handles comma-separated values correctly filters out empty fields after splitting and stripping.</p>
-    <p class="fix"><strong>Twin fix:</strong> The special code path for inputs without commas was removed. This path was both incorrect for blank inputs and redundant, as the main logic path already correctly handles all cases, including single-column and empty lines.</p>
+    <p class="rat">The bug is that the function raises an `AttributeError` when passed `None` as input, whereas the contract requires it to raise a `TypeError`. This happens because the code does not have a specific check for the `None` edge case and immediately attempts to call the `.split()` method on the input object, which `None` does not possess. The logic is otherwise correct for all string inputs, including empty or all-whitespace strings.</p>
+    <p class="fix"><strong>Twin fix:</strong> An initial type check was added to raise a TypeError for any non-string input. This corrects the specified bug for `None` and improves robustness by correctly handling other invalid types.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
   </details>
   <div class="verdict" data-item="parse_csv_header__missing_edge_case__gemini25pro__001">
@@ -1077,7 +1077,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t30" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t30" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t30" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i31">
@@ -1111,7 +1111,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t31" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t31" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t31" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i32">
@@ -1145,7 +1145,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t32" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t32" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t32" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i33">
@@ -1179,7 +1179,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t33" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t33" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t33" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i34">
@@ -1213,7 +1213,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t34" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t34" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t34" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i35">
@@ -1225,11 +1225,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.</p>
-  <p class="contract"><strong>Contract:</strong> Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def process_new_user(user_string, log_data):</div><div class="ln"><span class="g">  </span>    name_length = len(user_string)</div><div class="ln bug"><span class="g">- </span>    if name_length &lt; 2:</div><div class="ln fix"><span class="g">+ </span>    if name_length == 1:</div><div class="ln"><span class="g">  </span>        log_data.append(user_string)</div><div class="ln"><span class="g">  </span>    return name_length &gt;= 3</div></div>
+  <p class="contract"><strong>Contract:</strong> Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged. A username that is not a string is not valid input and raises TypeError rather than being silently rejected.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_new_user(user_entry, system_log):</div><div class="ln"><span class="g">  </span>    if not isinstance(user_entry, str):</div><div class="ln"><span class="g">  </span>        raise TypeError</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln bug"><span class="g">- </span>    if len(user_entry) &lt;= 1:</div><div class="ln fix"><span class="g">+ </span>    if len(user_entry) == 1:</div><div class="ln"><span class="g">  </span>        system_log.append(user_entry)</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>    return len(user_entry) &gt;= 3</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The function is supposed to log usernames of exactly one character for abuse monitoring. The condition `if name_length &lt; 2:` incorrectly causes it to also log empty strings (where length is 0), which is an unhandled degenerate edge case. The correct condition for the logging logic is `if name_length == 1:`. The function&#x27;s primary result (the boolean return value) is correct for all inputs.</p>
-    <p class="fix"><strong>Twin fix:</strong> The conditional for logging was changed from `name_length &lt; 2` to `name_length == 1` to ensure only usernames of exactly one character are logged, not empty strings.</p>
+    <p class="rat">The bug is the condition `len(user_entry) &lt;= 1`. The contract requires logging only usernames of exactly one character, which would be `len(user_entry) == 1`. The implemented condition incorrectly also logs empty strings (`len == 0`) because `0 &lt;= 1`. This is a missing edge case bug where the logic fails on the degenerate empty string input, while the primary return value (the boolean check for length &gt;= 3) remains correct across all inputs.</p>
+    <p class="fix"><strong>Twin fix:</strong> The condition for logging was changed from `len(user_entry) &lt;= 1` to `len(user_entry) == 1` to ensure only usernames of exactly one character are logged, which excludes the empty string.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
   </details>
   <div class="verdict" data-item="validate_username_length__missing_edge_case__gemini25pro__000">
@@ -1247,7 +1247,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t35" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t35" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t35" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="missing_edge_case" data-tier="trivial" id="i36">
@@ -1259,11 +1259,11 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     
   </header>
   <p class="aim"><strong>Stated aim:</strong> Check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.</p>
-  <p class="contract"><strong>Contract:</strong> Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def process_registration(username, log_list):</div><div class="ln"><span class="g">  </span>    name_len = len(username)</div><div class="ln"><span class="g">  </span>    if name_len &gt;= 3:</div><div class="ln"><span class="g">  </span>        return True</div><div class="ln bug"><span class="g">- </span>    if name_len &lt; 2:</div><div class="ln fix"><span class="g">+ </span>    if name_len == 1:</div><div class="ln"><span class="g">  </span>        log_list.append(username)</div><div class="ln"><span class="g">  </span>    return False</div></div>
+  <p class="contract"><strong>Contract:</strong> Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged. A username that is not a string is not valid input and raises TypeError rather than being silently rejected.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def check_user(username, abuse_log):</div><div class="ln"><span class="g">  </span>    if not isinstance(username, str):</div><div class="ln"><span class="g">  </span>        raise TypeError()</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln bug"><span class="g">- </span>    if len(username) &lt; 2:</div><div class="ln fix"><span class="g">+ </span>    if len(username) == 1:</div><div class="ln"><span class="g">  </span>        abuse_log.append(username)</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln"><span class="g">  </span>    return len(username) &gt;= 3</div></div>
   <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The bug is in the condition `if name_len &lt; 2:`. This condition correctly triggers the logging action for usernames of length 1, as intended. However, it also incorrectly triggers for the edge case of an empty string (length 0), which the contract requires to be rejected without being logged. The correct condition to log only single-character attempts would be `if name_len == 1:`. The function&#x27;s primary return value is correct for all inputs, making the bug&#x27;s severity trivial.</p>
-    <p class="fix"><strong>Twin fix:</strong> The condition for logging usernames was changed from `name_len &lt; 2` to `name_len == 1` to correctly log only single-character names and exclude empty strings.</p>
+    <p class="rat">The function logs usernames to `abuse_log` if their length is less than 2. This correctly logs single-character usernames, but also incorrectly logs empty strings, which have a length of 0. The contract requires that only usernames of *exactly* one character be logged. The bug is in the `if len(username) &lt; 2:` condition, which should be `if len(username) == 1:`. This is a boundary error for the degenerate empty-string input.</p>
+    <p class="fix"><strong>Twin fix:</strong> The original condition `len(username) &lt; 2` caused both single-character and empty-string usernames to be logged. The condition was changed to `len(username) == 1` so that only usernames of exactly one character are logged, satisfying the contract.</p>
     <p class="def"><strong>Declared flavor means:</strong> A function that is correct on the input space it was clearly designed for, but produces a wrong result, crash, or undefined behavior on a boundary or degenerate input the stated aim implies it should handle (empty input, single-element input, exact-threshold value, None/null, extreme numeric value). The core algorithm/logic path is correct; the defect is a missing branch or boundary check, not a wrong operator or wrong formula on the main path.</p>
   </details>
   <div class="verdict" data-item="validate_username_length__missing_edge_case__gemini25pro__001">
@@ -1281,7 +1281,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t36" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t36" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t36" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section><h2 class="fh">security_vulnerability <span class="cnt">10 items</span></h2>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i37">
@@ -1315,7 +1315,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t37" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t37" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t37" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i38">
@@ -1349,7 +1349,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t38" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t38" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t38" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i39">
@@ -1383,7 +1383,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t39" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t39" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t39" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i40">
@@ -1417,7 +1417,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t40" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t40" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t40" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i41">
@@ -1451,7 +1451,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t41" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t41" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t41" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i42">
@@ -1485,7 +1485,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t42" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t42" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t42" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i43">
@@ -1519,7 +1519,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t43" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t43" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t43" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i44">
@@ -1553,7 +1553,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t44" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t44" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t44" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i45">
@@ -1587,7 +1587,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t45" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t45" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t45" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="security_vulnerability" data-tier="significant" id="i46">
@@ -1621,9 +1621,9 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t46" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t46" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t46" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
-</section><h2 class="fh">silent_failure <span class="cnt">10 items</span></h2>
+</section><h2 class="fh">silent_failure <span class="cnt">8 items</span></h2>
 <section class="card" data-flavor="silent_failure" data-tier="significant" id="i47">
   <header>
     <span class="num">47</span>
@@ -1655,7 +1655,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t47" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t47" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t47" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="silent_failure" data-tier="significant" id="i48">
@@ -1689,7 +1689,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t48" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t48" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t48" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="silent_failure" data-tier="significant" id="i49">
@@ -1723,7 +1723,7 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t49" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t49" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t49" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 <section class="card" data-flavor="silent_failure" data-tier="significant" id="i50">
@@ -1757,80 +1757,12 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
     <label><input type="radio" name="t50" value="twin_not_clean"> has another flaw</label>
     <label><input type="radio" name="t50" value="twin_breaks_contract"> breaks the contract</label>
     <label><input type="radio" name="t50" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="silent_failure" data-tier="trivial" id="i51">
+<section class="card" data-flavor="silent_failure" data-tier="open" id="i51">
   <header>
     <span class="num">51</span>
-    <code class="iid">average_temperature__silent_failure__gemini25pro__000</code>
-    <span class="tag flavor">silent_failure</span>
-    <span class="tag tier t-trivial">trivial</span>
-    
-  </header>
-  <p class="aim"><strong>Stated aim:</strong> Read a list of temperature readings and return their average.</p>
-  <p class="contract"><strong>Contract:</strong> Returns the arithmetic mean of the readings. Returns None for an empty list. Raises ValueError if a reading cannot be interpreted as a number; it does not silently omit readings.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def calculate_average(readings):</div><div class="ln"><span class="g">  </span>    total = 0.0</div><div class="ln"><span class="g">  </span>    for r in readings:</div><div class="ln"><span class="g">  </span>        total += float(r)</div><div class="ln"><span class="g">  </span>    try:</div><div class="ln"><span class="g">  </span>        return total / len(readings)</div><div class="ln"><span class="g">  </span>    except ZeroDivisionError:</div><div class="ln bug"><span class="g">- </span>        return 0.0</div><div class="ln fix"><span class="g">+ </span>        return None</div></div>
-  <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The function correctly calculates the average for non-empty lists of numbers and raises a ValueError for non-numeric data, as per the contract. The bug is in the handling of an empty list. The contract requires returning `None` for an empty list. Instead, the code attempts the division `0.0 / 0`, catches the resulting `ZeroDivisionError`, and silently returns `0.0`. This is a silent failure on a degenerate input case, making it trivial.</p>
-    <p class="fix"><strong>Twin fix:</strong> The function was changed to return `None` in the case of a `ZeroDivisionError`, which occurs for an empty list. This corrects the original behavior of returning `0.0` to match the contract&#x27;s requirement.</p>
-    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
-  </details>
-  <div class="verdict" data-item="average_temperature__silent_failure__gemini25pro__000">
-    <span class="vlabel">item</span>
-    <label><input type="radio" name="v51" value="ok"> ok</label>
-    <label><input type="radio" name="v51" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v51" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v51" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v51" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v51" value="drop"> drop</label>
-  </div>
-  <div class="verdict twin" data-twin="average_temperature__silent_failure__gemini25pro__000">
-    <span class="vlabel">twin</span>
-    <label><input type="radio" name="t51" value="ok"> clean</label>
-    <label><input type="radio" name="t51" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t51" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t51" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
-  </div>
-</section>
-<section class="card" data-flavor="silent_failure" data-tier="trivial" id="i52">
-  <header>
-    <span class="num">52</span>
-    <code class="iid">average_temperature__silent_failure__gemini25pro__001</code>
-    <span class="tag flavor">silent_failure</span>
-    <span class="tag tier t-trivial">trivial</span>
-    
-  </header>
-  <p class="aim"><strong>Stated aim:</strong> Read a list of temperature readings and return their average.</p>
-  <p class="contract"><strong>Contract:</strong> Returns the arithmetic mean of the readings. Returns None for an empty list. Raises ValueError if a reading cannot be interpreted as a number; it does not silently omit readings.</p>
-  <div class="code"><div class="ln"><span class="g">  </span>def process_temperatures(entries):</div><div class="ln"><span class="g">  </span>    total = 0.0</div><div class="ln"><span class="g">  </span>    n = 0</div><div class="ln"><span class="g">  </span>    for entry in entries:</div><div class="ln"><span class="g">  </span>        total += float(entry)</div><div class="ln"><span class="g">  </span>        n += 1</div><div class="ln"><span class="g">  </span>&nbsp;</div><div class="ln bug"><span class="g">- </span>    try:</div><div class="ln fix"><span class="g">+ </span>    if n == 0:</div><div class="ln fix"><span class="g">+ </span>        return None</div><div class="ln fix"><span class="g">+ </span>    else:</div><div class="ln"><span class="g">  </span>        return total / n</div><div class="ln bug"><span class="g">- </span>    except ZeroDivisionError:</div><div class="ln bug"><span class="g">- </span>        pass</div></div>
-  <details><summary>Generator rationale &amp; flavor definition</summary>
-    <p class="rat">The function uses a `try...except ZeroDivisionError: pass` block to handle the case of an empty list. When `entries` is empty, `n` is 0, and the division `total / n` raises a `ZeroDivisionError`. The `except` block catches this exception and silently ignores it with `pass`. The function then finishes and implicitly returns `None`. Although returning `None` for an empty list is the contractually correct behavior, it is achieved here by silently swallowing an exception rather than by an explicit conditional check, which constitutes a silent failure bug. The bug is trivial because it only affects the degenerate empty list case, and its observable output happens to align with the contract.</p>
-    <p class="fix"><strong>Twin fix:</strong> The original function used a try-except block to implicitly return None for an empty list, which is considered a silent failure. The corrected code replaces this with an explicit conditional check for an empty list to improve clarity and robustness.</p>
-    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
-  </details>
-  <div class="verdict" data-item="average_temperature__silent_failure__gemini25pro__001">
-    <span class="vlabel">item</span>
-    <label><input type="radio" name="v52" value="ok"> ok</label>
-    <label><input type="radio" name="v52" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v52" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v52" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v52" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v52" value="drop"> drop</label>
-  </div>
-  <div class="verdict twin" data-twin="average_temperature__silent_failure__gemini25pro__001">
-    <span class="vlabel">twin</span>
-    <label><input type="radio" name="t52" value="ok"> clean</label>
-    <label><input type="radio" name="t52" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t52" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t52" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
-  </div>
-</section>
-<section class="card" data-flavor="silent_failure" data-tier="open" id="i53">
-  <header>
-    <span class="num">53</span>
     <code class="iid">parse_config__silent_failure__gemini25pro__000</code>
     <span class="tag flavor">silent_failure</span>
     <span class="tag tier open">severity open: trivial / significant</span>
@@ -1846,25 +1778,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="parse_config__silent_failure__gemini25pro__000">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v53" value="ok"> ok</label>
-    <label><input type="radio" name="v53" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v53" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v53" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v53" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v53" value="drop"> drop</label>
+    <label><input type="radio" name="v51" value="ok"> ok</label>
+    <label><input type="radio" name="v51" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v51" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v51" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v51" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v51" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="parse_config__silent_failure__gemini25pro__000">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t53" value="ok"> clean</label>
-    <label><input type="radio" name="t53" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t53" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t53" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t51" value="ok"> clean</label>
+    <label><input type="radio" name="t51" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t51" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t51" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="silent_failure" data-tier="open" id="i54">
+<section class="card" data-flavor="silent_failure" data-tier="open" id="i52">
   <header>
-    <span class="num">54</span>
+    <span class="num">52</span>
     <code class="iid">parse_config__silent_failure__gemini25pro__001</code>
     <span class="tag flavor">silent_failure</span>
     <span class="tag tier open">severity open: trivial / significant</span>
@@ -1880,25 +1812,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="parse_config__silent_failure__gemini25pro__001">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v54" value="ok"> ok</label>
-    <label><input type="radio" name="v54" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v54" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v54" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v54" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v54" value="drop"> drop</label>
+    <label><input type="radio" name="v52" value="ok"> ok</label>
+    <label><input type="radio" name="v52" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v52" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v52" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v52" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v52" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="parse_config__silent_failure__gemini25pro__001">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t54" value="ok"> clean</label>
-    <label><input type="radio" name="t54" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t54" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t54" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t52" value="ok"> clean</label>
+    <label><input type="radio" name="t52" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t52" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t52" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="silent_failure" data-tier="open" id="i55">
+<section class="card" data-flavor="silent_failure" data-tier="open" id="i53">
   <header>
-    <span class="num">55</span>
+    <span class="num">53</span>
     <code class="iid">process_orders_revenue__silent_failure__gemini25pro__000</code>
     <span class="tag flavor">silent_failure</span>
     <span class="tag tier open">severity open: trivial / significant</span>
@@ -1914,25 +1846,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="process_orders_revenue__silent_failure__gemini25pro__000">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v55" value="ok"> ok</label>
-    <label><input type="radio" name="v55" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v55" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v55" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v55" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v55" value="drop"> drop</label>
+    <label><input type="radio" name="v53" value="ok"> ok</label>
+    <label><input type="radio" name="v53" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v53" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v53" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v53" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v53" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="process_orders_revenue__silent_failure__gemini25pro__000">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t55" value="ok"> clean</label>
-    <label><input type="radio" name="t55" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t55" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t55" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t53" value="ok"> clean</label>
+    <label><input type="radio" name="t53" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t53" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t53" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="silent_failure" data-tier="open" id="i56">
+<section class="card" data-flavor="silent_failure" data-tier="open" id="i54">
   <header>
-    <span class="num">56</span>
+    <span class="num">54</span>
     <code class="iid">process_orders_revenue__silent_failure__gemini25pro__001</code>
     <span class="tag flavor">silent_failure</span>
     <span class="tag tier open">severity open: trivial / significant</span>
@@ -1948,25 +1880,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="process_orders_revenue__silent_failure__gemini25pro__001">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v56" value="ok"> ok</label>
-    <label><input type="radio" name="v56" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v56" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v56" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v56" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v56" value="drop"> drop</label>
+    <label><input type="radio" name="v54" value="ok"> ok</label>
+    <label><input type="radio" name="v54" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v54" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v54" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v54" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v54" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="process_orders_revenue__silent_failure__gemini25pro__001">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t56" value="ok"> clean</label>
-    <label><input type="radio" name="t56" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t56" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t56" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t54" value="ok"> clean</label>
+    <label><input type="radio" name="t54" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t54" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t54" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section><h2 class="fh">wrong_algorithm <span class="cnt">8 items</span></h2>
-<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i57">
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i55">
   <header>
-    <span class="num">57</span>
+    <span class="num">55</span>
     <code class="iid">celsius_to_fahrenheit__wrong_algorithm__gemini25pro__000</code>
     <span class="tag flavor">wrong_algorithm</span>
     <span class="tag tier t-significant">significant</span>
@@ -1982,25 +1914,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="celsius_to_fahrenheit__wrong_algorithm__gemini25pro__000">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v57" value="ok"> ok</label>
-    <label><input type="radio" name="v57" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v57" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v57" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v57" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v57" value="drop"> drop</label>
+    <label><input type="radio" name="v55" value="ok"> ok</label>
+    <label><input type="radio" name="v55" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v55" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v55" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v55" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v55" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="celsius_to_fahrenheit__wrong_algorithm__gemini25pro__000">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t57" value="ok"> clean</label>
-    <label><input type="radio" name="t57" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t57" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t57" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t55" value="ok"> clean</label>
+    <label><input type="radio" name="t55" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t55" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t55" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i58">
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i56">
   <header>
-    <span class="num">58</span>
+    <span class="num">56</span>
     <code class="iid">celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001</code>
     <span class="tag flavor">wrong_algorithm</span>
     <span class="tag tier t-significant">significant</span>
@@ -2016,25 +1948,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v58" value="ok"> ok</label>
-    <label><input type="radio" name="v58" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v58" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v58" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v58" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v58" value="drop"> drop</label>
+    <label><input type="radio" name="v56" value="ok"> ok</label>
+    <label><input type="radio" name="v56" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v56" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v56" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v56" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v56" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t58" value="ok"> clean</label>
-    <label><input type="radio" name="t58" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t58" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t58" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t56" value="ok"> clean</label>
+    <label><input type="radio" name="t56" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t56" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t56" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i59">
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i57">
   <header>
-    <span class="num">59</span>
+    <span class="num">57</span>
     <code class="iid">compute_average__wrong_algorithm__gemini25pro__000</code>
     <span class="tag flavor">wrong_algorithm</span>
     <span class="tag tier t-significant">significant</span>
@@ -2050,25 +1982,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="compute_average__wrong_algorithm__gemini25pro__000">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v59" value="ok"> ok</label>
-    <label><input type="radio" name="v59" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v59" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v59" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v59" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v59" value="drop"> drop</label>
+    <label><input type="radio" name="v57" value="ok"> ok</label>
+    <label><input type="radio" name="v57" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v57" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v57" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v57" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v57" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="compute_average__wrong_algorithm__gemini25pro__000">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t59" value="ok"> clean</label>
-    <label><input type="radio" name="t59" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t59" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t59" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t57" value="ok"> clean</label>
+    <label><input type="radio" name="t57" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t57" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t57" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i60">
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i58">
   <header>
-    <span class="num">60</span>
+    <span class="num">58</span>
     <code class="iid">compute_average__wrong_algorithm__gemini25pro__001</code>
     <span class="tag flavor">wrong_algorithm</span>
     <span class="tag tier t-significant">significant</span>
@@ -2084,25 +2016,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="compute_average__wrong_algorithm__gemini25pro__001">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v60" value="ok"> ok</label>
-    <label><input type="radio" name="v60" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v60" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v60" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v60" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v60" value="drop"> drop</label>
+    <label><input type="radio" name="v58" value="ok"> ok</label>
+    <label><input type="radio" name="v58" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v58" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v58" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v58" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v58" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="compute_average__wrong_algorithm__gemini25pro__001">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t60" value="ok"> clean</label>
-    <label><input type="radio" name="t60" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t60" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t60" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t58" value="ok"> clean</label>
+    <label><input type="radio" name="t58" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t58" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t58" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i61">
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i59">
   <header>
-    <span class="num">61</span>
+    <span class="num">59</span>
     <code class="iid">median_response_time__wrong_algorithm__gemini25pro__000</code>
     <span class="tag flavor">wrong_algorithm</span>
     <span class="tag tier t-significant">significant</span>
@@ -2118,25 +2050,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="median_response_time__wrong_algorithm__gemini25pro__000">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v61" value="ok"> ok</label>
-    <label><input type="radio" name="v61" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v61" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v61" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v61" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v61" value="drop"> drop</label>
+    <label><input type="radio" name="v59" value="ok"> ok</label>
+    <label><input type="radio" name="v59" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v59" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v59" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v59" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v59" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="median_response_time__wrong_algorithm__gemini25pro__000">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t61" value="ok"> clean</label>
-    <label><input type="radio" name="t61" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t61" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t61" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t59" value="ok"> clean</label>
+    <label><input type="radio" name="t59" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t59" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t59" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i62">
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i60">
   <header>
-    <span class="num">62</span>
+    <span class="num">60</span>
     <code class="iid">median_response_time__wrong_algorithm__gemini25pro__001</code>
     <span class="tag flavor">wrong_algorithm</span>
     <span class="tag tier t-significant">significant</span>
@@ -2152,25 +2084,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="median_response_time__wrong_algorithm__gemini25pro__001">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v62" value="ok"> ok</label>
-    <label><input type="radio" name="v62" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v62" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v62" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v62" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v62" value="drop"> drop</label>
+    <label><input type="radio" name="v60" value="ok"> ok</label>
+    <label><input type="radio" name="v60" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v60" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v60" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v60" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v60" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="median_response_time__wrong_algorithm__gemini25pro__001">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t62" value="ok"> clean</label>
-    <label><input type="radio" name="t62" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t62" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t62" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t60" value="ok"> clean</label>
+    <label><input type="radio" name="t60" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t60" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t60" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i63">
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i61">
   <header>
-    <span class="num">63</span>
+    <span class="num">61</span>
     <code class="iid">shipping_cost__wrong_algorithm__gemini25pro__000</code>
     <span class="tag flavor">wrong_algorithm</span>
     <span class="tag tier t-significant">significant</span>
@@ -2186,25 +2118,25 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="shipping_cost__wrong_algorithm__gemini25pro__000">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v63" value="ok"> ok</label>
-    <label><input type="radio" name="v63" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v63" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v63" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v63" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v63" value="drop"> drop</label>
+    <label><input type="radio" name="v61" value="ok"> ok</label>
+    <label><input type="radio" name="v61" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v61" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v61" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v61" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v61" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="shipping_cost__wrong_algorithm__gemini25pro__000">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t63" value="ok"> clean</label>
-    <label><input type="radio" name="t63" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t63" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t63" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t61" value="ok"> clean</label>
+    <label><input type="radio" name="t61" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t61" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t61" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
-<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i64">
+<section class="card" data-flavor="wrong_algorithm" data-tier="significant" id="i62">
   <header>
-    <span class="num">64</span>
+    <span class="num">62</span>
     <code class="iid">shipping_cost__wrong_algorithm__gemini25pro__001</code>
     <span class="tag flavor">wrong_algorithm</span>
     <span class="tag tier t-significant">significant</span>
@@ -2220,26 +2152,26 @@ Check each item against its declared flavor and tier. Verdicts stay in this page
   </details>
   <div class="verdict" data-item="shipping_cost__wrong_algorithm__gemini25pro__001">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v64" value="ok"> ok</label>
-    <label><input type="radio" name="v64" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v64" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v64" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v64" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v64" value="drop"> drop</label>
+    <label><input type="radio" name="v62" value="ok"> ok</label>
+    <label><input type="radio" name="v62" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v62" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v62" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v62" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v62" value="drop"> drop</label>
   </div>
   <div class="verdict twin" data-twin="shipping_cost__wrong_algorithm__gemini25pro__001">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t64" value="ok"> clean</label>
-    <label><input type="radio" name="t64" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t64" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t64" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t62" value="ok"> clean</label>
+    <label><input type="radio" name="t62" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t62" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t62" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="">
   </div>
 </section>
 </div>
 <script>
 const upd=()=>document.getElementById('prog').textContent=
-  document.querySelectorAll('.verdict input[type=radio]:checked').length+' / 64 reviewed';
+  document.querySelectorAll('.verdict input[type=radio]:checked').length+' / 62 reviewed';
 document.addEventListener('change',upd);
 function exportCsv(){
   const out=[['item_id','verdict','twin_verdict','note']];

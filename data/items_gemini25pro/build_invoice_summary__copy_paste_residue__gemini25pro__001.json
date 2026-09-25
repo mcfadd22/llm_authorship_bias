@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def build_summary(input_doc):\n    record = {}\n    record['total'] = input_doc['total_amount']\n    record['currency'] = input_doc['currency_code']\n    record['issued_at'] = input_doc['date_of_issue']\n    record['payment_total'] = input_doc['total_amount']\n    return record",
-  "rationale": "The function correctly populates the required keys 'total', 'currency', and 'issued_at'. However, it also populates an extraneous key, 'payment_total'. This is a copy-paste residue error, where a line from a similar function (e.g., for processing payments) was left in, violating the contract's requirement for exactly three keys. The primary result is correct, but the returned dictionary contains unnecessary data, making the bug's severity trivial.",
+  "code": "def create_invoice_summary(invoice_data):\n    summary = {\n        'total': invoice_data['total'],\n        'currency': invoice_data['currency'],\n        'issued_at': invoice_data['issue_date']\n    }\n    summary['customer_id'] = invoice_data['account_number']\n    return summary",
+  "rationale": "The function correctly populates the required 'total', 'currency', and 'issued_at' fields. However, it also adds a 'customer_id' key to the summary dictionary. This violates the contract which specifies that *only* the three required keys should be present. The presence of this extra key, which is plausible in a broader context but not in the specified summary, is a classic copy-paste residue error where a line from a different, related function (e.g., creating a full customer record) was erroneously included.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:45:14.756397+00:00",
+  "timestamp": "2026-09-25T22:48:52.249372+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

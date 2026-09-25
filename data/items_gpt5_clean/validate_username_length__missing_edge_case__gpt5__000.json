@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "validate_username_length__missing_edge_case__gpt5__000",
-  "code": "def process_username(username, abuse_log):\n    if len(username) == 1:\n        abuse_log.append(username)\n        return False\n    if len(username) >= 3:\n        return True\n    return False",
-  "fix_rationale": "Changed the acceptance condition from > 3 to >= 3 so that exactly three-character usernames are accepted while preserving the single-character logging behavior.",
+  "code": "def check_username(username, abuse_log):\n    if not isinstance(username, str):\n        raise TypeError\n    n = len(username)\n    if n == 1:\n        abuse_log.append(username)\n    return n >= 3\n",
+  "fix_rationale": "Changed the logging condition from <= 1 to == 1 so only single-character usernames are logged; all other behavior remains the same.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:51:13.419413+00:00",
+  "timestamp": "2026-09-25T22:51:33.135076+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

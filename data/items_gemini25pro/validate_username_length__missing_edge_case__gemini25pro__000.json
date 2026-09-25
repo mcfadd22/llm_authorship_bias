@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def process_new_user(user_string, log_data):\n    name_length = len(user_string)\n    if name_length < 2:\n        log_data.append(user_string)\n    return name_length >= 3",
-  "rationale": "The function is supposed to log usernames of exactly one character for abuse monitoring. The condition `if name_length < 2:` incorrectly causes it to also log empty strings (where length is 0), which is an unhandled degenerate edge case. The correct condition for the logging logic is `if name_length == 1:`. The function's primary result (the boolean return value) is correct for all inputs.",
+  "code": "def process_new_user(user_entry, system_log):\n    if not isinstance(user_entry, str):\n        raise TypeError\n\n    if len(user_entry) <= 1:\n        system_log.append(user_entry)\n\n    return len(user_entry) >= 3\n",
+  "rationale": "The bug is the condition `len(user_entry) <= 1`. The contract requires logging only usernames of exactly one character, which would be `len(user_entry) == 1`. The implemented condition incorrectly also logs empty strings (`len == 0`) because `0 <= 1`. This is a missing edge case bug where the logic fails on the degenerate empty string input, while the primary return value (the boolean check for length >= 3) remains correct across all inputs.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:42:31.937748+00:00",
+  "timestamp": "2026-09-25T22:48:19.065120+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

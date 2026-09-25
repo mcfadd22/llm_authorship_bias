@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "validate_username_length__missing_edge_case__gemini25pro__000",
-  "code": "def process_new_user(user_string, log_data):\n    name_length = len(user_string)\n    if name_length == 1:\n        log_data.append(user_string)\n    return name_length >= 3",
-  "fix_rationale": "The conditional for logging was changed from `name_length < 2` to `name_length == 1` to ensure only usernames of exactly one character are logged, not empty strings.",
+  "code": "def process_new_user(user_entry, system_log):\n    if not isinstance(user_entry, str):\n        raise TypeError\n\n    if len(user_entry) == 1:\n        system_log.append(user_entry)\n\n    return len(user_entry) >= 3\n",
+  "fix_rationale": "The condition for logging was changed from `len(user_entry) <= 1` to `len(user_entry) == 1` to ensure only usernames of exactly one character are logged, which excludes the empty string.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:55:59.887477+00:00",
+  "timestamp": "2026-09-25T22:52:34.269097+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

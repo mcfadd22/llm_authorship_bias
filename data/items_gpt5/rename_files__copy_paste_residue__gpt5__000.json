@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def rename_with_suffix(names, suffix):\n    result = []\n    rename_map = {}\n    for n in names:\n        i = n.rfind('.')\n        if i > 0:\n            new = n[:i] + suffix + n[i:]\n        else:\n            new = n + suffix\n        result.append(new)\n        rename_map[n] = new\n    return result",
-  "rationale": "Copy-paste residue: an unused mapping (rename_map) is built and populated, likely leftover from a related function that returned a dict of original->new names. It does not affect the returned list but is unnecessary work.",
+  "code": "import os\n\ndef apply_suffix(filenames, suffix):\n    result = []\n    for name in filenames:\n        base, ext = os.path.splitext(name)\n        new_name = base + suffix + ext if ext else name + suffix\n        result.append(new_name)\n        archive_path = os.path.join(\"archive\", os.path.basename(name))\n        print(\"archiving\", name, \"->\", archive_path)\n    return result\n",
+  "rationale": "The function correctly inserts the suffix before the final extension using os.path.splitext and returns the transformed names. The planted copy-paste residue is the construction of archive_path and the subsequent print(\"archiving\", ...), which appears to be leftover from a file-archiving function. This introduces console output, violating the contract's no-output requirement, but leaves the primary transformation result correct.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:41:30.729910+00:00",
+  "timestamp": "2026-09-25T22:47:35.619064+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

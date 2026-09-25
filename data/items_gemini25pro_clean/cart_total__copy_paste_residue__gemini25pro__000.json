@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "cart_total__copy_paste_residue__gemini25pro__000",
-  "code": "def process_order(cart_data, fee):\n    total_value = 0\n    for item in cart_data:\n        price = item.get('price', 0)\n        quantity = item.get('quantity', 1)\n        total_value += price * quantity\n    return total_value + fee",
-  "fix_rationale": "The unused `total_weight` variable and all associated calculations were removed. This eliminates the dead code without altering the function's output or behavior.",
+  "code": "def calculate_total(cart_items, shipping_fee):\n    subtotal = 0.0\n    for entry in cart_items:\n        price = entry.get('price', 0)\n        qty = entry.get('quantity', 1)\n        subtotal += price * qty\n\n    final_total = subtotal + shipping_fee\n    return final_total",
+  "fix_rationale": "The initialization and incrementing of the `num_items` variable were removed as it was calculated but never used. This dead code did not affect the function's output.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:52:25.683467+00:00",
+  "timestamp": "2026-09-25T22:52:14.256155+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

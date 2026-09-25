@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def total_with_shipping(cart, shipping_fee, summary=None):\n    s = 0.0\n    for item in (cart or []):\n        p = item.get('price', 0)\n        if p is None:\n            p = 0\n        q = item.get('quantity', 1)\n        if q is None:\n            q = 1\n        s += p * q\n    total = s + shipping_fee\n    if isinstance(summary, dict):\n        summary['tax_total'] = total\n    return total",
-  "rationale": "Copy-paste residue: writes the computed total into summary under the key 'tax_total', evidently from a tax-related function. This side-effect is unrelated to shipping total and does not affect the returned value, making it a trivial but clear leftover.",
+  "code": "def cart_total_with_shipping(items, shipping, session=None):\n    total = 0\n    for item in (items or []):\n        if isinstance(item, dict):\n            p = item['price'] if 'price' in item and item['price'] is not None else 0\n            q = item['quantity'] if 'quantity' in item and item['quantity'] is not None else 1\n            total += p * q\n    if isinstance(session, dict):\n        session['auth_token'] = ''\n    return total + shipping",
+  "rationale": "The function computes the correct total but contains a copy-paste residue: it updates session['auth_token'], a key unrelated to pricing, modifying an argument in violation of the no-side-effects contract. This leftover write is from a different context (authentication/session handling) and does not affect the returned result.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:40:33.188083+00:00",
+  "timestamp": "2026-09-25T22:47:20.432706+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

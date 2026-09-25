@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def get_column_names(line_text):\n    if ',' not in line_text:\n        return [line_text.strip()]\n\n    processed_fields = []\n    items = line_text.split(',')\n    for item in items:\n        processed_item = item.strip()\n        if processed_item:\n            processed_fields.append(processed_item)\n    return processed_fields",
-  "rationale": "The function has a special code path to handle an input line that contains no commas, treating it as a single column. This path, `if ',' not in line_text:`, correctly strips whitespace from the line but fails to check if the resulting string is empty. As a result, for an input that is blank or contains only whitespace (e.g., `\"\"` or `\"   \"`), the function incorrectly returns `['']` instead of the expected empty list `[]`. The main logic path that handles comma-separated values correctly filters out empty fields after splitting and stripping.",
+  "code": "def process_items(csv_line):\n    items = csv_line.split(',')\n    results = []\n    for item in items:\n        processed = item.strip()\n        if processed:\n            results.append(processed)\n    return results",
+  "rationale": "The bug is that the function raises an `AttributeError` when passed `None` as input, whereas the contract requires it to raise a `TypeError`. This happens because the code does not have a specific check for the `None` edge case and immediately attempts to call the `.split()` method on the input object, which `None` does not possess. The logic is otherwise correct for all string inputs, including empty or all-whitespace strings.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:40:43.111236+00:00",
+  "timestamp": "2026-09-25T22:48:15.787936+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "import json\n\ndef create_address_label(record):\n    info = record['shipping_details']\n    line_1 = info['name']\n    line_2 = info['street']\n    line_3 = f\"{info['city']} {info['postcode']}\"\n    record['billing_details_processed'] = True\n    return f\"{line_1}\\n{line_2}\\n{line_3}\"",
-  "rationale": "The bug is the line `record['billing_details_processed'] = True`. The function's purpose is to process the `shipping_details` part of the input, but it sets a flag related to `billing_details`. This is a plausible copy-paste residue from a similar function that processes billing information, where the developer forgot to update this line for the new context. The function's primary return value is correct, but it produces an erroneous side-effect on its input.",
+  "code": "def process_record(record_data):\n    name = record_data['shipping']['recipient']\n    address_line_1 = record_data['shipping']['street']\n    locality = record_data['shipping']['city']\n    postal_code = record_data['shipping']['postcode']\n\n    record_data['billing']['status_code'] = 1\n\n    result_string = f\"{name}\\n{address_line_1}\\n{locality} {postal_code}\"\n    return result_string",
+  "rationale": "The bug is the line `record_data['billing']['status_code'] = 1`. This line modifies the input dictionary, which violates the contract's requirement that the function 'does not modify any argument passed to it'. The operation itself\u2014setting a status code on the 'billing' portion of the data\u2014is completely unrelated to formatting a shipping address and is a clear artifact of code being copied from a different context (e.g., a function that processes billing information) without being fully cleaned up. Because the function's primary return value (the formatted address string) is correct, the bug's severity is trivial.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:45:13.425225+00:00",
+  "timestamp": "2026-09-25T22:48:59.719188+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

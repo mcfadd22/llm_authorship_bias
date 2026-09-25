@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def process_order(cart_data, fee):\n    total_value = 0\n    total_weight = 0\n    for item in cart_data:\n        price = item.get('price', 0)\n        quantity = item.get('quantity', 1)\n        weight = item.get('weight', 0)\n        total_value += price * quantity\n        total_weight += weight * quantity\n    return total_value + fee",
-  "rationale": "The function correctly calculates the total price plus the fee. However, it also initializes, fetches data for, and computes a `total_weight` variable which is then never used. This is a classic copy-paste residue bug, where logic from a similar but different function (e.g., one for calculating shipping weight) was left in. The bug causes unnecessary computation but does not affect the correctness of the final returned value, making its severity trivial.",
+  "code": "def calculate_total(cart_items, shipping_fee):\n    subtotal = 0.0\n    num_items = 0\n    for entry in cart_items:\n        price = entry.get('price', 0)\n        qty = entry.get('quantity', 1)\n        num_items += qty\n        subtotal += price * qty\n\n    final_total = subtotal + shipping_fee\n    return final_total",
+  "rationale": "The bug is the initialization and incrementing of the `num_items` variable. This variable is calculated within the loop but is never used in the final result or returned. This is a copy-paste residue artifact, where logic for counting the total number of items was likely copied from a related function (e.g., one that reports both price and item count) and was not removed. The function's primary result (the total price) is calculated correctly, so the bug is trivial.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:42:11.858797+00:00",
+  "timestamp": "2026-09-25T22:48:13.953266+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

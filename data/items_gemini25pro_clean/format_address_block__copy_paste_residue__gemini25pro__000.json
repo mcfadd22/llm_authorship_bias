@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "format_address_block__copy_paste_residue__gemini25pro__000",
-  "code": "def create_address_label(record):\n    info = record['shipping_details']\n    line_1 = info['name']\n    line_2 = info['street']\n    line_3 = f\"{info['city']} {info['postcode']}\"\n    return f\"{line_1}\\n{line_2}\\n{line_3}\"",
-  "fix_rationale": "The line that modified the input dictionary by setting a 'billing_details_processed' flag was removed. This change eliminates the incorrect side-effect, as the function should only format shipping details, not alter unrelated data.",
+  "code": "def process_record(record_data):\n    name = record_data['shipping']['recipient']\n    address_line_1 = record_data['shipping']['street']\n    locality = record_data['shipping']['city']\n    postal_code = record_data['shipping']['postcode']\n\n    result_string = f\"{name}\\n{address_line_1}\\n{locality} {postal_code}\"\n    return result_string",
+  "fix_rationale": "The line that modified the input dictionary `record_data` was removed. This change ensures the function adheres to the contract, which forbids modifying arguments, and removes the unintended side effect.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:52:54.145402+00:00",
+  "timestamp": "2026-09-25T22:52:27.811141+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

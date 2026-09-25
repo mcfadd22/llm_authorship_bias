@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "import os\n\ndef create_tagged_filenames(source_paths, tag):\n    processed_list = []\n    path_mapping = {}\n\n    for path_item in source_paths:\n        base, extension = os.path.splitext(path_item)\n        new_path = f\"{base}{tag}{extension}\"\n        processed_list.append(new_path)\n        path_mapping[path_item] = new_path\n\n    return processed_list",
-  "rationale": "The bug is the creation and population of the `path_mapping` dictionary. This dictionary is built during the loop but is never used, returned, or referenced again. This suggests the code was adapted from a similar function that had a different purpose (e.g., returning a map of old to new paths), and the developer forgot to remove the now-superfluous logic. The function's primary return value remains correct.",
+  "code": "import os\n\ndef generate_new_paths(items, tag):\n    results = []\n    processing_record = {}\n    for path in items:\n        root, extension = os.path.splitext(path)\n        new_path = f\"{root}{tag}{extension}\"\n        results.append(new_path)\n        processing_record[path] = new_path\n    return results",
+  "rationale": "The bug is the creation and population of the `processing_record` dictionary. This dictionary is built inside the loop but is never used, read, or returned; it goes out of scope when the function returns. This is characteristic of a copy-paste error where code from a function that caches or logs its results was adapted, but the unneeded caching/logging lines were not removed. The function's primary return value is correct, making the bug's effect trivial (unnecessary computation and memory allocation).",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:44:04.200938+00:00",
+  "timestamp": "2026-09-25T22:48:40.438103+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def build_invoice_summary(invoice):\n    if invoice is None:\n        invoice = {}\n    t = invoice.get('total')\n    c = invoice.get('currency')\n    i = invoice.get('issued_at')\n    result = {'total': t, 'currency': c, 'issued_at': i}\n    if not invoice:\n        result['created_at'] = i\n    return result",
-  "rationale": "Copy/paste residue: when the input is empty/None, the function adds a leftover 'created_at' key (from a prior context using creation timestamps). This violates the contract\u2019s 'exactly these keys' requirement only on the degenerate empty/None case, leaving normal inputs correct.",
+  "code": "def invoice_summary(invoice):\n    total = invoice.get('total')\n    currency = invoice.get('currency')\n    issued = invoice.get('issued_at')\n    order_id = invoice.get('order_id')\n    return {'total': total, 'currency': currency, 'issued_at': issued}\n",
+  "rationale": "Copy-paste residue: the variable 'order_id' is retrieved from the invoice but never used, likely leftover from a related order-summary function. The returned dict is correct and unaffected.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:42:24.004254+00:00",
+  "timestamp": "2026-09-25T22:47:18.140866+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

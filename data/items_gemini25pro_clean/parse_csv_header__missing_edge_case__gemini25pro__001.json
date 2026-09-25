@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "parse_csv_header__missing_edge_case__gemini25pro__001",
-  "code": "def get_column_names(line_text):\n    processed_fields = []\n    items = line_text.split(',')\n    for item in items:\n        processed_item = item.strip()\n        if processed_item:\n            processed_fields.append(processed_item)\n    return processed_fields",
-  "fix_rationale": "The special code path for inputs without commas was removed. This path was both incorrect for blank inputs and redundant, as the main logic path already correctly handles all cases, including single-column and empty lines.",
+  "code": "def process_items(csv_line):\n    if not isinstance(csv_line, str):\n        raise TypeError\n    items = csv_line.split(',')\n    results = []\n    for item in items:\n        processed = item.strip()\n        if processed:\n            results.append(processed)\n    return results",
+  "fix_rationale": "An initial type check was added to raise a TypeError for any non-string input. This corrects the specified bug for `None` and improves robustness by correctly handling other invalid types.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:53:50.656231+00:00",
+  "timestamp": "2026-09-25T22:52:50.428282+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

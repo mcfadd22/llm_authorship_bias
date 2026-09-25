@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def format_shipping_address(name, street, city, postcode):\n    a = str(name).strip()\n    b = str(street).strip()\n    c = f\"{str(city).strip()} {str(postcode).strip()}\"\n    print(\"Billing address:\\n\" + a + \"\\n\" + b + \"\\n\" + c)\n    return a + \"\\n\" + b + \"\\n\" + c\n",
-  "rationale": "Copy-paste residue: a stray print labeled 'Billing address' remains from a similar billing formatter. It performs side-effect output but the returned multi-line shipping address string is correct.",
+  "code": "def format_shipping_address(data):\n    name = data.get('shipping_name', '')\n    street = data.get('shipping_street', '')\n    city = data.get('shipping_city', '')\n    postcode = data.get('shipping_postcode', '')\n    billing_line = \"{}\\n{}\\n{} {}\".format(\n        data.get('billing_name', ''),\n        data.get('billing_street', ''),\n        data.get('billing_city', ''),\n        data.get('billing_postcode', '')\n    )\n    line3 = (city + \" \" + postcode).strip()\n    return \"\\n\".join([name, street, line3])",
+  "rationale": "Copy-paste residue: an unused variable 'billing_line' is built from billing fields, clearly leftover from a billing formatter. It has no effect on the returned shipping-only address, making the defect trivial.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:42:25.070752+00:00",
+  "timestamp": "2026-09-25T22:47:37.390213+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

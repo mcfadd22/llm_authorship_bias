@@ -9,10 +9,10 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "import os\n\ndef process_entries(items, tag):\n    output_list = []\n    entry_mapping = {}\n    for entry in items:\n        base, extension = os.path.splitext(entry)\n        new_entry = f\"{base}{tag}{extension}\"\n        output_list.append(new_entry)\n        entry_mapping[entry] = new_entry\n    return output_list",
-  "rationale": "The bug is the creation and population of the `entry_mapping` dictionary. This dictionary is built inside the loop but is never used, returned, or has any other side effect, as the function only returns `output_list`. This is a classic copy-paste residue, where logic from a function that was supposed to return a key-value map was left behind when it was adapted to only return a list. The function's primary result is correct, but it performs unnecessary work.",
+  "code": "import os\n\ndef process_filenames(filenames, append_str):\n    processed_names = []\n    name_map = {}\n    for name in filenames:\n        base, ext = os.path.splitext(name)\n        new_name = f\"{base}{append_str}{ext}\"\n        processed_names.append(new_name)\n        name_map[name] = new_name\n    return processed_names",
+  "rationale": "The bug consists of the initialization of the `name_map` dictionary and its subsequent population inside the loop. This dictionary is never used, returned, or inspected again, so its creation and the assignments to it are unnecessary work. This is a classic 'copy_paste_residue' artifact, where logic to build a mapping was likely copied from a related function and not removed. The bug is 'trivial' because the function's primary return value (`processed_names`) is entirely correct and unaffected; the only side effect is wasted computation and memory.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:43:46.943777+00:00",
+  "timestamp": "2026-09-25T22:48:39.165371+00:00",
   "prompt_version": "2026-09-25-v2",
   "provenance": {
     "source": "generated",

@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "format_address_block__copy_paste_residue__gemini25pro__001",
-  "code": "def format_shipping_label(record):\n    shipping_details = record['shipping']\n\n    recipient = shipping_details['name']\n    line_1 = shipping_details['street']\n    line_2 = f\"{shipping_details['city']} {shipping_details['postcode']}\"\n\n    return f\"{recipient}\\n{line_1}\\n{line_2}\"",
-  "fix_rationale": "The line that caused an unintended side-effect by modifying the input dictionary was removed. The function now correctly adheres to its contract, which is only to format and return the shipping address.",
+  "code": "def format_shipping_address(customer_info):\n    addr = customer_info['shipping']\n    name_line = addr['recipient']\n    street_line = addr['street']\n    city_line = f\"{addr['city']} {addr['postcode']}\"\n    return \"\\n\".join([name_line, street_line, city_line])",
+  "fix_rationale": "The print statement that wrote billing information to the console was removed. This side effect violated the contract's requirements for no console output and to only use shipping address fields.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:53:03.826537+00:00",
+  "timestamp": "2026-09-25T22:52:16.191110+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

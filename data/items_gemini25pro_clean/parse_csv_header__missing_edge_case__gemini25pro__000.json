@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "parse_csv_header__missing_edge_case__gemini25pro__000",
-  "code": "def extract_fields(csv_header):\n    if csv_header is None:\n        return []\n    components = csv_header.split(',')\n    final_list = []\n    for c in components:\n        processed_c = c.strip()\n        if processed_c:\n            final_list.append(processed_c)\n    return final_list",
-  "fix_rationale": "The original function crashed with an `AttributeError` if the input was `None`. A check was added at the start of the function to handle this case by returning an empty list.",
+  "code": "def process_header(header_line):\n    if not isinstance(header_line, str):\n        raise TypeError(\"Input must be a string\")\n    return [\n        field.strip()\n        for field in header_line.split(',')\n        if field.strip()\n    ]",
+  "fix_rationale": "The original function raised an AttributeError on None input instead of the required TypeError. A type check was added to validate that the input is a string, raising a TypeError for any invalid type, including None.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:53:45.946326+00:00",
+  "timestamp": "2026-09-25T22:52:42.941516+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }
