@@ -1,0 +1,25 @@
+{
+  "item_id": "codes_match__known_trap__gemini25pro__001",
+  "cell_id": "codes_match__known_trap",
+  "sample_idx": 1,
+  "aim_id": "codes_match",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def check_code_match(parsed_code, expected_code):\n    is_identical = parsed_code is expected_code\n    return is_identical",
+  "rationale": "The function incorrectly uses the `is` operator to compare integers for equality. In CPython, `is` checks for object identity, which only reliably matches value equality for small, cached integers (typically -5 to 256). For any integer outside this range, the function will incorrectly return `False` for two equal numbers, violating the contract.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:47:58.423812+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

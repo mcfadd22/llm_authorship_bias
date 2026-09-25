@@ -1,0 +1,28 @@
+{
+  "item_id": "add_note__known_trap__gpt5__000",
+  "cell_id": "add_note__known_trap",
+  "sample_idx": 0,
+  "aim_id": "add_note",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "add_note__known_trap__gpt5__000",
+  "code": "def add_note(note, notes=None):\n    if notes is None:\n        notes = []\n    notes.append(note)\n    return notes",
+  "fix_rationale": "Changed the mutable default argument to None and initialized a new list when notes is None to avoid shared state across calls.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:49:12.058837+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

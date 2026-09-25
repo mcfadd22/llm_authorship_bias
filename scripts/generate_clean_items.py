@@ -9,6 +9,7 @@ produced the buggy bank, so an item and its twin share a true author. Rerunning 
 import argparse
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Optional
@@ -124,7 +125,8 @@ def generate_clean_one(client: JudgeClient, item: Dict, stated_aims: Dict, max_r
 
 
 def run(client: Optional[JudgeClient], items_dir: Path, out_dir: Path, stated_aims: Dict,
-        limit: Optional[int], overwrite: bool, max_retries: int, dry_run: bool) -> Dict:
+        limit: Optional[int], overwrite: bool, max_retries: int, dry_run: bool,
+        concurrency: int = 4) -> Dict:
     items = sorted(load_items(items_dir), key=lambda i: i["item_id"])
     if limit is not None:
         items = items[:limit]
@@ -135,21 +137,30 @@ def run(client: Optional[JudgeClient], items_dir: Path, out_dir: Path, stated_ai
             print(build_clean_prompt(item, stated_aims))
         return {"generated": 0, "skipped": 0, "failed": 0}
 
-    generated = skipped = failed = 0
-    for item in items:
-        if not overwrite and item_exists(out_dir, item["item_id"]):
-            skipped += 1
-            continue
-        try:
-            record = generate_clean_one(client, item, stated_aims, max_retries)
-        except RuntimeError as exc:
-            append_failure(out_dir / "failures.jsonl", {"item_id": item["item_id"], "error": str(exc)})
-            failed += 1
-            print(f"FAILED {item['item_id']}: {exc}")
-            continue
-        write_item(out_dir, item["item_id"], record)
-        generated += 1
-        print(f"generated {item['item_id']}")
+    pending = [i for i in items if overwrite or not item_exists(out_dir, i["item_id"])]
+    skipped = len(items) - len(pending)
+    generated = failed = 0
+
+    # Same shape as vignette_gen.orchestrate: futures out, results consumed on
+    # this thread, so writes and counters stay serial and need no locking.
+    with ThreadPoolExecutor(max_workers=max(1, concurrency)) as pool:
+        futures = {
+            pool.submit(generate_clean_one, client, item, stated_aims, max_retries): item
+            for item in pending
+        }
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                record = future.result()
+            except RuntimeError as exc:
+                append_failure(out_dir / "failures.jsonl",
+                               {"item_id": item["item_id"], "error": str(exc)})
+                failed += 1
+                print(f"FAILED {item['item_id']}: {exc}")
+                continue
+            write_item(out_dir, item["item_id"], record)
+            generated += 1
+            print(f"generated {item['item_id']}  ({generated}/{len(pending)})")
 
     print(f"done: {generated} generated, {skipped} skipped, {failed} failed")
     return {"generated": generated, "skipped": skipped, "failed": failed}
@@ -167,6 +178,7 @@ def parse_args(argv=None):
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--max-retries", type=int, default=3)
+    parser.add_argument("--concurrency", type=int, default=4)
     return parser.parse_args(argv)
 
 
@@ -182,7 +194,8 @@ def main(argv=None):
             )
         client = make_client({"provider": args.provider, "model": args.model})
     run(client, args.items_dir, args.out_dir, stated_aims, limit=args.limit,
-        overwrite=args.overwrite, max_retries=args.max_retries, dry_run=args.dry_run)
+        overwrite=args.overwrite, max_retries=args.max_retries, dry_run=args.dry_run,
+        concurrency=args.concurrency)
 
 
 if __name__ == "__main__":

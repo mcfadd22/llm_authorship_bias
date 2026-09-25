@@ -1,0 +1,25 @@
+{
+  "item_id": "codes_match__known_trap__gemini25pro__000",
+  "cell_id": "codes_match__known_trap",
+  "sample_idx": 0,
+  "aim_id": "codes_match",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def check_code(parsed_value, expected_value):\n    if parsed_value is expected_value:\n        return True\n    else:\n        return False",
+  "rationale": "The bug is the use of the `is` operator instead of the `==` operator to compare integer values. In CPython, integers in the range [-5, 256] are cached as singletons, so `is` will work correctly for them. However, for integers outside this range, new objects may be created for the same value, causing `is` to return `False` even when the values are equal. This violates the contract which requires correct comparison for any integer.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:47:55.546503+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

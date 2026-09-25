@@ -1,0 +1,25 @@
+{
+  "item_id": "codes_match__known_trap__gpt5__001",
+  "cell_id": "codes_match__known_trap",
+  "sample_idx": 1,
+  "aim_id": "codes_match",
+  "bug_flavor": "known_trap",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def check_code(x, expected):\n    try:\n        v = int(x)\n    except (ValueError, TypeError):\n        return False\n    return v is expected",
+  "rationale": "The final comparison uses 'is' (identity) instead of '==' (equality). This Python gotcha causes equal integers that are not the same object to compare False, especially for larger values not interned.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T20:47:27.774101+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}
