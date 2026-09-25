@@ -20,6 +20,8 @@ def parse_args(argv=None):
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--max-retries", type=int, default=3)
+    parser.add_argument("--concurrency", type=int, default=4,
+                        help="parallel generation calls; retries dominate wall clock")
     parser.add_argument("--items-dir", type=Path, default=DATA_DIR / "items",
                         help="output bank; use a separate directory per generator model")
     parser.add_argument("--generator-tag", default=None,
@@ -38,6 +40,7 @@ def main(argv=None):
         dry_run=args.dry_run,
         overwrite=args.overwrite,
         max_retries=args.max_retries,
+        concurrency=args.concurrency,
         items_dir=args.items_dir,
         failures_path=args.items_dir / "failures.jsonl",
     )

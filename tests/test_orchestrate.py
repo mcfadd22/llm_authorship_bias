@@ -296,3 +296,57 @@ def test_run_refuses_to_write_into_another_generators_bank(tmp_path):
         run(_ScriptedClient([]), options,
             load_config_fn=lambda: CONFIG,
             build_items_fn=lambda config, samples_per_cell, limit, tag: [ITEM])
+
+
+def test_run_generates_every_pending_item_concurrently(tmp_path):
+    """Results are consumed on the calling thread, so counts and writes stay
+    correct even though the API calls overlap."""
+    import threading
+
+    seen = []
+    lock = threading.Lock()
+
+    class _Concurrent:
+        def generate(self, prompt):
+            with lock:
+                seen.append(prompt)
+            return json.dumps({"code": GOOD_CODE, "rationale": "r"})
+
+    items = [
+        {**ITEM, "item_id": f"aim_a__missing_edge_case__{TAG}__{n:03d}", "sample_idx": n}
+        for n in range(6)
+    ]
+    options = RunOptions(
+        model="m", generator_tag=TAG, samples_per_cell=1, limit=None, dry_run=False,
+        overwrite=False, max_retries=1, items_dir=tmp_path / "items",
+        failures_path=tmp_path / "failures.jsonl", concurrency=4,
+    )
+    counts = run(_Concurrent(), options,
+                 load_config_fn=lambda: CONFIG,
+                 build_items_fn=lambda config, spc, limit, tag: items)
+
+    assert counts == {"generated": 6, "skipped": 0, "failed": 0}
+    assert len(seen) == 6
+    assert len(list((tmp_path / "items").glob("*.json"))) == 6
+
+
+def test_run_concurrent_still_records_failures_and_continues(tmp_path):
+    class _AlwaysFails:
+        def generate(self, prompt):
+            raise GenerationError("boom")
+
+    items = [
+        {**ITEM, "item_id": f"aim_a__missing_edge_case__{TAG}__{n:03d}", "sample_idx": n}
+        for n in range(3)
+    ]
+    options = RunOptions(
+        model="m", generator_tag=TAG, samples_per_cell=1, limit=None, dry_run=False,
+        overwrite=False, max_retries=1, items_dir=tmp_path / "items",
+        failures_path=tmp_path / "failures.jsonl", concurrency=3,
+    )
+    counts = run(_AlwaysFails(), options,
+                 load_config_fn=lambda: CONFIG,
+                 build_items_fn=lambda config, spc, limit, tag: items)
+
+    assert counts == {"generated": 0, "skipped": 0, "failed": 3}
+    assert len((tmp_path / "failures.jsonl").read_text().strip().splitlines()) == 3

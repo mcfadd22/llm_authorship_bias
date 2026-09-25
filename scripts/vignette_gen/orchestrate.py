@@ -1,4 +1,5 @@
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,7 @@ class RunOptions:
     items_dir: Path
     failures_path: Path
     generator_tag: str = ""
+    concurrency: int = 4
 
 
 def _default_build_items(
@@ -74,39 +76,53 @@ def run(
 
     check_bank_generator(options.items_dir, options.generator_tag)
 
-    generated = skipped = failed = 0
-    for item in items:
-        if not options.overwrite and item_exists(options.items_dir, item["item_id"]):
-            skipped += 1
-            continue
-        try:
-            result = generate_one(client, item, config, options.max_retries)
-        except RuntimeError as exc:
-            append_failure(options.failures_path, {**item, "error": str(exc)})
-            failed += 1
-            continue
+    pending = [
+        item for item in items
+        if options.overwrite or not item_exists(options.items_dir, item["item_id"])
+    ]
+    skipped = len(items) - len(pending)
 
-        record = {
-            **item,
-            "code": result["code"],
-            "rationale": result["rationale"],
-            "generation_model": options.model,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "prompt_version": PROMPT_VERSION,
-            # Corpus-backed generation will populate the source fields; items
-            # written from a flavour definition record that they have no source.
-            "provenance": {
-                "source": "generated",
-                "source_id": None,
-                "source_label": None,
-                "source_license": None,
-                "mutation_operator": None,
-                "modifications": None,
-            },
-        }
-        write_item(options.items_dir, item["item_id"], record)
-        generated += 1
-        print(f"generated {item['item_id']}")
+    generated = failed = 0
+
+    def work(item):
+        return generate_one(client, item, config, options.max_retries)
+
+    # Retries dominate the wall clock: a rejected candidate costs another full
+    # call, and a single security-flavoured item has taken six minutes that way.
+    # Results are consumed on this thread, so the counters and writes stay serial.
+    with ThreadPoolExecutor(max_workers=max(1, options.concurrency)) as pool:
+        futures = {pool.submit(work, item): item for item in pending}
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                result = future.result()
+            except RuntimeError as exc:
+                append_failure(options.failures_path, {**item, "error": str(exc)})
+                failed += 1
+                print(f"FAILED {item['item_id']}: {exc}")
+                continue
+
+            record = {
+                **item,
+                "code": result["code"],
+                "rationale": result["rationale"],
+                "generation_model": options.model,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "prompt_version": PROMPT_VERSION,
+                # Corpus-backed generation will populate the source fields; items
+                # written from a flavour definition record they have no source.
+                "provenance": {
+                    "source": "generated",
+                    "source_id": None,
+                    "source_label": None,
+                    "source_license": None,
+                    "mutation_operator": None,
+                    "modifications": None,
+                },
+            }
+            write_item(options.items_dir, item["item_id"], record)
+            generated += 1
+            print(f"generated {item['item_id']}  ({generated}/{len(pending)})")
 
     print(f"done: {generated} generated, {skipped} skipped, {failed} failed")
     return {"generated": generated, "skipped": skipped, "failed": failed}
