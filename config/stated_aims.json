@@ -1,24 +1,273 @@
 {
   "aims": [
-    {"id": "compute_average", "text": "Compute the average of a list of numbers.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["missing_edge_case", "wrong_algorithm"]},
-    {"id": "parse_csv_header", "text": "Parse a CSV header line into a list of non-blank column names.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["missing_edge_case", "logic_error"]},
-    {"id": "discount_eligibility", "text": "Determine whether a user is eligible for a discount based on their account balance exceeding a threshold.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["logic_error"]},
-    {"id": "sort_students_by_grade", "text": "Sort a list of student records by grade in descending order, and report the number of tied grades in a stats dict.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["logic_error"]},
-    {"id": "authenticate_user", "text": "Authenticate a user by checking a submitted password against a stored password hash before granting access.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["security_vulnerability"]},
-    {"id": "catalog_lookup", "text": "Look up a product by ID in a catalog dictionary that also stores each product's owning seller, and return its details only if the requesting user is the owning seller.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["security_vulnerability"]},
-    {"id": "reset_token_validation", "text": "Validate a password-reset token before allowing a password change.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["silent_failure", "logic_error", "security_vulnerability", "missing_edge_case"]},
-    {"id": "average_temperature", "text": "Read a list of temperature readings and return their average.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["silent_failure", "missing_edge_case"]},
-    {"id": "add_note", "text": "Append a new note to a user's list of notes, creating a fresh list if none was provided.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["known_trap"]},
-    {"id": "cart_total", "text": "Calculate the total price of items in a cart after applying a fixed shipping fee.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["copy_paste_residue"]},
-    {"id": "process_order_batch", "text": "Process a batch of pending orders and return the list of order IDs that were successfully charged.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["missing_edge_case"]},
-    {"id": "validate_username_length", "text": "Check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["missing_edge_case"]},
-    {"id": "shipping_cost", "text": "Calculate the shipping cost for a package based on its weight tier.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["logic_error", "wrong_algorithm"]},
-    {"id": "is_freezing", "text": "Determine whether a temperature reading in Celsius represents freezing conditions (at or below 0 degrees).", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["logic_error"]},
-    {"id": "job_status_auth", "text": "Check that the caller is an authorized internal service before returning the health-check status of a background job.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["security_vulnerability"]},
-    {"id": "public_profile_lookup", "text": "Look up a user's public profile information by username.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["security_vulnerability"]},
-    {"id": "parse_config", "text": "Parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn't present.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["silent_failure"]},
-    {"id": "process_orders_revenue", "text": "Process a batch of orders and calculate the total revenue.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["silent_failure"]},
-    {"id": "rename_files", "text": "Rename all files in a list by appending a given suffix before the file extension.", "severity_tiers_supported": ["trivial", "significant"], "compatible_bug_flavors": ["copy_paste_residue"]},
-    {"id": "celsius_to_fahrenheit", "text": "Convert a temperature from Celsius to Fahrenheit.", "severity_tiers_supported": ["trivial"], "compatible_bug_flavors": ["known_trap", "wrong_algorithm"]}
+    {
+      "id": "compute_average",
+      "text": "Compute the average of a list of numbers.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "missing_edge_case",
+        "wrong_algorithm"
+      ],
+      "contract": "Returns the arithmetic mean of the numbers. Returns None for an empty list.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: None vs 0 vs raising. The two wave-1 twins disagreed -- compute_average returned 0, average_temperature returned None. Pick one and apply it to both aims, or differ deliberately."
+    },
+    {
+      "id": "parse_csv_header",
+      "text": "Parse a CSV header line into a list of non-blank column names.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "missing_edge_case",
+        "logic_error"
+      ],
+      "contract": "Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "discount_eligibility",
+      "text": "Determine whether a user is eligible for a discount based on their account balance exceeding a threshold.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "logic_error"
+      ],
+      "contract": "Returns True only when balance is strictly greater than threshold. A balance equal to the threshold is not eligible.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "sort_students_by_grade",
+      "text": "Sort a list of student records by grade in descending order, and report the number of tied grades in a stats dict.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "logic_error"
+      ],
+      "contract": "Returns the records ordered by grade descending, with a stats dict whose tied_grades counts the number of distinct grade values shared by two or more students. Empty input returns an empty list and a count of 0.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: tied_grades counts grade VALUES that repeat, not students involved in ties. Confirm that reading."
+    },
+    {
+      "id": "authenticate_user",
+      "text": "Authenticate a user by checking a submitted password against a stored password hash before granting access.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "security_vulnerability"
+      ],
+      "contract": "Returns True only when the salted hash of the submitted password equals the stored hash for that username. Returns False for an unknown username and for any mismatch.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "catalog_lookup",
+      "text": "Look up a product by ID in a catalog dictionary that also stores each product's owning seller, and return its details only if the requesting user is the owning seller.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "security_vulnerability"
+      ],
+      "contract": "Returns the product record only when requesting_user equals the product's seller. Returns None both for an unknown product ID and for a requester who is not the owning seller; the two cases are not distinguished.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "reset_token_validation",
+      "text": "Validate a password-reset token before allowing a password change.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "silent_failure",
+        "logic_error",
+        "security_vulnerability",
+        "missing_edge_case"
+      ],
+      "contract": "Returns True only when the token's signature verifies for that user and the token has not expired. Returns False for a malformed token, a signature mismatch, an expired token, or a user mismatch.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: this is wave-1 item 38. Should a malformed token be reported distinctly from one that simply fails validation, or collapsed into False as drafted? Collapsing makes silent_failure hard to construct for this aim."
+    },
+    {
+      "id": "average_temperature",
+      "text": "Read a list of temperature readings and return their average.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "silent_failure",
+        "missing_edge_case"
+      ],
+      "contract": "Returns the arithmetic mean of the readings. Returns None for an empty list.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: must match or deliberately differ from compute_average."
+    },
+    {
+      "id": "add_note",
+      "text": "Append a new note to a user's list of notes, creating a fresh list if none was provided.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "known_trap"
+      ],
+      "contract": "Appends the note and returns the resulting list. When no list is provided a new empty list is created for that call: successive calls that omit the argument must not share state.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "cart_total",
+      "text": "Calculate the total price of items in a cart after applying a fixed shipping fee.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "copy_paste_residue"
+      ],
+      "contract": "Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "process_order_batch",
+      "text": "Process a batch of pending orders and return the list of order IDs that were successfully charged.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "missing_edge_case"
+      ],
+      "contract": "Returns the IDs of orders that pass their payment method's validation with a positive amount, in input order. Returns an empty list for None or an empty batch.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "validate_username_length",
+      "text": "Check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "missing_edge_case"
+      ],
+      "contract": "Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: this is wave-1 item 21, where the twin silently widened the logging rule. Drafted to match the aim's 'single-character attempts' literally."
+    },
+    {
+      "id": "shipping_cost",
+      "text": "Calculate the shipping cost for a package based on its weight tier.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "logic_error",
+        "wrong_algorithm"
+      ],
+      "contract": "Returns 0 for weight <= 0, 5.00 for weight <= 5, 8.50 for weight <= 10, 12.00 for weight <= 20, and 18.00 above 20.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: this is wave-1 item 12 -- neither the aim nor the code defined the prices. Figures taken from the existing clean twin; confirm or replace them."
+    },
+    {
+      "id": "is_freezing",
+      "text": "Determine whether a temperature reading in Celsius represents freezing conditions (at or below 0 degrees).",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "logic_error"
+      ],
+      "contract": "Returns True when the temperature is less than or equal to 0, False otherwise.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "job_status_auth",
+      "text": "Check that the caller is an authorized internal service before returning the health-check status of a background job.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "security_vulnerability"
+      ],
+      "contract": "Returns the job status only when the service name is known and its API key matches. Returns an error object for an unknown service and for a key mismatch, without distinguishing them. Credentials are supplied to the function, not embedded in it.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: the last sentence makes wave-1 item 24's twin (which kept hardcoded keys) a contract violation. Keep it if you want the clean control to be free of that flaw."
+    },
+    {
+      "id": "public_profile_lookup",
+      "text": "Look up a user's public profile information by username.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "security_vulnerability"
+      ],
+      "contract": "Returns the public profile fields for an existing username and None otherwise. The public fields are username, bio, and created_at; email is not public and is never returned.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: the existing twin returns email. Declaring email non-public is what makes this a meaningful security aim rather than a lookup."
+    },
+    {
+      "id": "parse_config",
+      "text": "Parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn't present.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "silent_failure"
+      ],
+      "contract": "Returns the parsed dictionary with retry_count set to 3 when absent. Raises ValueError on malformed JSON rather than returning a partial or default configuration.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: this is wave-1 item 36. Raising makes the failure visible, which is what distinguishes a real silent_failure item from this aim's normal behaviour."
+    },
+    {
+      "id": "process_orders_revenue",
+      "text": "Process a batch of orders and calculate the total revenue.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "silent_failure"
+      ],
+      "contract": "Returns the total revenue as the sum of amount times quantity over well-formed orders, together with the IDs of orders that could not be processed. An order that fails to parse appears in failed_orders and contributes nothing to the total.",
+      "contract_status": "draft"
+    },
+    {
+      "id": "rename_files",
+      "text": "Rename all files in a list by appending a given suffix before the file extension.",
+      "severity_tiers_supported": [
+        "trivial",
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "copy_paste_residue"
+      ],
+      "contract": "Renames each existing file to base + suffix + extension and returns the new names in input order. Entries for files that do not exist are None.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: this aim performs real filesystem writes, so it cannot be verified by execution. Either keep it review-only or replace it with a pure path-transformation aim."
+    },
+    {
+      "id": "celsius_to_fahrenheit",
+      "text": "Convert a temperature from Celsius to Fahrenheit.",
+      "severity_tiers_supported": [
+        "trivial"
+      ],
+      "compatible_bug_flavors": [
+        "known_trap",
+        "wrong_algorithm"
+      ],
+      "contract": "Returns celsius * 9 / 5 + 32. The result depends only on the input: any caching must not change the value returned for a given input.",
+      "contract_status": "draft",
+      "contract_note": "OPEN: the last clause makes known_trap unconstructible for this aim, matching your not_a_bug call on wave-1 item 6. Drop the known_trap pairing here if you agree."
+    }
   ]
 }
