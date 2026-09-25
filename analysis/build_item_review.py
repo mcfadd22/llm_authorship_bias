@@ -25,6 +25,9 @@ def parse_args(argv=None):
                     help="defaults to <items-dir>_clean")
     ap.add_argument("--out", type=Path, default=None,
                     help="defaults to analysis/item_review_<bank>.html")
+    ap.add_argument("--verdicts", type=Path, default=None,
+                    help="CSV of existing verdicts to pre-load, so the sheet "
+                         "reflects a completed review and can be revised")
     return ap.parse_args(argv)
 
 
@@ -75,9 +78,15 @@ def _severity_tag(it):
     return f'<span class="tag tier open">severity open: {html.escape(expected)}</span>'
 
 
-def card(it, n):
+def card(it, n, prior=None):
     changed = "" if it["clean_code"] else '<span class="warn">no clean twin</span>'
     iid = html.escape(it["item_id"])
+    prior = prior or {}
+    v, tv = prior.get("verdict", ""), prior.get("twin_verdict", "")
+    note = html.escape(prior.get("note", ""))
+
+    def chk(name, value):
+        return " checked" if name == value else ""
     return f'''
 <section class="card" data-flavor="{html.escape(it['bug_flavor'])}" data-tier="{html.escape(it.get('severity_tier') or 'open')}" id="i{n}">
   <header>
@@ -97,20 +106,20 @@ def card(it, n):
   </details>
   <div class="verdict" data-item="{iid}">
     <span class="vlabel">item</span>
-    <label><input type="radio" name="v{n}" value="ok"> ok</label>
-    <label><input type="radio" name="v{n}" value="wrong_flavor"> wrong flavor</label>
-    <label><input type="radio" name="v{n}" value="wrong_tier"> wrong tier</label>
-    <label><input type="radio" name="v{n}" value="not_a_bug"> not a real bug</label>
-    <label><input type="radio" name="v{n}" value="violates_contract"> breaks contract elsewhere</label>
-    <label><input type="radio" name="v{n}" value="drop"> drop</label>
+    <label><input type="radio" name="v{n}" value="ok"{chk("ok", v)}> ok</label>
+    <label><input type="radio" name="v{n}" value="wrong_flavor"{chk("wrong_flavor", v)}> wrong flavor</label>
+    <label><input type="radio" name="v{n}" value="wrong_tier"{chk("wrong_tier", v)}> wrong tier</label>
+    <label><input type="radio" name="v{n}" value="not_a_bug"{chk("not_a_bug", v)}> not a real bug</label>
+    <label><input type="radio" name="v{n}" value="violates_contract"{chk("violates_contract", v)}> breaks contract elsewhere</label>
+    <label><input type="radio" name="v{n}" value="drop"{chk("drop", v)}> drop</label>
   </div>
   <div class="verdict twin" data-twin="{iid}">
     <span class="vlabel">twin</span>
-    <label><input type="radio" name="t{n}" value="ok"> clean</label>
-    <label><input type="radio" name="t{n}" value="twin_not_clean"> has another flaw</label>
-    <label><input type="radio" name="t{n}" value="twin_breaks_contract"> breaks the contract</label>
-    <label><input type="radio" name="t{n}" value="twin_not_minimal"> changes too much</label>
-    <input class="note" type="text" placeholder="note (optional)">
+    <label><input type="radio" name="t{n}" value="ok"{chk("ok", tv)}> clean</label>
+    <label><input type="radio" name="t{n}" value="twin_not_clean"{chk("twin_not_clean", tv)}> has another flaw</label>
+    <label><input type="radio" name="t{n}" value="twin_breaks_contract"{chk("twin_breaks_contract", tv)}> breaks the contract</label>
+    <label><input type="radio" name="t{n}" value="twin_not_minimal"{chk("twin_not_minimal", tv)}> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="{note}">
   </div>
 </section>'''
 
@@ -121,6 +130,12 @@ def main(argv=None):
     clean_dir = args.clean_dir or items_dir.parent / f"{items_dir.name}_clean"
     out_path = args.out or ROOT / "analysis" / f"item_review_{items_dir.name}.html"
     rows = load(items_dir, clean_dir)
+
+    prior = {}
+    if args.verdicts:
+        import csv
+        with args.verdicts.open() as fh:
+            prior = {r["item_id"]: r for r in csv.DictReader(fh)}
     by_flavor = defaultdict(list)
     for r in rows:
         by_flavor[r["bug_flavor"]].append(r)
@@ -131,7 +146,7 @@ def main(argv=None):
         body.append(f'<h2 class="fh">{html.escape(flavor)} <span class="cnt">{len(group)} items</span></h2>')
         for it in group:
             n += 1
-            body.append(card(it, n))
+            body.append(card(it, n, prior.get(it['item_id'])))
 
     tiers = defaultdict(int)
     for r in rows:

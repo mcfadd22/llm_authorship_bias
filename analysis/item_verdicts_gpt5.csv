@@ -1,0 +1,65 @@
+item_id,verdict,twin_verdict,note
+build_invoice_summary__copy_paste_residue__gpt5__000,ok,ok,Extra created_at violates exact-key contract on empty input; copy-paste origin is inferred.
+build_invoice_summary__copy_paste_residue__gpt5__001,not_a_bug,ok,Returned dict satisfies contract; customer-profile print is extraneous but output silence is not specified.
+cart_total__copy_paste_residue__gpt5__000,not_a_bug,ok,"Invoices-table print is residue, but return value satisfies contract; stdout is unspecified."
+cart_total__copy_paste_residue__gpt5__001,drop,ok,"Mutates optional summary, but contract does not define that argument or prohibit mutation. Specify purity before regenerating."
+format_address_block__copy_paste_residue__gpt5__000,not_a_bug,ok,Returned shipping block is correct; contract does not clearly prohibit console output.
+format_address_block__copy_paste_residue__gpt5__001,drop,twin_not_minimal,"Mutates input billing field, but contract does not prohibit mutation; twin also changes field coercion and formatting."
+rename_files__copy_paste_residue__gpt5__000,not_a_bug,ok,Unused map changes neither result nor stated behavior; inferred copy-paste history.
+rename_files__copy_paste_residue__gpt5__001,not_a_bug,ok,Unused pair list changes neither result nor stated behavior; near duplicate of 7.
+codes_match__known_trap__gpt5__000,ok,ok,Integer identity can disagree with value equality.
+codes_match__known_trap__gpt5__001,ok,ok,Same valid trap as 9; near duplicate.
+price_total_match__known_trap__gpt5__000,ok,ok,Identity of integer cent values can give false for equal totals; tests integer identity rather than float accumulation.
+price_total_match__known_trap__gpt5__001,ok,twin_not_minimal,`is` is the defect; twin also replaces float accumulation and rounding with Decimal.
+add_note__known_trap__gpt5__000,ok,ok,Mutable default shares notes across calls; tier remains open.
+add_note__known_trap__gpt5__001,ok,ok,"Same code, bug, and fix as 13; duplicate; tier remains open."
+discount_eligibility__logic_error__gpt5__000,ok,ok,Reversed discount comparison.
+discount_eligibility__logic_error__gpt5__001,ok,ok,Reversed discount comparison; close to 15.
+is_freezing__logic_error__gpt5__000,ok,ok,>= 0 reverses freezing classifications away from zero.
+is_freezing__logic_error__gpt5__001,ok,ok,Effective duplicate of 17.
+parse_csv_header__logic_error__gpt5__000,ok,ok,Filter retains blank fields rather than named fields.
+parse_csv_header__logic_error__gpt5__001,ok,ok,Effective duplicate of 19.
+reset_token_validation__logic_error__gpt5__000,ok,twin_not_minimal,Inverted expiry check; twin also adds unrelated type and finite-number checks.
+reset_token_validation__logic_error__gpt5__001,ok,twin_not_minimal,Approves expired tokens; twin also changes structural checks and expiry conversion.
+shipping_cost__logic_error__gpt5__000,ok,ok,Misordered tiers misprice weights through 5.
+shipping_cost__logic_error__gpt5__001,ok,ok,Wrong rates and ineffective 10-20 tier; rationale understates the control-flow defect.
+sort_students_by_grade__logic_error__gpt5__000,ok,ok,Sorts ascending rather than descending.
+sort_students_by_grade__logic_error__gpt5__001,ok,ok,Effective duplicate of 25.
+average_temperature__missing_edge_case__gpt5__000,ok,ok,Empty list divides by zero instead of returning None.
+average_temperature__missing_edge_case__gpt5__001,ok,ok,Near duplicate of 27.
+parse_csv_header__missing_edge_case__gpt5__000,not_a_bug,ok,"Contract covers blank string lines, not None; buggy code handles blank strings."
+parse_csv_header__missing_edge_case__gpt5__001,not_a_bug,ok,Same unsupported None case as 29.
+process_order_batch__missing_edge_case__gpt5__000,ok,twin_not_minimal,None batch violates contract; twin also changes validation and missing-ID behavior.
+process_order_batch__missing_edge_case__gpt5__001,ok,ok,Focused None-batch fix; stated aim still says 'charged' although code only validates.
+reset_token_validation__missing_edge_case__gpt5__000,ok,twin_not_minimal,now == exp boundary bug; twin adds unrelated numeric checks.
+reset_token_validation__missing_edge_case__gpt5__001,ok,ok,now == exp boundary bug. Broad except is shared by both versions and may distract.
+validate_username_length__missing_edge_case__gpt5__000,ok,ok,Exactly-three-character username wrongly rejected.
+validate_username_length__missing_edge_case__gpt5__001,not_a_bug,ok,Contract never says a non-string username such as None must return False.
+authenticate_user__security_vulnerability__gpt5__000,ok,twin_not_minimal,Hard-coded password bypass; twin also changes hash comparison method.
+authenticate_user__security_vulnerability__gpt5__001,ok,twin_not_minimal,SQL interpolation of username; twin also adds malformed-salt handling.
+catalog_lookup__security_vulnerability__gpt5__000,ok,ok,Hard-coded override bypasses seller check.
+catalog_lookup__security_vulnerability__gpt5__001,ok,twin_not_minimal,Missing ownership check; twin also adds record-type handling.
+job_status_auth__security_vulnerability__gpt5__000,ok,ok,Hard-coded fallback key bypasses service/key check.
+job_status_auth__security_vulnerability__gpt5__001,ok,twin_not_minimal,Same fallback bypass; twin also changes accepted credentials-object behavior.
+public_profile_lookup__security_vulnerability__gpt5__000,ok,twin_not_minimal,SQL injection; twin also changes connection management.
+public_profile_lookup__security_vulnerability__gpt5__001,ok,twin_not_minimal,SQL injection; twin also changes 'if not row' to 'if row is None'.
+reset_token_validation__security_vulnerability__gpt5__000,ok,ok,Interpolated submitted token can alter lookup; parameterization fixes it.
+reset_token_validation__security_vulnerability__gpt5__001,ok,ok,Interpolated user_id is the relevant injection route; hex-only token check restricts the token route claimed in rationale.
+apply_discount_codes__silent_failure__gpt5__000,ok,ok,Unknown code caught and omitted from rejected.
+apply_discount_codes__silent_failure__gpt5__001,ok,ok,Same failure mechanism as 47.
+parse_timestamps__silent_failure__gpt5__000,ok,ok,Unparseable timestamp vanishes from both lists.
+parse_timestamps__silent_failure__gpt5__001,ok,twin_not_minimal,Same swallowed failure as 49; twin additionally catches TypeError.
+average_temperature__silent_failure__gpt5__000,wrong_flavor,ok,Returns wrong sentinel on empty input; better characterized as empty-input handling than silent reporting of a detected processing failure.
+average_temperature__silent_failure__gpt5__001,wrong_flavor,ok,Same issue and near duplicate of 51.
+parse_config__silent_failure__gpt5__000,ok,twin_not_minimal,Malformed JSON becomes plausible default config; twin also adds TypeError handling. Tier remains open.
+parse_config__silent_failure__gpt5__001,ok,ok,Broad handler hides parse failures behind default config; tier remains open.
+process_orders_revenue__silent_failure__gpt5__000,ok,twin_not_minimal,ValueError silently skips order; twin changes ID extraction and exception grouping. Tier remains open.
+process_orders_revenue__silent_failure__gpt5__001,ok,twin_breaks_contract,Failures are swallowed; twin still omits a failed order when its ID cannot be obtained. Specify how missing IDs are reported. Tier remains open.
+celsius_to_fahrenheit__wrong_algorithm__gpt5__000,ok,ok,Applies reverse temperature-conversion formula.
+celsius_to_fahrenheit__wrong_algorithm__gpt5__001,ok,ok,Same reverse conversion as 57.
+compute_average__wrong_algorithm__gpt5__000,ok,ok,Computes sum rather than mean.
+compute_average__wrong_algorithm__gpt5__001,ok,ok,Effective duplicate of 59.
+median_response_time__wrong_algorithm__gpt5__000,ok,ok,Computes mean rather than median.
+median_response_time__wrong_algorithm__gpt5__001,ok,ok,Effective duplicate of 61.
+shipping_cost__wrong_algorithm__gpt5__000,ok,ok,Computes a weight-dependent charge instead of fixed tier prices.
+shipping_cost__wrong_algorithm__gpt5__001,ok,ok,Computes a linear fee instead of fixed tier prices.
