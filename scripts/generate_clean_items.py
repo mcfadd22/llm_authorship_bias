@@ -152,7 +152,7 @@ def run(client: Optional[JudgeClient], items_dir: Path, out_dir: Path, stated_ai
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default="claude-sonnet-4-5")
-    parser.add_argument("--provider", default="anthropic", choices=["anthropic", "openai"],
+    parser.add_argument("--provider", default="anthropic", choices=["anthropic", "openai", "openrouter"],
                         help="match the provider that generated the buggy bank, so an "
                              "item and its twin share a true author")
     parser.add_argument("--items-dir", type=Path, default=DATA_DIR / "items")

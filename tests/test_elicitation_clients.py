@@ -144,8 +144,9 @@ class _FakeOpenAI:
 def _patch_openai(monkeypatch, response):
     holder = {}
 
-    def factory():
+    def factory(**kwargs):
         inst = _FakeOpenAI(response)
+        inst.init_kwargs = kwargs
         holder["inst"] = inst
         return inst
 
@@ -197,9 +198,34 @@ def test_detect_schema_shape():
 # --------------------------------------------------------------- factory
 
 def test_make_client_dispatches_on_provider(monkeypatch):
-    monkeypatch.setattr("elicitation.clients.anthropic.Anthropic", lambda: object())
-    monkeypatch.setattr("elicitation.clients.openai.OpenAI", lambda: object())
+    monkeypatch.setattr("elicitation.clients.anthropic.Anthropic", lambda **kw: object())
+    monkeypatch.setattr("elicitation.clients.openai.OpenAI", lambda **kw: object())
     assert isinstance(make_client({"provider": "anthropic", "model": "m"}), AnthropicJudgeClient)
     assert isinstance(make_client({"provider": "openai", "model": "m"}), OpenAIJudgeClient)
     with pytest.raises(ValueError):
         make_client({"provider": "nope", "model": "m"})
+
+
+def test_make_client_routes_openrouter_through_the_openai_compatible_client(monkeypatch):
+    """One OpenRouter key should reach every generator, so an item and its twin
+    can share a provider without needing a second vendor account."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key-not-real")
+    captured = {}
+
+    def fake_openai(base_url=None, api_key=None):
+        captured["base_url"] = base_url
+        captured["api_key"] = api_key
+        return object()
+
+    monkeypatch.setattr("elicitation.clients.openai.OpenAI", fake_openai)
+    client = make_client({"provider": "openrouter", "model": "google/gemini-2.5-pro"})
+
+    assert client.model == "google/gemini-2.5-pro"
+    assert captured["base_url"] == "https://openrouter.ai/api/v1"
+    assert captured["api_key"] == "test-key-not-real"
+
+
+def test_make_client_openrouter_fails_fast_without_a_key(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
+        make_client({"provider": "openrouter", "model": "google/gemini-2.5-pro"})

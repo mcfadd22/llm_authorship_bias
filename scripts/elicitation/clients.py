@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import dataclass
 from typing import Dict, Optional, Protocol
 
@@ -102,12 +103,18 @@ class AnthropicJudgeClient:
         )
 
 
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+
 class OpenAIJudgeClient:
     provider = "openai"
 
-    def __init__(self, model: str):
+    def __init__(self, model: str, base_url=None, api_key=None):
         self.model = model
-        self._client = openai.OpenAI()
+        # Both None falls back to the SDK defaults: OPENAI_API_KEY and OpenAI's
+        # own endpoint. Passing a base_url lets the same client reach any
+        # OpenAI-compatible gateway, OpenRouter included.
+        self._client = openai.OpenAI(base_url=base_url, api_key=api_key)
 
     def ask(self, prompt: str, schema: Dict) -> JudgeResponse:
         response = self._client.chat.completions.create(
@@ -139,4 +146,11 @@ def make_client(judge: Dict) -> JudgeClient:
         return AnthropicJudgeClient(model=judge["model"])
     if provider == "openai":
         return OpenAIJudgeClient(model=judge["model"])
+    if provider == "openrouter":
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY is required for provider 'openrouter'")
+        return OpenAIJudgeClient(
+            model=judge["model"], base_url=OPENROUTER_BASE_URL, api_key=api_key
+        )
     raise ValueError(f"unknown provider {provider!r}")
