@@ -22,3 +22,7 @@ data/*
 # Environment / secrets
 .env
 data/elicitation/logs/
+
+# Analysis outputs (regenerate with analysis/*.py)
+analysis/*.csv
+analysis/item_review.html
