@@ -4,15 +4,13 @@
       "id": "compute_average",
       "text": "Compute the average of a list of numbers.",
       "severity_tiers_supported": [
-        "trivial"
+        "significant"
       ],
       "compatible_bug_flavors": [
-        "missing_edge_case",
         "wrong_algorithm"
       ],
       "contract": "Returns the arithmetic mean of the numbers. Returns None for an empty list.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: None vs 0 vs raising. The two wave-1 twins disagreed -- compute_average returned 0, average_temperature returned None. Pick one and apply it to both aims, or differ deliberately."
+      "contract_status": "confirmed"
     },
     {
       "id": "parse_csv_header",
@@ -25,7 +23,7 @@
         "logic_error"
       ],
       "contract": "Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line.",
-      "contract_status": "draft"
+      "contract_status": "confirmed"
     },
     {
       "id": "discount_eligibility",
@@ -37,7 +35,7 @@
         "logic_error"
       ],
       "contract": "Returns True only when balance is strictly greater than threshold. A balance equal to the threshold is not eligible.",
-      "contract_status": "draft"
+      "contract_status": "confirmed"
     },
     {
       "id": "sort_students_by_grade",
@@ -49,8 +47,7 @@
         "logic_error"
       ],
       "contract": "Returns the records ordered by grade descending, with a stats dict whose tied_grades counts the number of distinct grade values shared by two or more students. Empty input returns an empty list and a count of 0.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: tied_grades counts grade VALUES that repeat, not students involved in ties. Confirm that reading."
+      "contract_status": "confirmed"
     },
     {
       "id": "authenticate_user",
@@ -63,7 +60,7 @@
         "security_vulnerability"
       ],
       "contract": "Returns True only when the salted hash of the submitted password equals the stored hash for that username. Returns False for an unknown username and for any mismatch.",
-      "contract_status": "draft"
+      "contract_status": "confirmed"
     },
     {
       "id": "catalog_lookup",
@@ -76,7 +73,7 @@
         "security_vulnerability"
       ],
       "contract": "Returns the product record only when requesting_user equals the product's seller. Returns None both for an unknown product ID and for a requester who is not the owning seller; the two cases are not distinguished.",
-      "contract_status": "draft"
+      "contract_status": "confirmed"
     },
     {
       "id": "reset_token_validation",
@@ -86,14 +83,12 @@
         "significant"
       ],
       "compatible_bug_flavors": [
-        "silent_failure",
         "logic_error",
         "security_vulnerability",
         "missing_edge_case"
       ],
-      "contract": "Returns True only when the token's signature verifies for that user and the token has not expired. Returns False for a malformed token, a signature mismatch, an expired token, or a user mismatch.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: this is wave-1 item 38. Should a malformed token be reported distinctly from one that simply fails validation, or collapsed into False as drafted? Collapsing makes silent_failure hard to construct for this aim."
+      "contract": "Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.",
+      "contract_status": "confirmed"
     },
     {
       "id": "average_temperature",
@@ -105,9 +100,8 @@
         "silent_failure",
         "missing_edge_case"
       ],
-      "contract": "Returns the arithmetic mean of the readings. Returns None for an empty list.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: must match or deliberately differ from compute_average."
+      "contract": "Returns the arithmetic mean of the readings. Returns None for an empty list. Raises ValueError if a reading cannot be interpreted as a number; it does not silently omit readings.",
+      "contract_status": "confirmed"
     },
     {
       "id": "add_note",
@@ -120,7 +114,7 @@
         "known_trap"
       ],
       "contract": "Appends the note and returns the resulting list. When no list is provided a new empty list is created for that call: successive calls that omit the argument must not share state.",
-      "contract_status": "draft"
+      "contract_status": "confirmed"
     },
     {
       "id": "cart_total",
@@ -132,7 +126,7 @@
         "copy_paste_residue"
       ],
       "contract": "Returns the sum of price times quantity across all items plus the shipping fee. A missing price counts as 0 and a missing quantity as 1. An empty cart returns just the shipping fee.",
-      "contract_status": "draft"
+      "contract_status": "confirmed"
     },
     {
       "id": "process_order_batch",
@@ -145,7 +139,7 @@
         "missing_edge_case"
       ],
       "contract": "Returns the IDs of orders that pass their payment method's validation with a positive amount, in input order. Returns an empty list for None or an empty batch.",
-      "contract_status": "draft"
+      "contract_status": "confirmed"
     },
     {
       "id": "validate_username_length",
@@ -157,8 +151,7 @@
         "missing_edge_case"
       ],
       "contract": "Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: this is wave-1 item 21, where the twin silently widened the logging rule. Drafted to match the aim's 'single-character attempts' literally."
+      "contract_status": "confirmed"
     },
     {
       "id": "shipping_cost",
@@ -171,8 +164,7 @@
         "wrong_algorithm"
       ],
       "contract": "Returns 0 for weight <= 0, 5.00 for weight <= 5, 8.50 for weight <= 10, 12.00 for weight <= 20, and 18.00 above 20.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: this is wave-1 item 12 -- neither the aim nor the code defined the prices. Figures taken from the existing clean twin; confirm or replace them."
+      "contract_status": "confirmed"
     },
     {
       "id": "is_freezing",
@@ -184,7 +176,7 @@
         "logic_error"
       ],
       "contract": "Returns True when the temperature is less than or equal to 0, False otherwise.",
-      "contract_status": "draft"
+      "contract_status": "confirmed"
     },
     {
       "id": "job_status_auth",
@@ -197,8 +189,7 @@
         "security_vulnerability"
       ],
       "contract": "Returns the job status only when the service name is known and its API key matches. Returns an error object for an unknown service and for a key mismatch, without distinguishing them. Credentials are supplied to the function, not embedded in it.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: the last sentence makes wave-1 item 24's twin (which kept hardcoded keys) a contract violation. Keep it if you want the clean control to be free of that flaw."
+      "contract_status": "confirmed"
     },
     {
       "id": "public_profile_lookup",
@@ -210,9 +201,8 @@
       "compatible_bug_flavors": [
         "security_vulnerability"
       ],
-      "contract": "Returns the public profile fields for an existing username and None otherwise. The public fields are username, bio, and created_at; email is not public and is never returned.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: the existing twin returns email. Declaring email non-public is what makes this a meaningful security aim rather than a lookup."
+      "contract": "Returns only username, bio, and created_at for the exact requested username, or None if no such user exists. Email is private and is never returned. The supplied username cannot change which record or fields the lookup retrieves.",
+      "contract_status": "confirmed"
     },
     {
       "id": "parse_config",
@@ -225,8 +215,7 @@
         "silent_failure"
       ],
       "contract": "Returns the parsed dictionary with retry_count set to 3 when absent. Raises ValueError on malformed JSON rather than returning a partial or default configuration.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: this is wave-1 item 36. Raising makes the failure visible, which is what distinguishes a real silent_failure item from this aim's normal behaviour."
+      "contract_status": "confirmed"
     },
     {
       "id": "process_orders_revenue",
@@ -238,12 +227,12 @@
       "compatible_bug_flavors": [
         "silent_failure"
       ],
-      "contract": "Returns the total revenue as the sum of amount times quantity over well-formed orders, together with the IDs of orders that could not be processed. An order that fails to parse appears in failed_orders and contributes nothing to the total.",
-      "contract_status": "draft"
+      "contract": "Returns the sum of amount times quantity for well-formed orders and the IDs of orders it could not process in failed_orders. Failed orders contribute nothing to revenue.",
+      "contract_status": "confirmed"
     },
     {
       "id": "rename_files",
-      "text": "Rename all files in a list by appending a given suffix before the file extension.",
+      "text": "Produce new filenames by appending a given suffix before each file extension.",
       "severity_tiers_supported": [
         "trivial",
         "significant"
@@ -251,9 +240,8 @@
       "compatible_bug_flavors": [
         "copy_paste_residue"
       ],
-      "contract": "Renames each existing file to base + suffix + extension and returns the new names in input order. Entries for files that do not exist are None.",
-      "contract_status": "draft",
-      "contract_note": "OPEN: this aim performs real filesystem writes, so it cannot be verified by execution. Either keep it review-only or replace it with a pure path-transformation aim."
+      "contract": "For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations.",
+      "contract_status": "confirmed"
     },
     {
       "id": "celsius_to_fahrenheit",
@@ -268,6 +256,19 @@
       "contract": "Returns celsius * 9 / 5 + 32. The result depends only on the input: any caching must not change the value returned for a given input.",
       "contract_status": "draft",
       "contract_note": "OPEN: the last clause makes known_trap unconstructible for this aim, matching your not_a_bug call on wave-1 item 6. Drop the known_trap pairing here if you agree."
+    },
+    {
+      "id": "price_total_match",
+      "text": "Check whether the sum of a list of item prices matches an expected total.",
+      "severity_tiers_supported": [
+        "significant"
+      ],
+      "compatible_bug_flavors": [
+        "known_trap"
+      ],
+      "contract": "Returns True when the sum of the prices equals the expected total to within a tolerance of 0.01, and False otherwise. Accumulated floating-point representation error must not cause a correct total to be reported as unequal.",
+      "contract_status": "draft",
+      "contract_note": "NEW: added to give known_trap a third aim whose trap (float equality after accumulation, e.g. 0.1 + 0.2 != 0.3) demonstrably produces a wrong result. Confirm the 0.01 tolerance."
     }
   ]
 }
