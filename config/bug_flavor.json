@@ -67,7 +67,7 @@
     {
       "id": "copy_paste_residue",
       "category": "exploratory",
-      "definition": "A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error: a stray debug print/logging statement, a variable copied from a similar function whose name or value no longer matches its new context, or dead/commented-out code. Distinguishing test: would a reviewer describe this as 'forgot to clean up,' not 'got the logic wrong'?",
+      "definition": "A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error, which produces an unrequested, observable effect: a stray print or logging statement, a write to an argument or to state the function has no reason to touch, or a value stored under a neighbouring function's key. Dead code, commented-out code and variables that are computed but never used do not qualify, because they change no behaviour. Distinguishing test: would a reviewer describe this as 'forgot to clean up,' not 'got the logic wrong', and does it do something?",
       "examples": [
         {
           "source": "Hand-constructed; code-smell literature (Fowler, Refactoring - dead code)",

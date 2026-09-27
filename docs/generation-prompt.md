@@ -179,6 +179,11 @@ publication or public release of the item bank.
      later execution-based check. Part (4) is the generator arguing its own
      case, so review should verify it, not rely on it.
 
+  *Update 2026-09-27:* the `copy_paste_residue` narrowing in (1) is now
+  adopted (`config/bug_flavor.json`, design.md §1a), so any new generation
+  already asks for observable residue; (1) and (2) in the prompt itself
+  remain unapplied.
+
   Do not apply this to the existing GPT-5 and Gemini banks: they are reviewed
   or under review, and switching mid-bank would mix prompt versions. If adopted,
   use it for new banks or for items regenerated after failing review, and

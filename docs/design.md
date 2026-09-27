@@ -81,7 +81,7 @@ allows.
 
 | Flavor | Example | Predicted profile |
 |---|---|---|
-| `copy_paste_residue` | Leftover debug print; a variable copy-pasted from a similar function that doesn't match context; dead/commented-out code. | Uniquely diagnostic of carelessness over competence — a stray `print("here")` rarely reads as a skill gap. Cleanest diligence-lapse prototype, complementing `silent_failure`. |
+| `copy_paste_residue` | Leftover code from another context that produces an unrequested, observable effect: a stray print or log line, a write to an argument or to state the function has no reason to touch, a value stored under a neighbouring function's key. *Narrowed 2026-09-27:* dead code, commented-out code and stale-but-unused variables are excluded, because they change no behaviour. | Uniquely diagnostic of carelessness over competence — a stray `print("here")` rarely reads as a skill gap. Cleanest diligence-lapse prototype, complementing `silent_failure`. Because the aim rarely forbids a side effect outright, most surviving items are expected to be aim-visibility **borderline** (§1c); the flavour is reported descriptively, with no `bug_flavor:author_label` test. |
 | `known_trap` | Mutable default argument (Python); floating-point equality comparison; integer overflow where easy to forget. | Predicted lowest blame across the board regardless of label — strong "even experts fall into this" folk narrative. Second low-signal contrast to `missing_edge_case`. Risk: judge models may not uniformly recognize a given trap as "classic," which is itself a confound — treat as lower-priority than the other five. |
 | `wrong_algorithm` | Computes a sum when asked for an average with no division step anywhere; sorts ascending when descending was asked; checks the wrong field entirely. | Predicted to read as clearly competence-diagnostic once spotted — unlike `missing_edge_case`/`logic_error`, there's no "everyone misses this" framing available, since the code doesn't even attempt the right computation. Best flavor for testing whether label bias survives an unambiguous, low-effort-to-verify failure. Distinct from `known_trap`'s "even experts fall into this" framing — reads more like "didn't understand the task" than "forgot a subtlety." |
 
@@ -129,12 +129,34 @@ frozen before collection. Two kinds of exclusion are kept apart:
   and re-reviewed. They are never elicited, so there is nothing to
   re-include.
 - **Sensitivity exclusions (after collection)** apply to items kept in the
-  bank but carrying a recorded caveat, e.g. the 15 flagged GPT-5 twins.
+  bank but carrying a recorded caveat, e.g. twins flagged `twin_not_minimal`.
   `--verdicts` / `--exclude-twin-verdicts` in `run_confirmatory.py` drop
   them in a clearly labelled rerun; the primary result is the full frozen
   bank.
 
 Wave 1 predates this step: review after collection passed 13 of 41 items.
+
+### Twin eligibility (decided 2026-09-27)
+
+The clean twin is the false-positive control, so it has to be genuinely
+bug-free. Twin verdicts are handled by what they break:
+
+| twin verdict | effect | handling |
+|---|---|---|
+| `twin_not_clean`, `twin_breaks_contract` | A judge reporting the remaining flaw is *correct*, so the false-positive measure fails. | Eligibility exclusion: regenerate the twin through the same generator and re-review, or exclude the twin. |
+| `twin_not_minimal` | The twin differs from its item in more than the bug. Label effects on false positives are unaffected (the twin is identical across labels); buggy-vs-clean comparisons of the same item are. | Keep; flag; sensitivity rerun without them. Excluded from buggy-vs-clean paired comparisons. |
+
+**Repairs keep the true author.** A twin is repaired by regenerating it with
+the item's own generator, not by hand: a hand-edited twin is no longer
+purely that generator's code, which breaks source detection on clean items
+(§6.2). If a hand edit is unavoidable, it is recorded in `provenance` and
+that twin is left out of source detection.
+
+**Incomplete pairs.** An eligible buggy item stays in H1–H4 even when its
+twin is excluded. The false-positive analysis uses every eligible twin;
+buggy-vs-clean paired comparisons use complete pairs with a minimal twin
+only. Excluding a twin means moving its file out of the clean directory,
+which is elicited separately.
 
 ### Aim-visibility check (adopted 2026-09-27)
 
@@ -153,6 +175,28 @@ input-domain or output rule?
 Examples: AttributeError instead of TypeError on `None`, where the aim says
 nothing about exceptions, is **no**; a crash on an empty list is
 **borderline**; an unused variable is **no**.
+
+**Pending calls from the contract review (2026-09-27).** These are
+expectations to test, not decisions: the blind pass can overturn any of
+them, and adjudication treats them as open.
+
+- *Likely no (contract-only):* `rename_files__copy_paste_residue__gemini25pro__000`
+  and `__001` (fail only because the contract forbids another collection);
+  `parse_csv_header__missing_edge_case__{gpt5,gemini25pro}__{000,001}`
+  (AttributeError vs. TypeError on `None`; the aim says nothing about
+  exceptions); `build_invoice_summary__copy_paste_residue__gemini25pro__000`
+  and `__001` (an extra returned key, wrong only under the contract's
+  "exactly" clause).
+- *Likely borderline (side effects the aim does not forbid):* the stray
+  prints and argument writes in `rename_files__copy_paste_residue__gpt5__000`,
+  `build_invoice_summary__copy_paste_residue__gpt5__001`,
+  `format_address_block__copy_paste_residue__{gemini25pro__000,gpt5__001,gemini25pro__001}`,
+  `cart_total__copy_paste_residue__{gemini25pro__001,gpt5__001}`.
+- *Already excluded as inert (`not_a_bug`):*
+  `build_invoice_summary__copy_paste_residue__gpt5__000`,
+  `format_address_block__copy_paste_residue__gpt5__000`,
+  `cart_total__copy_paste_residue__gemini25pro__000`. No replacements of that
+  kind are generated (§1a).
 
 **Procedure.** The contract-and-flavour review above needs the contract;
 this check must not have it, so it is done by reviewers who have not seen
@@ -287,7 +331,7 @@ changed as possible. Clean items get only `q_bug_present` and
 label effects on bug reports: whether judges report bugs that are not there
 (false positives) more under some labels. They get no blame, intentionality
 or ability-vs-diligence ratings, so they cannot measure impressions of the
-author when no bug is present. See
+author when no bug is present. Twin eligibility and incomplete pairs: §1c. See
 `docs/superpowers/specs/2026-09-16-clean-code-control-design.md`.
 
 ## 3. Question battery
@@ -497,6 +541,8 @@ explicitly stated)
   `bug_detected ~ author_label` on clean items, logistic, clustered by
   item; detection rate on buggy items, same model. If detection varies by
   label, re-run H1–H3 on the detected subset as a robustness check.
+  False positives use every eligible twin; buggy-vs-clean paired
+  comparisons use complete pairs with a minimal twin (§1c).
 - Any three-way interaction involving explored factors, e.g.
   `author_label:bug_flavor:generator_family`. None involving
   `severity_tier`, for the reason given above.
@@ -586,10 +632,11 @@ generator and source match.
   families; a Gemini judge would also give Gemini a source-match condition
   (§6.2), since a Gemini bank exists. Judges are the main cost lever, so
   size them after items and questions are fixed.
-- **`copy_paste_residue`.** Whether inert residue is a defect the battery can
-  sensibly ask about; the candidate generation-prompt revision in
-  `docs/generation-prompt.md` (Open items) would settle it by requiring an
-  observable contract violation.
+- ~~**`copy_paste_residue`.** Whether inert residue is a defect the battery
+  can sensibly ask about~~ — **Resolved 2026-09-27**: no. The bank is
+  behavioural, so the flavour is narrowed to residue with an observable
+  effect (§1a); inert items are excluded and not replaced; the flavour is
+  reported descriptively.
 
 - ~~Whether `other_model_A/B` should be fixed named models across the
   whole item bank or resolved per-judge~~ — **Resolved**: a fixed pool of
