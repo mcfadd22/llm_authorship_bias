@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a single self-contained HTML review sheet for the 41-item bank.
+"""Build a single self-contained HTML review sheet for one or more item banks.
 
 Each item is shown with its declared bug_flavor/severity_tier, the generator's
 rationale, and a minimal-pair diff against its bug-free twin in data/items_clean/
@@ -7,9 +7,22 @@ rationale, and a minimal-pair diff against its bug-free twin in data/items_clean
 checkable at a glance. Verdicts are recorded in-page and exported as CSV.
 
     python analysis/build_item_review.py
+
+Several banks can share one sheet. With --blind the item_id (which carries the
+generator tag) is hidden and cards are shuffled within each flavour, so the
+reviewer does not know which generator wrote an item. --only-unreviewed skips
+items that already have a verdict in any --verdicts file:
+
+    python analysis/build_item_review.py --blind --only-unreviewed \
+        --items-dir data/items_gpt5 data/items_gemini25pro \
+        --verdicts analysis/item_verdicts_gpt5.csv --out analysis/item_review_pending.html
+
+Merge the exported CSV back with analysis/merge_verdicts.py.
 """
 import argparse
+import csv
 import difflib
+import hashlib
 import html
 import json
 from collections import defaultdict
@@ -20,15 +33,23 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def parse_args(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--items-dir", type=Path, default=ROOT / "data" / "items")
+    ap.add_argument("--items-dir", type=Path, nargs="+", default=[ROOT / "data" / "items"])
     ap.add_argument("--clean-dir", type=Path, default=None,
-                    help="defaults to <items-dir>_clean")
+                    help="defaults to <items-dir>_clean; only with a single --items-dir")
     ap.add_argument("--out", type=Path, default=None,
-                    help="defaults to analysis/item_review_<bank>.html")
-    ap.add_argument("--verdicts", type=Path, default=None,
-                    help="CSV of existing verdicts to pre-load, so the sheet "
+                    help="defaults to analysis/item_review_<bank>[+<bank>...].html")
+    ap.add_argument("--verdicts", type=Path, nargs="+", default=[],
+                    help="CSVs of existing verdicts to pre-load, so the sheet "
                          "reflects a completed review and can be revised")
-    return ap.parse_args(argv)
+    ap.add_argument("--only-unreviewed", action="store_true",
+                    help="omit items that already have an item verdict in --verdicts")
+    ap.add_argument("--blind", action="store_true",
+                    help="hide item_id and shuffle within flavour, so the "
+                         "generator is not visible")
+    args = ap.parse_args(argv)
+    if args.clean_dir and len(args.items_dir) > 1:
+        ap.error("--clean-dir needs a single --items-dir")
+    return args
 
 
 def load(ITEMS, CLEAN):
@@ -78,7 +99,7 @@ def _severity_tag(it):
     return f'<span class="tag tier open">severity open: {html.escape(expected)}</span>'
 
 
-def card(it, n, prior=None):
+def card(it, n, prior=None, blind=False):
     changed = "" if it["clean_code"] else '<span class="warn">no clean twin</span>'
     iid = html.escape(it["item_id"])
     prior = prior or {}
@@ -91,7 +112,7 @@ def card(it, n, prior=None):
 <section class="card" data-flavor="{html.escape(it['bug_flavor'])}" data-tier="{html.escape(it.get('severity_tier') or 'open')}" id="i{n}">
   <header>
     <span class="num">{n}</span>
-    <code class="iid">{iid}</code>
+    {"" if blind else f'<code class="iid">{iid}</code>'}
     <span class="tag flavor">{html.escape(it['bug_flavor'])}</span>
     {_severity_tag(it)}
     {changed}
@@ -126,27 +147,38 @@ def card(it, n, prior=None):
 
 def main(argv=None):
     args = parse_args(argv)
-    items_dir = args.items_dir
-    clean_dir = args.clean_dir or items_dir.parent / f"{items_dir.name}_clean"
-    out_path = args.out or ROOT / "analysis" / f"item_review_{items_dir.name}.html"
-    rows = load(items_dir, clean_dir)
+    rows = []
+    for items_dir in args.items_dir:
+        clean_dir = args.clean_dir or items_dir.parent / f"{items_dir.name}_clean"
+        rows += load(items_dir, clean_dir)
+    names = "+".join(d.name for d in args.items_dir)
+    out_path = args.out or ROOT / "analysis" / f"item_review_{names}.html"
 
     prior = {}
-    if args.verdicts:
-        import csv
-        with args.verdicts.open() as fh:
-            prior = {r["item_id"]: r for r in csv.DictReader(fh)}
+    for path in args.verdicts:
+        with path.open() as fh:
+            prior.update({r["item_id"]: r for r in csv.DictReader(fh)})
+    if args.only_unreviewed:
+        rows = [r for r in rows if not (prior.get(r["item_id"]) or {}).get("verdict")]
+
+    def order(r):
+        if args.blind:
+            # a stable shuffle: item_id order would group each generator's items
+            return (r.get("severity_tier") or "~open",
+                    hashlib.sha256(r["item_id"].encode()).hexdigest())
+        return (r.get("severity_tier") or "~open", r["item_id"])
+
     by_flavor = defaultdict(list)
     for r in rows:
         by_flavor[r["bug_flavor"]].append(r)
 
     n, body = 0, []
     for flavor in sorted(by_flavor):
-        group = sorted(by_flavor[flavor], key=lambda r: (r.get("severity_tier") or "~open", r["item_id"]))
+        group = sorted(by_flavor[flavor], key=order)
         body.append(f'<h2 class="fh">{html.escape(flavor)} <span class="cnt">{len(group)} items</span></h2>')
         for it in group:
             n += 1
-            body.append(card(it, n, prior.get(it['item_id'])))
+            body.append(card(it, n, prior.get(it['item_id']), blind=args.blind))
 
     tiers = defaultdict(int)
     for r in rows:
