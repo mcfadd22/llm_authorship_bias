@@ -64,7 +64,12 @@ def main(argv=None):
     ap.add_argument("--verdicts", default=None,
                     help="CSV of item-bank review verdicts (item_id,verdict,note)")
     ap.add_argument("--exclude-verdicts", default="drop,not_a_bug",
-                    help="comma-separated verdicts to exclude when --verdicts is given")
+                    help="comma-separated item verdicts to exclude when --verdicts is given")
+    ap.add_argument("--exclude-twin-verdicts", default=None,
+                    help="comma-separated twin verdicts to exclude, e.g. "
+                         "twin_not_minimal,twin_breaks_contract. A sensitivity check: the twin "
+                         "is the clean-code control, so a non-minimal one differs from its item "
+                         "in more than the planted bug")
     ap.add_argument("--item-fe", action="store_true",
                     help="add item fixed effects (robustness, NOT the locked 6.1 spec)")
     ap.add_argument("--out", default=None, help="write results CSV here")
@@ -78,8 +83,17 @@ def main(argv=None):
         excluded = set(verdicts.loc[verdicts["verdict"].isin(drop), "item_id"])
         before = df["item_id"].nunique()
         df = df[~df["item_id"].isin(excluded)]
-        print(f"excluded {len(excluded)} items with verdict in {sorted(drop)}: "
-              f"{before} -> {df['item_id'].nunique()} items")
+        after = df["item_id"].nunique()
+        print(f"verdict in {sorted(drop)}: dropped {before - after} of {before} items"
+              f"{'' if before != after else '  (no item_ids in common -- wrong bank?)'}")
+
+        if args.exclude_twin_verdicts and "twin_verdict" in verdicts.columns:
+            tdrop = set(args.exclude_twin_verdicts.split(","))
+            texcl = set(verdicts.loc[verdicts["twin_verdict"].isin(tdrop), "item_id"])
+            before = df["item_id"].nunique()
+            df = df[~df["item_id"].isin(texcl)]
+            after = df["item_id"].nunique()
+            print(f"twin verdict in {sorted(tdrop)}: dropped {before - after} of {before} items")
 
     res = run(df, args.n_boot, args.seed, item_fe=args.item_fe)
 
