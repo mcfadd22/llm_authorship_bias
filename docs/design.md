@@ -22,9 +22,9 @@ not seeded.
 it is attributed to a different model? The test is the label manipulation:
 the code is byte-identical across label cells, so any difference between
 labels is caused by the label, whoever actually wrote the code. The
-headline contrast is `other_model_pooled` vs. `none` (and, descriptively, vs.
-`self`) on the §6.1 outcomes. Blame (H1) is the most direct harshness
-measure; where intentionality (H2) or ability-vs-diligence (H3) results are
+headline test is pooled rival vs. `self` (H4, planned for wave 2, §6.5),
+with each label vs. `none` (H1–H3) as a separate test. Blame is the most
+direct harshness measure; where intentionality or ability-vs-diligence results are
 read as harshness, the writeup says so explicitly. `q_authorship_belief` is a
 check on whether the label took (§3, §6.2), not a second primary question.
 
@@ -56,7 +56,8 @@ source corpus, identifier and modifications where an item was adapted rather tha
 
 Everything else — the actual code, the actual bug, prompt scaffolding
 outside the label/purpose slots — is held byte-identical across cells
-within an item. Only the label and purpose sentences vary.
+within an item. Only the label sentence varies; the aim sentence is fixed
+per item.
 
 ## 1a. `bug_flavor` taxonomy
 
@@ -121,8 +122,18 @@ the generator tag) and shuffles banks together within flavour. Surface style
 can still hint at the generator, so blinding is partial. Verdicts live in
 `analysis/item_verdicts_<generator_tag>.csv`. Items that fail are dropped or
 regenerated, and regenerated items are reviewed again. The accepted bank is
-frozen before collection; `--verdicts` / `--exclude-twin-verdicts` in
-`run_confirmatory.py` exclude flagged items as a sensitivity analysis.
+frozen before collection. Two kinds of exclusion are kept apart:
+
+- **Eligibility exclusions (before collection)** define the primary wave-2
+  sample. Items that fail review are removed from the bank or regenerated
+  and re-reviewed. They are never elicited, so there is nothing to
+  re-include.
+- **Sensitivity exclusions (after collection)** apply to items kept in the
+  bank but carrying a recorded caveat, e.g. the 15 flagged GPT-5 twins.
+  `--verdicts` / `--exclude-twin-verdicts` in `run_confirmatory.py` drop
+  them in a clearly labelled rerun; the primary result is the full frozen
+  bank.
+
 Wave 1 predates this step: review after collection passed 13 of 41 items.
 
 ## 2. Prompt template (elicitation turn)
@@ -201,10 +212,11 @@ cell, identical across every `author_label` cell.
 Every item also has a bug-free twin (`code_version = clean`, same `item_id`,
 `data/items_clean/`): a minimal-pair fix of the buggy code with as little else
 changed as possible. Clean items get only `q_bug_present` and
-`q_authorship_belief` (the scaled questions presuppose a bug). This separates
-"the label changes how a found bug is explained" from "the label changes the
-judge's impression of the author regardless of the code," and tests whether
-judges report bugs that are not there under some labels. See
+`q_authorship_belief` (the scaled questions presuppose a bug). The twins test
+label effects on bug reports: whether judges report bugs that are not there
+(false positives) more under some labels. They get no blame, intentionality
+or ability-vs-diligence ratings, so they cannot measure impressions of the
+author when no bug is present. See
 `docs/superpowers/specs/2026-09-16-clean-code-control-design.md`.
 
 ## 3. Question battery
@@ -402,27 +414,30 @@ explicitly stated)
   - *Label-following — labelled cells.* Whether the coded family matches
     the family named in the label. Report true-label and false-label cells
     separately (`label_is_true`). A true label cannot separate recognition
-    from acceptance, since both predict the same answer. A false label can:
-    naming the labelled family is label-following, naming the generator is
-    recognition overriding the label, and this is the direct test of whether
-    judges see through the manipulation.
+    from acceptance, since both predict the same answer. On a false label,
+    naming the labelled family is *consistent with* following the label and
+    naming the generator is *consistent with* recognizing it despite the
+    label. Neither is established by that answer alone: a guess can also
+    reflect the judge's habitual model-name preferences or weak evidence.
+    Whether a judge tracks source in these items at all is shown by the
+    source-detection analysis above, and the false-label reading is only
+    interpreted in its light.
 - **Clean-code control** (own Holm family): false-positive rate
   `bug_detected ~ author_label` on clean items, logistic, clustered by
   item; detection rate on buggy items, same model. If detection varies by
   label, re-run H1–H3 on the detected subset as a robustness check.
-- Any three-way interaction involving explored factors (e.g.,
-  `author_label:severity_tier:bug_flavor`, etc.).
+- Any three-way interaction involving explored factors, e.g.
+  `author_label:bug_flavor:generator_family`. None involving
+  `severity_tier`, for the reason given above.
 
-### 6.3 Why the pooling in 6.1 also helps the streamlining question
+### 6.3 Rival pooling and balance
 
-Pooling `other_model_A`/`other_model_B` into one confirmatory contrast
-means the balanced-rotation label design (rotating a subset of the 6
-labels per item so every label co-occurs with every flavor/severity
-somewhere in the bank) doesn't need to guarantee A and B are evenly
-represented *within the confirmatory test itself* — that guarantee is
-only needed for the exploratory A-vs-B contrast in 6.2, which can
-tolerate a noisier, best-effort balance since it isn't
-significance-tested against the same bar as H1–H3.
+Every item is shown under all six labels (full crossing, §7), so every label
+co-occurs with every item and flavour by construction. Which rival fills A
+and B rotates across items (`rival_model_pool.json`), so each named rival is
+spread over items rather than tied to one. Pooling A and B in the
+confirmatory contrasts means their balance matters only for the exploratory
+A-vs-B contrast in §6.2.
 
 ### 6.4 Reporting convention
 
@@ -435,17 +450,53 @@ came back significant.
   its interval (from the wild cluster bootstrap), so readers can see which
   effect sizes are ruled out. It is not described as evidence of no effect,
   and not as an equivalence test, since none was preregistered.
-- **Self vs. rival is not a confirmatory test.** §6.1 compares each label
-  with `none`. Comparing the `self` and `other_model_pooled` estimates with
-  each other is descriptive unless tested directly, and then exploratory.
+- **Self vs. rival.** In wave 1 it was not tested: §6.1 compares each label
+  with `none`, and comparing the `self` and `other_model_pooled` estimates
+  with each other is descriptive only. In wave 2 it is tested directly as
+  H4 (§6.5).
 - **Post hoc item exclusions are sensitivity checks.** Results on a subset
-  chosen after collection (e.g. wave 1's 28 items that survived review) are
-  reported as such, not as the result.
+  chosen after collection are reported as such, not as the result. Wave 1's
+  28-item rerun is one: it drops the 13 items rated `drop` (9) or
+  `not_a_bug` (4) and keeps the 7 `wrong_tier` and 2 `wrong_flavor` items.
+  It is not the set that passed review; only 13 items passed outright.
 - **Wave 1** is reported as the preregistered initial test that exposed a
   materials problem: 13 of 41 items passed review after collection, all code
   was Claude-generated, and the authorship answers are uncoded. Its locked
   result stands; what it can say about judgments of contract-defined bugs is
   limited. The rebuilt, reviewed banks are the basis for the stronger test.
+
+### 6.5 Wave 2 plan (added 2026-09-27, before wave-2 collection)
+
+§6.1 was locked for wave 1 and is left as it stands. This section is the
+prospective plan for wave 2, written after seeing wave 1 and declared as
+such.
+
+**Sample.** The frozen, reviewed bank (§1c): both generator banks, buggy
+items, two repeats, prompt version `2026-09-27-v2`. WCB clustered by
+`item_id`, run per (judge_family, judge_tuning) cell as in §6.1.
+
+**H1–H3 (replication).** The §6.1 contrasts unchanged: `self`,
+`human_developer`, `generic_ai`, `other_model_pooled` vs. `none`, on blame
+(H1), intentionality (H2) and ability-vs-diligence (H3), Holm across the four
+contrasts within each hypothesis × judge cell. Two-sided. No directional
+prediction is carried over for H3: wave 1 moved `self` toward the
+diligence-lapse end, opposite to the actor-observer prediction in §6.1.
+
+**H4 (rival vs. self).** The direct test of the core question: pooled rival
+vs. `self`, estimated in the same model as H1–H3 with the contrast
+`other_model_pooled − self`. Two-sided; wave 1's point estimates leaned
+slightly the other way (Opus blame: `self` +0.34, rival +0.21 vs. `none`),
+so no one-sided test is justified. Three outcomes, each its own family:
+
+- **H4a** blame
+- **H4b** intentionality
+- **H4c** ability-vs-diligence
+
+One contrast per family per judge cell, so there is no Holm step inside a
+family, and H1–H3 keep their four-contrast families unchanged.
+
+**Everything else** in §6.2 stays exploratory, including label effects by
+generator and source match.
 
 ## 7. Open decisions
 
@@ -471,12 +522,14 @@ came back significant.
 - ~~Whether q_intentionality/q_explanation/q_blame should all run on
   every item for every label cell, or whether a partial (Latin-square)
   design is needed~~ — **Resolved**: full crossing. `severity_tier` and
-  `bug_flavor` are properties of an item, not crossed within it, so the
-  per-item cost is 6 labels × 4 questions = 24 calls; 41 items × 3 judges
-  came to ~2,950 calls and ~$45. No reduction needed.
-- Number and diversity of `bug_flavor` items needed per severity tier to
-  support the exploratory `bug_flavor:author_label` interaction without
-  under-powering the primary tests. **Still open**: the first wave has 41
-  items (28 trivial / 13 significant; exploratory flavors 3 cells each),
-  one sample per cell — adequate for H1–H3 main effects, underpowered
-  for interactions and for the `significant` tier on its own.
+  `bug_flavor` are properties of an item, not crossed within it. Wave 1:
+  6 labels × 4 questions = 24 calls per item; 41 items × 3 judges came to
+  2,952 calls and $60.37. Wave 2: 6 labels × 5 questions = 30 calls per
+  buggy item and 6 × 2 = 12 per clean twin; 124 items give 5,208 calls per
+  judge per repeat, 31,248 across 3 judges × 2 repeats, estimated at ~$575.
+  No reduction needed.
+- Number and diversity of items per `bug_flavor` needed for the
+  exploratory `bug_flavor:author_label` interaction. **Still open**: wave 2
+  has 31 (aim × flavour) cells, two samples each, per bank, with 4–6 aims
+  per flavour (`known_trap` has 3). Adequate for the main effects;
+  interactions by flavour remain underpowered.
