@@ -1,0 +1,28 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gpt5__001",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_orders_revenue__silent_failure__gpt5__001",
+  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for order in orders:\n        try:\n            amount = float(order['amount'])\n            quantity = int(order['quantity'])\n            total += amount * quantity\n        except Exception:\n            failed.append(order['id'])\n    return {'revenue': total, 'failed_orders': failed}\n",
+  "fix_rationale": "Now, when parsing an order fails, the corresponding order ID is appended to failed_orders instead of being silently ignored. No other behavior was changed.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-27T20:21:52.976478+00:00",
+  "prompt_version": "2026-09-27-clean-v3"
+}

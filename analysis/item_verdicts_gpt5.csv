@@ -41,8 +41,6 @@ price_total_match__known_trap__gpt5__000,ok,ok,Identity of integer cent values c
 price_total_match__known_trap__gpt5__001,ok,twin_not_minimal,`is` is the defect; twin also replaces float accumulation and rounding with Decimal.
 process_order_batch__missing_edge_case__gpt5__000,ok,twin_not_minimal,None batch violates contract; twin also changes validation and missing-ID behavior.
 process_order_batch__missing_edge_case__gpt5__001,ok,ok,Focused None-batch fix; stated aim still says 'charged' although code only validates.
-process_orders_revenue__silent_failure__gpt5__000,ok,twin_not_minimal,"Exception path silently loses a failed order. Twin also rewrites the existing missing-field path and adds a fallback for orders without IDs, which the revised contract excludes."
-process_orders_revenue__silent_failure__gpt5__001,ok,ok,"Replacing pass with failed.append(order['id']) is minimal. Settled by the 2026-09-27 contract clause that quantity is an integer in a well-formed order; before it, int(quantity) would have truncated a fractional quantity (item violates_contract, twin twin_not_clean)."
 public_profile_lookup__security_vulnerability__gpt5__000,ok,twin_not_minimal,SQL injection; twin also changes connection management.
 public_profile_lookup__security_vulnerability__gpt5__001,ok,twin_not_minimal,SQL injection; twin also changes 'if not row' to 'if row is None'.
 rename_files__copy_paste_residue__gpt5__000,ok,ok,Stray archive output violates the no-output contract; fix removes it.

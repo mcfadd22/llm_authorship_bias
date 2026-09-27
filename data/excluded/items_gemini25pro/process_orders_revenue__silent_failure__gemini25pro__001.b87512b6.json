@@ -1,0 +1,26 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gemini25pro__001",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 1,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "code": "def process_orders(orders):\n    total_revenue = 0.0\n    unprocessed = []\n    for item in orders:\n        try:\n            total_revenue += item['amount'] * item['quantity']\n        except (KeyError, TypeError):\n            pass\n    return total_revenue, unprocessed",
+  "rationale": "The bug is a silent failure in the form of an empty `except` block. When an order `item` is malformed (e.g., it is missing the 'amount' or 'quantity' key, or they are not numbers), the calculation raises a `KeyError` or `TypeError`. The `except` block catches these exceptions but then does nothing due to the `pass` statement. The error is detected but immediately discarded, so the function fails to add the problematic order's ID to the `unprocessed` list, violating the contract to report which orders could not be processed.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-27T20:22:28.713217+00:00",
+  "prompt_version": "2026-09-27-v4",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

@@ -211,12 +211,12 @@ the contracts:
    chooses the extent (`docs/aim-review-for-collaborator.md`), and the
    choice is recorded here:
    - **A, full:** all 124 items, `analysis/aim_only_review.html`.
-   - **B, subset:** 65 items, `analysis/aim_only_review_selection.html`,
+   - **B, subset:** 66 items, `analysis/aim_only_review_selection.html`,
      drawn by `analysis/select_aim_audit.py` (seed 20260927) into
      `analysis/aim_audit_selection.csv`: every item where the model found
-     no issue (15) or only a convention-based one (30), items the contract
+     no issue (15) or only a convention-based one (31), items the contract
      review flagged as likely "no" (all already included), and 20 of the
-     remaining 79 sampled in proportion to flavour. Redrawn after each
+     remaining 78 sampled in proportion to flavour. Redrawn after each
      2026-09-27 regeneration, before any human pass began. Rule: if 2 or more
      sampled items within a flavour turn out not to be aim-visible, that
      flavour gets a full human pass. The reviewer is not told how the subset

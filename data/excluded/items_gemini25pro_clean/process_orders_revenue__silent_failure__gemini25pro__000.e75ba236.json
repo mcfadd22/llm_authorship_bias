@@ -1,0 +1,28 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gemini25pro__000",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_orders_revenue__silent_failure__gemini25pro__000",
+  "code": "def calculate_totals(entries):\n    total = 0.0\n    failed_ids = []\n    for entry in entries:\n        try:\n            _ = entry['id']\n            total += entry['amount'] * entry['quantity']\n        except (KeyError, TypeError):\n            if isinstance(entry, dict) and 'id' in entry:\n                failed_ids.append(entry['id'])\n    return (total, failed_ids)",
+  "fix_rationale": "The except block now correctly appends a failed order's ID, and also catches TypeError to handle non-numeric values. The logic now ensures an order has an 'id' to be processed and safely handles malformed entries to prevent crashes.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-27T20:24:30.672181+00:00",
+  "prompt_version": "2026-09-27-clean-v3"
+}

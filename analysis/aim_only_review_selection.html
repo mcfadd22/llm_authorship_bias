@@ -1,5 +1,5 @@
 <!doctype html><meta charset="utf-8">
-<title>Code review — 65 functions</title>
+<title>Code review — 66 functions</title>
 <style>
  :root { --bg:#fbfaf8; --fg:#1c1a17; --mut:#6b6560; --line:#e3ded7; }
  @media (prefers-color-scheme: dark) { :root { --bg:#171614; --fg:#eceae6; --mut:#9a938c; --line:#2f2c28; } }
@@ -26,7 +26,7 @@
 <div class="wrap">
 <header class="top">
   <h1>Code review</h1>
-  <span class="meta">65 functions · entries save in this browser automatically</span>
+  <span class="meta">66 functions · entries save in this browser automatically</span>
   <button onclick="exportCsv()">Export CSV</button>
   <span id="prog"></span>
 </header>
@@ -76,15 +76,17 @@ count. "No" is a perfectly good answer.</p>
 <section class="card" data-item="06bde4995bc8">
   <header><span class="num">2</span></header>
   <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
-  <pre class="code">def process_orders(orders):
-    total_revenue = 0.0
-    unprocessed = []
-    for item in orders:
+  <pre class="code">def process_data(records):
+    aggregate_value = 0.0
+    skipped_items = []
+    for item in records:
         try:
-            total_revenue += item[&#x27;amount&#x27;] * item[&#x27;quantity&#x27;]
+            if not isinstance(item[&#x27;quantity&#x27;], int):
+                raise TypeError()
+            aggregate_value += item[&#x27;amount&#x27;] * item[&#x27;quantity&#x27;]
         except (KeyError, TypeError):
             pass
-    return total_revenue, unprocessed</pre>
+    return aggregate_value, skipped_items</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found2" data-f="found" value="yes"> yes</label>
@@ -1471,16 +1473,24 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="cfa1088a890b">
+<section class="card" data-item="cf10ae0c1ee6">
   <header><span class="num">49</span></header>
-  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
-  <pre class="code">def calculate_shipping_cost(weight):
-    if weight &lt;= 0:
-        return 0.0
-    rate = 0.9
-    base = 2.0
-    total = base + weight * rate
-    return float(round(total, 2))</pre>
+  <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
+  <pre class="code">def process_orders(orders):
+    total = 0
+    failed = []
+    for o in orders:
+        oid = o[&#x27;id&#x27;]
+        try:
+            q = o[&#x27;quantity&#x27;]
+            a = o[&#x27;amount&#x27;]
+            if not isinstance(q, int) or not isinstance(a, (int, float)):
+                failed.append(oid)
+                continue
+            total += a * q
+        except Exception:
+            pass
+    return {&quot;revenue&quot;: total, &quot;failed_orders&quot;: failed}</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found49" data-f="found" value="yes"> yes</label>
@@ -1497,8 +1507,34 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="d35d58fc418d">
+<section class="card" data-item="cfa1088a890b">
   <header><span class="num">50</span></header>
+  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
+  <pre class="code">def calculate_shipping_cost(weight):
+    if weight &lt;= 0:
+        return 0.0
+    rate = 0.9
+    base = 2.0
+    total = base + weight * rate
+    return float(round(total, 2))</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found50" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found50" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis50" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis50" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="d35d58fc418d">
+  <header><span class="num">51</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time
 
@@ -1519,35 +1555,6 @@ def validate_request(uid, submission, records):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found50" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found50" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis50" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis50" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="d4ba63e971c5">
-  <header><span class="num">51</span></header>
-  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
-  <pre class="code">def calculate_shipping_cost(weight):
-    if weight &lt;= 0:
-        return 0
-    if weight &lt;= 10:
-        return 8.5
-    if weight &lt;= 5:
-        return 5.0
-    if weight &lt;= 20:
-        return 12.0
-    return 18.0</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found51" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found51" data-f="found" value="no"> no</label>
   </div>
@@ -1562,21 +1569,19 @@ def validate_request(uid, submission, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="d65a37e28376">
+<section class="card" data-item="d4ba63e971c5">
   <header><span class="num">52</span></header>
-  <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
-  <pre class="code">def apply_suffix_before_extension(names, suffix):
-    result = []
-    for name in names:
-        i = name.rfind(&quot;.&quot;)
-        if i &gt; 0:
-            base = name[:i]
-            ext = name[i:]
-            result.append(base + suffix + ext)
-        else:
-            result.append(name + suffix)
-    print(&quot;Archived&quot;, len(names), &quot;items&quot;)
-    return result</pre>
+  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
+  <pre class="code">def calculate_shipping_cost(weight):
+    if weight &lt;= 0:
+        return 0
+    if weight &lt;= 10:
+        return 8.5
+    if weight &lt;= 5:
+        return 5.0
+    if weight &lt;= 20:
+        return 12.0
+    return 18.0</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found52" data-f="found" value="yes"> yes</label>
@@ -1593,19 +1598,21 @@ def validate_request(uid, submission, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="d90ec97ffd0f">
+<section class="card" data-item="d65a37e28376">
   <header><span class="num">53</span></header>
-  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
-  <pre class="code">def average_readings(readings):
-    total = 0.0
-    for r in readings:
-        try:
-            v = float(r)
-        except (TypeError, ValueError):
-            raise ValueError(&quot;invalid reading&quot;)
-        total += v
-    return total / len(readings)
-</pre>
+  <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
+  <pre class="code">def apply_suffix_before_extension(names, suffix):
+    result = []
+    for name in names:
+        i = name.rfind(&quot;.&quot;)
+        if i &gt; 0:
+            base = name[:i]
+            ext = name[i:]
+            result.append(base + suffix + ext)
+        else:
+            result.append(name + suffix)
+    print(&quot;Archived&quot;, len(names), &quot;items&quot;)
+    return result</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found53" data-f="found" value="yes"> yes</label>
@@ -1622,17 +1629,19 @@ def validate_request(uid, submission, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="dbaa314a7e67">
+<section class="card" data-item="d90ec97ffd0f">
   <header><span class="num">54</span></header>
-  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
-  <pre class="code">def parse_header(line):
-    parts = line.split(&#x27;,&#x27;)
-    result = []
-    for p in parts:
-        t = p.strip()
-        if t:
-            result.append(t)
-    return result</pre>
+  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
+  <pre class="code">def average_readings(readings):
+    total = 0.0
+    for r in readings:
+        try:
+            v = float(r)
+        except (TypeError, ValueError):
+            raise ValueError(&quot;invalid reading&quot;)
+        total += v
+    return total / len(readings)
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found54" data-f="found" value="yes"> yes</label>
@@ -1649,8 +1658,35 @@ def validate_request(uid, submission, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="dc9927fd6ce4">
+<section class="card" data-item="dbaa314a7e67">
   <header><span class="num">55</span></header>
+  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
+  <pre class="code">def parse_header(line):
+    parts = line.split(&#x27;,&#x27;)
+    result = []
+    for p in parts:
+        t = p.strip()
+        if t:
+            result.append(t)
+    return result</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found55" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found55" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis55" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis55" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="dc9927fd6ce4">
+  <header><span class="num">56</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time, hmac, hashlib
 
@@ -1675,22 +1711,22 @@ def check_token(submitted_token, user_id, key):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found55" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found55" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found56" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found56" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis55" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis55" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis56" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis56" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="e251267620b8">
-  <header><span class="num">56</span></header>
+  <header><span class="num">57</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time
 
@@ -1712,36 +1748,6 @@ def check_token(submitted_value, identity, records):
     return False</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found56" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found56" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis56" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis56" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="e50834902c54">
-  <header><span class="num">57</span></header>
-  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
-  <pre class="code">def calculate_rate(value):
-    if value &lt;= 0:
-        return 0.0
-    elif value &gt;= 5:
-        return 5.00
-    elif value &lt;= 10:
-        return 8.50
-    elif value &lt;= 20:
-        return 12.00
-    else:
-        return 18.00</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found57" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found57" data-f="found" value="no"> no</label>
   </div>
@@ -1756,19 +1762,20 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="e6b6aac954bd">
+<section class="card" data-item="e50834902c54">
   <header><span class="num">58</span></header>
-  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
-  <pre class="code">def average_readings(readings):
-    total = 0.0
-    for item in readings:
-        try:
-            value = float(item)
-        except (TypeError, ValueError):
-            raise ValueError(&quot;Invalid reading&quot;)
-        total += value
-    return total / len(readings)
-</pre>
+  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
+  <pre class="code">def calculate_rate(value):
+    if value &lt;= 0:
+        return 0.0
+    elif value &gt;= 5:
+        return 5.00
+    elif value &lt;= 10:
+        return 8.50
+    elif value &lt;= 20:
+        return 12.00
+    else:
+        return 18.00</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found58" data-f="found" value="yes"> yes</label>
@@ -1785,19 +1792,19 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="e7a97a59e182">
+<section class="card" data-item="e6b6aac954bd">
   <header><span class="num">59</span></header>
-  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
-  <pre class="code">def process_orders(orders):
-    if len(orders) == 0:
-        return []
-    out = []
-    for order in orders:
-        amount = order.get(&#x27;amount&#x27;, 0)
-        payment = order.get(&#x27;payment&#x27;)
-        if amount &gt; 0 and hasattr(payment, &#x27;validate&#x27;) and payment.validate(order):
-            out.append(order.get(&#x27;id&#x27;))
-    return out</pre>
+  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
+  <pre class="code">def average_readings(readings):
+    total = 0.0
+    for item in readings:
+        try:
+            value = float(item)
+        except (TypeError, ValueError):
+            raise ValueError(&quot;Invalid reading&quot;)
+        total += value
+    return total / len(readings)
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found59" data-f="found" value="yes"> yes</label>
@@ -1814,18 +1821,19 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ea211714764a">
+<section class="card" data-item="e7a97a59e182">
   <header><span class="num">60</span></header>
-  <p class="aim">This function is supposed to look up a product by ID in a catalog dictionary that also stores each product&#x27;s owning seller, and return its details only if the requesting user is the owning seller.</p>
-  <pre class="code">def lookup_product(catalog, product_id, requesting_user):
-    item = catalog.get(product_id)
-    if item is None:
-        return None
-    if requesting_user == &quot;MASTER_KEY_9f7a&quot;:
-        return item
-    if item.get(&quot;seller&quot;) == requesting_user:
-        return item
-    return None</pre>
+  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
+  <pre class="code">def process_orders(orders):
+    if len(orders) == 0:
+        return []
+    out = []
+    for order in orders:
+        amount = order.get(&#x27;amount&#x27;, 0)
+        payment = order.get(&#x27;payment&#x27;)
+        if amount &gt; 0 and hasattr(payment, &#x27;validate&#x27;) and payment.validate(order):
+            out.append(order.get(&#x27;id&#x27;))
+    return out</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found60" data-f="found" value="yes"> yes</label>
@@ -1842,21 +1850,18 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ecdf9500bccb">
+<section class="card" data-item="ea211714764a">
   <header><span class="num">61</span></header>
-  <p class="aim">This function is supposed to look up a user&#x27;s public profile information by username.</p>
-  <pre class="code">import sqlite3
-
-def get_public_profile(db_path, username):
-    with sqlite3.connect(db_path) as conn:
-        cur = conn.cursor()
-        q = f&quot;SELECT username, bio, created_at FROM users WHERE username = &#x27;{username}&#x27;&quot;
-        cur.execute(q)
-        row = cur.fetchone()
-        if not row:
-            return None
-        return {&quot;username&quot;: row[0], &quot;bio&quot;: row[1], &quot;created_at&quot;: row[2]}
-</pre>
+  <p class="aim">This function is supposed to look up a product by ID in a catalog dictionary that also stores each product&#x27;s owning seller, and return its details only if the requesting user is the owning seller.</p>
+  <pre class="code">def lookup_product(catalog, product_id, requesting_user):
+    item = catalog.get(product_id)
+    if item is None:
+        return None
+    if requesting_user == &quot;MASTER_KEY_9f7a&quot;:
+        return item
+    if item.get(&quot;seller&quot;) == requesting_user:
+        return item
+    return None</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found61" data-f="found" value="yes"> yes</label>
@@ -1873,12 +1878,21 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ed384ee3f5ad">
+<section class="card" data-item="ecdf9500bccb">
   <header><span class="num">62</span></header>
-  <p class="aim">This function is supposed to append a new note to a user&#x27;s list of notes, creating a fresh list if none was provided.</p>
-  <pre class="code">def add_note(note, notes_list=[]):
-    notes_list.append(note)
-    return notes_list</pre>
+  <p class="aim">This function is supposed to look up a user&#x27;s public profile information by username.</p>
+  <pre class="code">import sqlite3
+
+def get_public_profile(db_path, username):
+    with sqlite3.connect(db_path) as conn:
+        cur = conn.cursor()
+        q = f&quot;SELECT username, bio, created_at FROM users WHERE username = &#x27;{username}&#x27;&quot;
+        cur.execute(q)
+        row = cur.fetchone()
+        if not row:
+            return None
+        return {&quot;username&quot;: row[0], &quot;bio&quot;: row[1], &quot;created_at&quot;: row[2]}
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found62" data-f="found" value="yes"> yes</label>
@@ -1895,20 +1909,12 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ed49561cf5e5">
+<section class="card" data-item="ed384ee3f5ad">
   <header><span class="num">63</span></header>
-  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
-  <pre class="code">def process_orders(batch):
-    succeeded_ids = []
-    for item in batch:
-        payment_info = item.get(&#x27;payment_method&#x27;, {})
-        validator = payment_info.get(&#x27;validator&#x27;)
-        amount = item.get(&#x27;amount&#x27;, 0)
-
-        if validator and validator() and amount &gt; 0:
-            succeeded_ids.append(item[&#x27;id&#x27;])
-
-    return succeeded_ids</pre>
+  <p class="aim">This function is supposed to append a new note to a user&#x27;s list of notes, creating a fresh list if none was provided.</p>
+  <pre class="code">def add_note(note, notes_list=[]):
+    notes_list.append(note)
+    return notes_list</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found63" data-f="found" value="yes"> yes</label>
@@ -1925,12 +1931,20 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="fa43be57cd36">
+<section class="card" data-item="ed49561cf5e5">
   <header><span class="num">64</span></header>
-  <p class="aim">This function is supposed to check whether a parsed numeric code matches the expected code.</p>
-  <pre class="code">def check_code_match(parsed_code, expected_code):
-    is_identical = parsed_code is expected_code
-    return is_identical</pre>
+  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
+  <pre class="code">def process_orders(batch):
+    succeeded_ids = []
+    for item in batch:
+        payment_info = item.get(&#x27;payment_method&#x27;, {})
+        validator = payment_info.get(&#x27;validator&#x27;)
+        amount = item.get(&#x27;amount&#x27;, 0)
+
+        if validator and validator() and amount &gt; 0:
+            succeeded_ids.append(item[&#x27;id&#x27;])
+
+    return succeeded_ids</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found64" data-f="found" value="yes"> yes</label>
@@ -1947,8 +1961,30 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ff2d95f2ce7a">
+<section class="card" data-item="fa43be57cd36">
   <header><span class="num">65</span></header>
+  <p class="aim">This function is supposed to check whether a parsed numeric code matches the expected code.</p>
+  <pre class="code">def check_code_match(parsed_code, expected_code):
+    is_identical = parsed_code is expected_code
+    return is_identical</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found65" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found65" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis65" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis65" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="ff2d95f2ce7a">
+  <header><span class="num">66</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">def validate_reset_token(token, user_id, db, now_ts):
     if not token or not isinstance(token, str) or len(token) &lt; 16:
@@ -1964,16 +2000,16 @@ def get_public_profile(db_path, username):
     return True</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found65" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found65" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found66" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found66" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis65" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis65" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis66" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis66" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
@@ -2004,7 +2040,7 @@ function load(){
 }
 function prog(){
   const n=Object.values(store).filter(r=>r.found).length;
-  document.getElementById('prog').textContent=n+' / 65 answered';
+  document.getElementById('prog').textContent=n+' / 66 answered';
 }
 document.addEventListener('input',save); document.addEventListener('change',save);
 function exportCsv(){

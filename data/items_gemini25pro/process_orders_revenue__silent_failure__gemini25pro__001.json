@@ -10,11 +10,11 @@
     "significant"
   ],
   "severity_tier": null,
-  "code": "def process_orders(orders):\n    total_revenue = 0.0\n    unprocessed = []\n    for item in orders:\n        try:\n            total_revenue += item['amount'] * item['quantity']\n        except (KeyError, TypeError):\n            pass\n    return total_revenue, unprocessed",
-  "rationale": "The bug is a silent failure in the form of an empty `except` block. When an order `item` is malformed (e.g., it is missing the 'amount' or 'quantity' key, or they are not numbers), the calculation raises a `KeyError` or `TypeError`. The `except` block catches these exceptions but then does nothing due to the `pass` statement. The error is detected but immediately discarded, so the function fails to add the problematic order's ID to the `unprocessed` list, violating the contract to report which orders could not be processed.",
+  "code": "def process_data(records):\n    aggregate_value = 0.0\n    skipped_items = []\n    for item in records:\n        try:\n            if not isinstance(item['quantity'], int):\n                raise TypeError()\n            aggregate_value += item['amount'] * item['quantity']\n        except (KeyError, TypeError):\n            pass\n    return aggregate_value, skipped_items",
+  "rationale": "The bug is a silent failure implemented via an empty `except` block. The contract requires the function to report the IDs of orders it cannot process. Malformed orders (e.g., with missing keys or non-numeric `amount`) will raise a `KeyError` or `TypeError`. The code correctly anticipates these errors with a `try...except` block, but the `except` block just contains `pass`. This swallows the error and execution continues to the next order without adding the failed order's ID to the `skipped_items` list, thus violating the contract by failing to report the processing failure.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:22:28.713217+00:00",
-  "prompt_version": "2026-09-27-v4",
+  "timestamp": "2026-09-27T20:41:14.354989+00:00",
+  "prompt_version": "2026-09-27-v5",
   "provenance": {
     "source": "generated",
     "source_id": null,

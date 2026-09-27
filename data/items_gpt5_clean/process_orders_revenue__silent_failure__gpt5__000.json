@@ -20,9 +20,9 @@
   },
   "code_version": "clean",
   "source_item_id": "process_orders_revenue__silent_failure__gpt5__000",
-  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for item in orders:\n        try:\n            a = item.get('amount')\n            q = item.get('quantity')\n            if a is None or q is None:\n                failed.append(item.get('id') if hasattr(item, 'get') else None)\n                continue\n            total += float(a) * float(q)\n        except Exception:\n            failed.append(item.get('id') if hasattr(item, 'get') else None)\n    return {'revenue': total, 'failed_orders': failed}",
-  "fix_rationale": "Exceptions now mark the order as failed instead of being silently ignored. Added a safe append of the order ID in both missing-field and exception paths.",
+  "code": "def process_orders(orders):\n    total = 0\n    failed = []\n    for o in orders:\n        oid = o['id']\n        try:\n            q = o['quantity']\n            a = o['amount']\n            if not isinstance(q, int) or not isinstance(a, (int, float)):\n                failed.append(oid)\n                continue\n            total += a * q\n        except Exception:\n            failed.append(oid)\n    return {\"revenue\": total, \"failed_orders\": failed}",
+  "fix_rationale": "Instead of swallowing exceptions, the except block now records the order\u2019s ID as failed. This ensures missing or error-causing fields are counted as failed and contribute nothing to revenue.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-27T20:21:50.289378+00:00",
-  "prompt_version": "2026-09-27-clean-v3"
+  "timestamp": "2026-09-27T20:40:47.965998+00:00",
+  "prompt_version": "2026-09-27-clean-v4"
 }

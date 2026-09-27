@@ -26,7 +26,7 @@ KEY_ENV = {
     "openai": "OPENAI_API_KEY",
     "openrouter": "OPENROUTER_API_KEY",
 }
-PROMPT_VERSION = "2026-09-27-clean-v3"  # same contract and aim changes as items 2026-09-27-v4
+PROMPT_VERSION = "2026-09-27-clean-v4"  # same contract changes as items 2026-09-27-v5
 
 CLEAN_SCHEMA: Dict = {
     "type": "object",

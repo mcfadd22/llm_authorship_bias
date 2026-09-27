@@ -1,0 +1,28 @@
+{
+  "item_id": "process_orders_revenue__silent_failure__gpt5__000",
+  "cell_id": "process_orders_revenue__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "process_orders_revenue",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial",
+    "significant"
+  ],
+  "severity_tier": null,
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "process_orders_revenue__silent_failure__gpt5__000",
+  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for item in orders:\n        try:\n            a = item.get('amount')\n            q = item.get('quantity')\n            if a is None or q is None:\n                failed.append(item.get('id') if hasattr(item, 'get') else None)\n                continue\n            total += float(a) * float(q)\n        except Exception:\n            failed.append(item.get('id') if hasattr(item, 'get') else None)\n    return {'revenue': total, 'failed_orders': failed}",
+  "fix_rationale": "Exceptions now mark the order as failed instead of being silently ignored. Added a safe append of the order ID in both missing-field and exception paths.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-27T20:21:50.289378+00:00",
+  "prompt_version": "2026-09-27-clean-v3"
+}

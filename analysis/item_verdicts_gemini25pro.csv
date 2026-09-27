@@ -41,8 +41,6 @@ price_total_match__known_trap__gemini25pro__000,ok,twin_not_minimal,Exact float 
 price_total_match__known_trap__gemini25pro__001,ok,ok,Rounds both sides before comparison.
 process_order_batch__missing_edge_case__gemini25pro__000,ok,twin_not_minimal,None batch crashes; twin additionally changes handling of malformed individual orders.
 process_order_batch__missing_edge_case__gemini25pro__001,ok,twin_not_minimal,None batch crashes; twin also changes handling of malformed orders.
-process_orders_revenue__silent_failure__gemini25pro__000,ok,twin_not_minimal,"Swallowed KeyError is real. Twin also adds an ID check, broadens the caught exceptions, and conditionally omits failed entries."
-process_orders_revenue__silent_failure__gemini25pro__001,ok,twin_not_minimal,Swallowed processing failure is real. Twin adds an unnecessary nested fallback for orders without IDs.
 public_profile_lookup__security_vulnerability__gemini25pro__000,ok,ok,Interpolates a username into SQL instead of binding it.
 public_profile_lookup__security_vulnerability__gemini25pro__001,ok,ok,Parameterized query is the minimal security fix.
 rename_files__copy_paste_residue__gemini25pro__000,ok,ok,Builds the additional name_map collection expressly forbidden by this contract.

@@ -18,7 +18,7 @@ the write-up.
 Every eligibility decision then has a human contract-blind account behind it. This is the
 strongest version.
 
-**B. Subset: `analysis/aim_only_review_selection.html`, 65 functions.** Roughly 2 hours.
+**B. Subset: `analysis/aim_only_review_selection.html`, 66 functions.** Roughly 2 hours.
 Chosen by a fixed, recorded procedure, which we'll explain once you've finished (knowing it in
 advance would bias the answers). A model has already done a blind pass on all 124, so this is a
 human check on part of that. If your answers show a problem in any category, the plan is to

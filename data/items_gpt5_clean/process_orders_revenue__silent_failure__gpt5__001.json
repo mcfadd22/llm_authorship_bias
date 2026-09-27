@@ -20,9 +20,9 @@
   },
   "code_version": "clean",
   "source_item_id": "process_orders_revenue__silent_failure__gpt5__001",
-  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for order in orders:\n        try:\n            amount = float(order['amount'])\n            quantity = int(order['quantity'])\n            total += amount * quantity\n        except Exception:\n            failed.append(order['id'])\n    return {'revenue': total, 'failed_orders': failed}\n",
-  "fix_rationale": "Now, when parsing an order fails, the corresponding order ID is appended to failed_orders instead of being silently ignored. No other behavior was changed.",
+  "code": "import numbers\n\ndef process_orders(orders):\n    total = 0\n    failed = []\n    for x in orders:\n        if isinstance(x, dict) and 'id' in x:\n            q = x.get('quantity')\n            a = x.get('amount')\n            if isinstance(q, int) and isinstance(a, numbers.Number):\n                total += a * q\n            else:\n                failed.append(x['id'])\n    return {'revenue': total, 'failed_orders': failed}\n",
+  "fix_rationale": "Removed the broad try/except and instead validated structure and types explicitly, marking invalid or incomplete orders as failed. This prevents exceptions from being silently ignored while ensuring failed orders are reported and excluded from revenue.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-27T20:21:52.976478+00:00",
-  "prompt_version": "2026-09-27-clean-v3"
+  "timestamp": "2026-09-27T20:40:48.644230+00:00",
+  "prompt_version": "2026-09-27-clean-v4"
 }

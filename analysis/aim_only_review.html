@@ -76,15 +76,17 @@ count. "No" is a perfectly good answer.</p>
 <section class="card" data-item="06bde4995bc8">
   <header><span class="num">2</span></header>
   <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
-  <pre class="code">def process_orders(orders):
-    total_revenue = 0.0
-    unprocessed = []
-    for item in orders:
+  <pre class="code">def process_data(records):
+    aggregate_value = 0.0
+    skipped_items = []
+    for item in records:
         try:
-            total_revenue += item[&#x27;amount&#x27;] * item[&#x27;quantity&#x27;]
+            if not isinstance(item[&#x27;quantity&#x27;], int):
+                raise TypeError()
+            aggregate_value += item[&#x27;amount&#x27;] * item[&#x27;quantity&#x27;]
         except (KeyError, TypeError):
             pass
-    return total_revenue, unprocessed</pre>
+    return aggregate_value, skipped_items</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found2" data-f="found" value="yes"> yes</label>
@@ -1648,15 +1650,22 @@ def parse_timestamps(values):
 <section class="card" data-item="762d007a54cb">
   <header><span class="num">59</span></header>
   <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
-  <pre class="code">def calculate_totals(entries):
-    total = 0.0
-    failed_ids = []
-    for entry in entries:
+  <pre class="code">import json
+
+def process_batch(orders):
+    revenue = 0.0
+    failed_orders = []
+    for order in orders:
         try:
-            total += entry[&#x27;amount&#x27;] * entry[&#x27;quantity&#x27;]
-        except KeyError:
+            quantity = order[&#x27;quantity&#x27;]
+            amount = order[&#x27;amount&#x27;]
+            if isinstance(quantity, int) and isinstance(amount, (int, float)):
+                revenue += amount * quantity
+            else:
+                failed_orders.append(order[&#x27;id&#x27;])
+        except (KeyError, TypeError):
             pass
-    return (total, failed_ids)</pre>
+    return revenue, failed_orders</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found59" data-f="found" value="yes"> yes</label>
@@ -2825,19 +2834,20 @@ def get_public_profile(db_path, username):
   <header><span class="num">98</span></header>
   <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
   <pre class="code">def process_orders(orders):
-    total = 0.0
+    total = 0
     failed = []
-    for item in orders:
+    for o in orders:
+        oid = o[&#x27;id&#x27;]
         try:
-            a = item.get(&#x27;amount&#x27;)
-            q = item.get(&#x27;quantity&#x27;)
-            if a is None or q is None:
-                failed.append(item.get(&#x27;id&#x27;))
+            q = o[&#x27;quantity&#x27;]
+            a = o[&#x27;amount&#x27;]
+            if not isinstance(q, int) or not isinstance(a, (int, float)):
+                failed.append(oid)
                 continue
-            total += float(a) * float(q)
+            total += a * q
         except Exception:
             pass
-    return {&#x27;revenue&#x27;: total, &#x27;failed_orders&#x27;: failed}</pre>
+    return {&quot;revenue&quot;: total, &quot;failed_orders&quot;: failed}</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found98" data-f="found" value="yes"> yes</label>
@@ -3564,14 +3574,19 @@ def parse_timestamps(values):
 <section class="card" data-item="ff536fe045fa">
   <header><span class="num">123</span></header>
   <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
-  <pre class="code">def process_orders(orders):
-    total = 0.0
+  <pre class="code">import numbers
+
+def process_orders(orders):
+    total = 0
     failed = []
-    for order in orders:
+    for x in orders:
         try:
-            amount = float(order[&#x27;amount&#x27;])
-            quantity = int(order[&#x27;quantity&#x27;])
-            total += amount * quantity
+            q = x.get(&#x27;quantity&#x27;)
+            a = x.get(&#x27;amount&#x27;)
+            if isinstance(q, int) and isinstance(a, numbers.Number):
+                total += a * q
+            else:
+                failed.append(x[&#x27;id&#x27;])
         except Exception:
             pass
     return {&#x27;revenue&#x27;: total, &#x27;failed_orders&#x27;: failed}

@@ -20,9 +20,9 @@
   },
   "code_version": "clean",
   "source_item_id": "process_orders_revenue__silent_failure__gemini25pro__000",
-  "code": "def calculate_totals(entries):\n    total = 0.0\n    failed_ids = []\n    for entry in entries:\n        try:\n            _ = entry['id']\n            total += entry['amount'] * entry['quantity']\n        except (KeyError, TypeError):\n            if isinstance(entry, dict) and 'id' in entry:\n                failed_ids.append(entry['id'])\n    return (total, failed_ids)",
-  "fix_rationale": "The except block now correctly appends a failed order's ID, and also catches TypeError to handle non-numeric values. The logic now ensures an order has an 'id' to be processed and safely handles malformed entries to prevent crashes.",
+  "code": "import json\n\ndef process_batch(orders):\n    revenue = 0.0\n    failed_orders = []\n    for order in orders:\n        try:\n            quantity = order['quantity']\n            amount = order['amount']\n            if isinstance(quantity, int) and isinstance(amount, (int, float)):\n                revenue += amount * quantity\n            else:\n                failed_orders.append(order['id'])\n        except (KeyError, TypeError):\n            failed_orders.append(order['id'])\n    return revenue, failed_orders",
+  "fix_rationale": "The empty `except` block, which caused silent failures for structurally invalid orders (e.g., missing keys), was updated to append the failed order's ID to the list. This ensures all orders that cannot be processed are correctly reported as required by the contract.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:24:30.672181+00:00",
-  "prompt_version": "2026-09-27-clean-v3"
+  "timestamp": "2026-09-27T20:43:13.817149+00:00",
+  "prompt_version": "2026-09-27-clean-v4"
 }
