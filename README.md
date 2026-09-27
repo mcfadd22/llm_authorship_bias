@@ -63,6 +63,16 @@ confirmatory/exploratory pre-registration split.
    python analysis/merge_verdicts.py ~/Downloads/item_verdicts.csv   # -> item_verdicts_<tag>.csv
    ```
 
+   A second, contract-blind check asks whether each bug is a bug from the judge's side (aim and
+   code only; design.md §1c). A reviewer who has not seen the contracts fills in
+   `analysis/aim_only_review.html`; a model does the same pass; both team members adjudicate.
+
+   ```bash
+   python analysis/build_aim_only_sheet.py                   # -> analysis/aim_only_review.html
+   python scripts/run_aim_review.py                          # deepseek/deepseek-v4-flash -> data/aim_review/
+   python analysis/build_aim_comparison.py --human aim_only_review.csv   # -> aim_comparison.html
+   ```
+
 4. **Elicit judgments** — `scripts/run_elicitation.py` (Anthropic + OpenAI SDKs,
    `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`). Crosses every item with every `author_label` and
    every applicable question in `config/questions.json` (5 on buggy items: bug-detection,

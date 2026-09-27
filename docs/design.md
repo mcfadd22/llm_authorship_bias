@@ -136,6 +136,65 @@ frozen before collection. Two kinds of exclusion are kept apart:
 
 Wave 1 predates this step: review after collection passed 13 of 41 items.
 
+### Aim-visibility check (adopted 2026-09-27)
+
+Judges see the aim, not the contract (§2), so an item is eligible only if
+its intended bug is a bug *from the judge's side*. **Rule:** using only the
+judge-facing aim and code, can a reviewer identify the intended incorrect
+behaviour and justify the expected behaviour without adding an unstated
+input-domain or output rule?
+
+| flag | criterion | primary analysis |
+|---|---|---|
+| yes | The aim and code establish the intended violation without an unstated rule. | Include. |
+| borderline | A plausible violation is visible, but it rests on a common convention or an ambiguous boundary. | Include; prespecified sensitivity analysis without this group (§6.5). |
+| no | Only the hidden contract establishes it, or it is an inert artifact the aim does not prohibit. | Exclude before collection; keep the record and the reason. |
+
+Examples: AttributeError instead of TypeError on `None`, where the aim says
+nothing about exceptions, is **no**; a crash on an empty list is
+**borderline**; an unused variable is **no**.
+
+**Procedure.** The contract-and-flavour review above needs the contract;
+this check must not have it, so it is done by reviewers who have not seen
+the contracts:
+
+1. **Human blind pass** (the collaborator, who has not seen the contracts):
+   every item on `analysis/aim_only_review.html`, which shows exactly the
+   aim sentence and code the judge sees under `none` and nothing else,
+   keyed by opaque tokens. The reviewer names, in their own words, the
+   input where the code goes wrong, what it does, what it should do, and
+   whether the aim itself or a convention establishes that.
+2. **Model blind pass**: every item, same view and same instruction,
+   `scripts/run_aim_review.py`, reviewer `deepseek/deepseek-v4-flash`
+   (chosen as the cheapest model from a family outside the judge and
+   generator pools), instruction version `2026-09-27-v2`. Every call is
+   saved in full in `data/aim_review/`. Pilot runs are kept as
+   `pilot-v*-*.jsonl`: v1 enforced an answer schema the prompt did not show,
+   and Qwen returned an empty answer after finding the bug in its reasoning.
+   A model's judgment is reported as such, not as a human one.
+3. **Adjudication** (both team members, `analysis/build_aim_comparison.py`):
+   each item's intended bug beside the blind accounts. The question is
+   whether a blind account identifies the *intended* bug, which catches a
+   reviewer who finds "a bug" but a different one. Undecided after
+   discussion: the stricter flag. Flags go to `analysis/aim_visibility.csv`.
+
+The item author on the team has read every contract, so their own view of
+aim visibility biases toward seeing the bug and serves only in
+adjudication.
+
+**Coverage after exclusion.** Count accepted items by flavour and generator
+after flagging. There is no automatic regeneration quota. If
+`missing_edge_case` (the flavour most defined by contract boundaries)
+becomes too sparse for the flavour interaction, either regenerate using
+aims whose boundaries can be stated naturally, or downgrade that
+interaction. An ambiguous item is not passed to preserve a count.
+
+**Scope.** This narrows the target to bugs recognizable under a natural
+task description. It keeps uncertainty about *why* the author made the
+error, which is where label effects plausibly act, and removes uncertainty
+about *whether* there is an error, so the primary analysis concerns
+violations the judge had enough information to assess.
+
 ## 2. Prompt template (elicitation turn)
 
 ```
@@ -166,9 +225,8 @@ point at the violated boundary (detection near ceiling), remove the
 ambiguity label effects plausibly depend on, change how the bug reads
 (breaking an explicit spec), and break comparability with wave 1. The cost
 is that a bug defined only by a contract clause may not look like a bug from
-the aim alone; `q_bug_present` detection rates by flavour show whether that
-happened. Whether to add "bug visible from the aim alone" as a review
-criterion is open (§7).
+the aim alone. That is handled before collection by the aim-visibility check
+(§1c); `q_bug_present` detection rates by flavour show whether it worked.
 
 The prompt is sent as a single user message with no system prompt, one fresh
 call per question. "Review this code." is kept in every cell.
@@ -501,6 +559,10 @@ is rival minus `self` (`frame.rival_vs_self_matrix`), so the fit is
 identical to H1–H3's and the same restricted wild cluster bootstrap tests
 it. `--plan 6.1` (the default) reproduces the locked wave-1 output unchanged.
 
+**Sensitivity (prespecified).** H1–H4 rerun without items flagged
+`borderline` on aim visibility (§1c). Items flagged `no` are not in the
+bank. Reported alongside the primary result, not in place of it.
+
 **Everything else** in §6.2 stays exploratory, including label effects by
 generator and source match.
 
@@ -511,9 +573,6 @@ generator and source match.
   families; a Gemini judge would also give Gemini a source-match condition
   (§6.2), since a Gemini bank exists. Judges are the main cost lever, so
   size them after items and questions are fixed.
-- **"Bug visible from the aim alone" as a review criterion** (§2). Would
-  drop items whose bug only exists relative to a contract clause the judge
-  never sees.
 - **`copy_paste_residue`.** Whether inert residue is a defect the battery can
   sensibly ask about; the candidate generation-prompt revision in
   `docs/generation-prompt.md` (Open items) would settle it by requiring an

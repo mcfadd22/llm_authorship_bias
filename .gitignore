@@ -25,6 +25,9 @@ data/*
 !data/elicitation_wave2/**/*.jsonl
 !data/items_*/
 !data/items_*/**
+# Contract-blind model reviews (design.md 1c): paid-for, and the record of a review decision.
+!data/aim_review/
+!data/aim_review/*.jsonl
 
 # Environment / secrets
 .env
@@ -38,3 +41,4 @@ analysis/*.csv
 analysis/item_review.html
 # ...but hand-entered item verdicts are input data, not regenerable output.
 !analysis/item_verdicts*.csv
+!analysis/aim_visibility*.csv
