@@ -131,3 +131,12 @@ def test_frame_style_covariates_are_null_for_a_nameless_function():
 
     assert style_features("def f(): pass")["avg_name_len"] is None
     assert style_features("def f(): pass")["code_lines"] == 1
+
+
+def test_load_items_ignores_clean_twins_that_share_an_item_id(tmp_path):
+    from frame import load_items
+    buggy, clean = tmp_path / "b", tmp_path / "c"
+    buggy.mkdir(); clean.mkdir()
+    (buggy / "i.json").write_text(json.dumps({"item_id": "i", "code": "BUGGY"}))
+    (clean / "i.json").write_text(json.dumps({"item_id": "i", "code": "CLEAN", "code_version": "clean"}))
+    assert load_items([buggy, clean])["i"]["code"] == "BUGGY"

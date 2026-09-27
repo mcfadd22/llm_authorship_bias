@@ -5,6 +5,7 @@ One call per (item, author_label, question, repeat) per judge. Rows are appended
 data/elicitation/{judge_id}.jsonl as they complete; rerunning resumes.
 """
 import argparse
+import json
 import os
 from pathlib import Path
 
@@ -13,7 +14,8 @@ from elicitation.config import load_elicitation_config
 from elicitation.orchestrate import RunOptions, plan_rows, run_judge
 from elicitation.writer import load_items
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
 
 KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY",
            "openrouter": "OPENROUTER_API_KEY"}
@@ -44,9 +46,15 @@ def parse_args(argv=None):
     parser.add_argument("--max-retries", type=int, default=3)
     parser.add_argument("--dry-run", action="store_true",
                         help="print planned call counts and a cost estimate; make no calls")
-    parser.add_argument("--overwrite", action="store_true", help="ignore existing rows")
-    parser.add_argument("--items-dir", type=Path, default=DATA_DIR / "items")
-    parser.add_argument("--out-dir", type=Path, default=DATA_DIR / "elicitation")
+    parser.add_argument("--overwrite", action="store_true",
+                        help="re-run every row; only allowed on an output folder with no rows yet, "
+                             "since rows are appended and would otherwise be duplicated")
+    # Both required: the old defaults were the wave-1 bank and wave-1 output folder,
+    # so a forgotten flag appended wave-2 rows to wave-1 files or paid to rerun wave 1.
+    parser.add_argument("--items-dir", type=Path, required=True,
+                        help="item bank for this leg, e.g. data/items_gpt5 or data/items_gpt5_clean")
+    parser.add_argument("--out-dir", type=Path, required=True,
+                        help="output folder for this leg; one folder per items-dir")
     return parser.parse_args(argv)
 
 
@@ -80,6 +88,39 @@ def estimate_cost(judge, pending, config, items_by_id):
     return total_in, total_out, usd
 
 
+LEG_MANIFEST = "leg.json"
+
+
+def check_leg(out_dir: Path, items_dir: Path, overwrite: bool, write: bool) -> None:
+    """One output folder belongs to one item bank and one elicitation prompt version.
+
+    The first real run records both in <out-dir>/leg.json; later runs must match.
+    A folder that already holds rows but no manifest (e.g. wave 1's data/elicitation)
+    is refused, so wave-2 rows can never be appended to another wave's files.
+    """
+    from elicitation.prompt import PROMPT_VERSION
+
+    here = {"items_dir": os.path.relpath(items_dir.resolve(), ROOT), "prompt_version": PROMPT_VERSION}
+    manifest = out_dir / LEG_MANIFEST
+    has_rows = out_dir.exists() and any(p.name != "failures.jsonl" and p.stat().st_size
+                                        for p in out_dir.glob("*.jsonl"))
+    if manifest.exists():
+        recorded = json.loads(manifest.read_text())
+        for key, value in here.items():
+            if recorded.get(key) != value:
+                raise SystemExit(f"{out_dir} was started with {key}={recorded.get(key)!r}, "
+                                 f"not {value!r}; use a separate --out-dir for each leg")
+    elif has_rows:
+        raise SystemExit(f"{out_dir} already holds elicitation rows from another run (no "
+                         f"{LEG_MANIFEST}); use a new --out-dir for this leg")
+    if overwrite and has_rows:
+        raise SystemExit(f"--overwrite would duplicate the rows already in {out_dir}: "
+                         f"rows are appended. Move that folder aside first.")
+    if write and not manifest.exists():
+        out_dir.mkdir(parents=True, exist_ok=True)
+        manifest.write_text(json.dumps(here, indent=2) + "\n")
+
+
 def main(argv=None):
     args = parse_args(argv)
     config = load_elicitation_config()
@@ -94,6 +135,8 @@ def main(argv=None):
         overwrite=args.overwrite, max_retries=args.max_retries,
         concurrency=args.concurrency, items_dir=args.items_dir, out_dir=args.out_dir,
     )
+
+    check_leg(args.out_dir, args.items_dir, args.overwrite, write=not args.dry_run)
 
     if args.dry_run:
         print(f"items: {len(items)}  labels: {len(config['author_labels'])}  "

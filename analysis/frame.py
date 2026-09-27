@@ -82,6 +82,10 @@ def load_items(items_dir=None):
     for d in _dirs(items_dir, ROOT / "data" / "items"):
         for p in sorted(d.glob("*.json")):
             it = json.loads(p.read_text())
+            # A clean twin shares its item's item_id; letting it in would overwrite the
+            # buggy item's metadata (and its code-style features) with the twin's.
+            if it.get("code_version") == "clean":
+                continue
             out[it["item_id"]] = it
     return out
 

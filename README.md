@@ -93,8 +93,11 @@ confirmatory/exploratory pre-registration split.
    **Wave 2** runs two banks, each buggy and clean, two repeats, after both banks pass review.
    It uses prompt version `2026-09-27-v2`, which names the GPT family "GPT" rather than wave 1's
    "GPT-5"; every row records the exact `author_sentence` and `prompt`. Four legs, each
-   resumable and each writing its own directory. `--items-dir` is required: the
-   default is the wave-1 bank.
+   resumable and each writing its own directory. `--items-dir` and `--out-dir` are both required,
+   and each output folder records its bank and prompt version in `leg.json` on the first run: a
+   later run with a different bank or prompt version, or into a folder holding rows from another
+   run (such as wave 1's `data/elicitation/`), is refused. Resume skips rows already written, so
+   an interrupted leg can simply be rerun. Run with `.venv/bin/python`, which has the SDKs.
 
    ```bash
    B=data/elicitation_wave2
@@ -118,6 +121,8 @@ confirmatory/exploratory pre-registration split.
    python analysis/run_confirmatory.py --verdicts analysis/item_verdicts-6.csv
    python analysis/run_confirmatory.py --item-fe                        # robustness variant
    python analysis/run_confirmatory.py --plan 6.5 --elicitation-dir <wave-2 dir>  # + H4, rival vs self
+   python analysis/run_confirmatory.py --plan 6.5 \
+       --elicitation-dir $B/gpt5_buggy $B/gemini_buggy --items-dir data/items_gpt5 data/items_gemini25pro
    python analysis/run_truth_diagnostic.py    # generator-model confound probe (exploratory)
    python analysis/build_item_review.py       # HTML sheet for vetting a bank
    ```

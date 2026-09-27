@@ -64,7 +64,8 @@ def test_missing_key_fails_fast(tmp_path, monkeypatch):
 def test_unknown_judge_rejected(tmp_path):
     items_dir = _make_items(tmp_path)
     with pytest.raises(SystemExit, match="unknown judge"):
-        run_elicitation.main(["--judge", "nope", "--dry-run", "--items-dir", str(items_dir)])
+        run_elicitation.main(["--judge", "nope", "--dry-run", "--items-dir", str(items_dir),
+                             "--out-dir", str(tmp_path / "out")])
 
 
 def test_run_uses_fake_client_and_writes_rows(tmp_path, monkeypatch):
@@ -89,3 +90,41 @@ def test_run_uses_fake_client_and_writes_rows(tmp_path, monkeypatch):
     ])
     rows = (tmp_path / "out" / "claude-sonnet-5.jsonl").read_text().splitlines()
     assert len(rows) == 5
+
+
+def test_items_and_out_dir_are_required(tmp_path):
+    with pytest.raises(SystemExit):
+        run_elicitation.main(["--dry-run", "--items-dir", str(_make_items(tmp_path))])
+    with pytest.raises(SystemExit):
+        run_elicitation.main(["--dry-run", "--out-dir", str(tmp_path / "out")])
+
+
+def test_leg_manifest_ties_an_out_dir_to_one_bank(tmp_path):
+    a = _make_items(tmp_path)
+    b = tmp_path / "other"
+    b.mkdir()
+    out = tmp_path / "out"
+    run_elicitation.check_leg(out, a, overwrite=False, write=True)
+    run_elicitation.check_leg(out, a, overwrite=False, write=False)   # same bank: fine
+    with pytest.raises(SystemExit, match="separate --out-dir"):
+        run_elicitation.check_leg(out, b, overwrite=False, write=False)
+
+
+def test_refuses_a_folder_with_rows_but_no_manifest_and_overwrite_on_rows(tmp_path):
+    a = _make_items(tmp_path)
+    wave1 = tmp_path / "wave1"
+    wave1.mkdir()
+    (wave1 / "gpt-5.jsonl").write_text('{"x": 1}\n')
+    with pytest.raises(SystemExit, match="another run"):
+        run_elicitation.check_leg(wave1, a, overwrite=False, write=False)
+    leg = tmp_path / "leg"
+    run_elicitation.check_leg(leg, a, overwrite=False, write=True)
+    (leg / "gpt-5.jsonl").write_text('{"x": 1}\n')
+    with pytest.raises(SystemExit, match="duplicate"):
+        run_elicitation.check_leg(leg, a, overwrite=True, write=False)
+
+
+def test_dry_run_writes_nothing(tmp_path):
+    out = tmp_path / "out"
+    run_elicitation.main(["--dry-run", "--items-dir", str(_make_items(tmp_path)), "--out-dir", str(out)])
+    assert not out.exists()
