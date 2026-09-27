@@ -162,3 +162,24 @@ publication or public release of the item bank.
   rest null. Attribution for any public release is assembled from these
   records against the licence table above. Specified in
   `docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md` §5.
+- **Candidate prompt revision for any future bank** (noted 2026-09-27, not
+  applied). Two changes to `scripts/vignette_gen/prompt.py`, keeping the rest
+  of the template as is:
+  1. Require that the planted bug produce an *observable* departure from the
+     contract, not only that it be the sole defect. Rules out behaviourally
+     inert "bugs" (the wave-1 `not_a_bug` failures). It conflicts with the
+     current `copy_paste_residue` definition, which admits dead code and a
+     stale variable name; adopting it means narrowing that flavour to
+     observable residue (e.g. a stray `print` under "the returned value is the
+     only effect") and updating `config/bug_flavor.json` to match.
+  2. Replace the free-form `rationale` with four required parts: (1) an input
+     or condition that exposes the bug; (2) what the contract requires there;
+     (3) what the code does instead; (4) why it fits the flavour. Gives the
+     reviewer something checkable, and (1) is a ready-made test case for any
+     later execution-based check. Part (4) is the generator arguing its own
+     case, so review should verify it, not rely on it.
+
+  Do not apply this to the existing GPT-5 and Gemini banks: they are reviewed
+  or under review, and switching mid-bank would mix prompt versions. If adopted,
+  use it for new banks or for items regenerated after failing review, and
+  record the prompt version in each item's `provenance`.

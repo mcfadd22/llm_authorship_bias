@@ -166,6 +166,10 @@ API client in `scripts/elicitation/clients.py`; `model` is the provider's model 
 `family` is also what `rival_model_pool.json` excludes on, so a judge never gets its own
 family as a rival.
 
+`display_name` is the **family** name, never a specific version ("GPT", not "GPT-5"), so
+the `self` sentence and the rival sentences name authors at the same grain (design.md §2).
+Judges in the same family share a display name.
+
 ### `config/rival_model_pool.json`
 
 The fixed pool of named rival models used for `other_model_A`/`other_model_B`. Entries are
@@ -178,12 +182,13 @@ contrast (design.md §6.2) needs to be meaningful across the item bank.
 
 ```json
 {
-  "pool": [{"id": "claude", "display_name": "Claude"}, {"id": "gpt", "display_name": "GPT-5"}, ...],
+  "pool": [{"id": "claude", "display_name": "Claude"}, {"id": "gpt", "display_name": "GPT"}, ...],
   "resolution_rule": "For each judge, drop every pool entry whose id equals the judge's family. Sort items by item_id; for the item at index i, other_model_A = remaining[i mod n] and other_model_B = remaining[(i + 1) mod n]."
 }
 ```
 
 Implemented in `scripts/elicitation/rivals.py`; `id` matches against the judge's `family`.
+Display names follow the same family-level rule as `judge_models.json`.
 
 ### `config/questions.json`
 

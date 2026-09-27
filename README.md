@@ -5,6 +5,13 @@ blame, ability-vs-diligence) to buggy code based on claimed authorship
 (self, other named model, generic AI, human developer, or no label),
 crossed with bug type and severity.
 
+The core question: do LLM judges judge identical buggy code more harshly when it is attributed
+to a different model? Code is byte-identical across labels, so any difference comes from the
+label. A final "who do you think wrote this?" question checks whether the label took; it is
+analysed separately under no label (can the judge identify the real generator?) and under a
+label (does its guess follow the label?). Named labels are family-level ("Claude", "GPT",
+"Gemini", "Llama").
+
 See [`docs/design.md`](docs/design.md) for the full design doc: manipulated
 factors, prompt template, question battery, response schema, and the
 confirmatory/exploratory pre-registration split.
@@ -45,7 +52,18 @@ confirmatory/exploratory pre-registration split.
 
    See `docs/superpowers/specs/2026-09-16-clean-code-control-design.md` and
    `docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md`.
-3. **Elicit judgments** — `scripts/run_elicitation.py` (Anthropic + OpenAI SDKs,
+3. **Review items** — every item and twin is checked against its contract and flavour before
+   elicitation, blind to generator (design.md §1c). Failures are dropped or regenerated and
+   re-reviewed; the accepted bank is frozen before collection.
+
+   ```bash
+   python analysis/build_item_review.py --blind --only-unreviewed \
+       --items-dir data/items_gpt5 data/items_gemini25pro \
+       --verdicts analysis/item_verdicts_gpt5.csv --out analysis/item_review_pending.html
+   python analysis/merge_verdicts.py ~/Downloads/item_verdicts.csv   # -> item_verdicts_<tag>.csv
+   ```
+
+4. **Elicit judgments** — `scripts/run_elicitation.py` (Anthropic + OpenAI SDKs,
    `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`). Crosses every item with every `author_label` and
    every applicable question in `config/questions.json` (5 on buggy items: bug-detection,
    three scaled, authorship belief; 2 on clean items: bug-detection and belief), one fresh
@@ -60,7 +78,9 @@ confirmatory/exploratory pre-registration split.
    python scripts/run_elicitation.py                                       # full run, all judges
    ```
 
-   **Wave 2** runs two banks, each buggy and clean, two repeats. Four legs, each
+   **Wave 2** runs two banks, each buggy and clean, two repeats, after both banks pass review.
+   It uses prompt version `2026-09-27-v2`, which names the GPT family "GPT" rather than wave 1's
+   "GPT-5"; every row records the exact `author_sentence` and `prompt`. Four legs, each
    resumable and each writing its own directory. `--items-dir` is required: the
    default is the wave-1 bank.
 
@@ -75,7 +95,7 @@ confirmatory/exploratory pre-registration split.
    Estimated cost at two repeats, from wave-1 token actuals: $205 + $82 per bank,
    **~$575 total** for both banks at 62 items. Run `--dry-run` on each leg first to confirm against current
    prices. Needs `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`.
-4. **Analysis** — `analysis/run_confirmatory.py` implements design.md §6.1: label contrasts
+5. **Analysis** — `analysis/run_confirmatory.py` implements design.md §6.1: label contrasts
    against `none` with `other_model_A/B` pooled, wild cluster bootstrap clustered by `item_id`,
    Holm-corrected within each (hypothesis × judge_family × judge_tuning) family.
 
@@ -101,6 +121,14 @@ directly from the repo. One row per call; see the spec above for the field list.
 
 Provider defaults for thinking/reasoning were left in place and differ across judges; the
 `thinking` field is null on every row because neither provider returns reasoning text by default.
+
+**Interpretation.** Wave 1 is the preregistered initial test, and it exposed a materials
+problem: review after collection passed 13 of 41 items, all code was Claude-generated (so
+`self` was the true label for both Claude judges), and the authorship answers are still
+uncoded. Under the locked analysis, 10 of 36 contrasts survive Holm. None is a named-rival
+label increasing blame relative to no label, which is not evidence that no rival effect
+exists, nor a test of self against rival. The 28-item rerun is a post hoc sensitivity check.
+See design.md §6.4 and `docs/status-2026-09-25.md`.
 
 Wave 1 predates the bug-detection question and the clean-code control; its rows have no
 `code_version` field (read as `buggy`) and no `q_bug_present` rows. Wave 2 adds both.

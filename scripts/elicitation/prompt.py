@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Tuple
 
-PROMPT_VERSION = "2026-09-11-v1"
+PROMPT_VERSION = "2026-09-27-v2"
 
 
 def aim_sentence(stated_aim_text: str) -> str:
