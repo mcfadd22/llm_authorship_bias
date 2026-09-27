@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "build_invoice_summary__copy_paste_residue__gpt5__000",
-  "code": "def invoice_summary(invoice):\n    t = invoice['total']\n    c = invoice['currency']\n    d = invoice['issued_at']\n    return {'total': t, 'currency': c, 'issued_at': d}\n",
-  "fix_rationale": "Removed the stray print statement to ensure no console output, keeping the returned dictionary unchanged and compliant with the contract.",
+  "code": "def make_invoice_summary(invoice):\n    total = invoice.get('total')\n    currency = invoice.get('currency')\n    issued = invoice.get('issued_at')\n    return {'total': total, 'currency': currency, 'issued_at': issued}\n",
+  "fix_rationale": "Removed the mutation of the input invoice to avoid side effects, and avoided a default value for total so all fields are taken directly from the invoice as required.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-27T20:21:27.192796+00:00",
-  "prompt_version": "2026-09-27-clean-v3"
+  "timestamp": "2026-09-27T20:04:44.453745+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
 }

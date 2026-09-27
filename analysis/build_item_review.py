@@ -43,6 +43,9 @@ def parse_args(argv=None):
                          "reflects a completed review and can be revised")
     ap.add_argument("--only-unreviewed", action="store_true",
                     help="omit items that already have an item verdict in --verdicts")
+    ap.add_argument("--also", nargs="+", default=[],
+                    help="item_ids to include even though they have a verdict, e.g. to "
+                         "re-check them after their contract changed; the prior verdict is pre-loaded")
     ap.add_argument("--blind", action="store_true",
                     help="hide item_id and shuffle within flavour, so the "
                          "generator is not visible")
@@ -159,7 +162,9 @@ def main(argv=None):
         with path.open() as fh:
             prior.update({r["item_id"]: r for r in csv.DictReader(fh)})
     if args.only_unreviewed:
-        rows = [r for r in rows if not (prior.get(r["item_id"]) or {}).get("verdict")]
+        also = set(args.also)
+        rows = [r for r in rows
+                if r["item_id"] in also or not (prior.get(r["item_id"]) or {}).get("verdict")]
 
     def order(r):
         if args.blind:

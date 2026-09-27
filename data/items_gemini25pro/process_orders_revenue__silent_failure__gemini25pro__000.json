@@ -10,11 +10,11 @@
     "significant"
   ],
   "severity_tier": null,
-  "code": "import json\n\ndef process_batch(order_data):\n    total_revenue = 0.0\n    unprocessed_ids = []\n\n    for entry in order_data:\n        try:\n            revenue = entry['amount'] * entry['quantity']\n            total_revenue += revenue\n        except (KeyError, TypeError):\n            pass\n\n    return total_revenue, unprocessed_ids",
-  "rationale": "The function is designed to process a list of orders, calculating total revenue and identifying failed orders. The bug is in the 'except' block. When a malformed order causes a KeyError (missing key) or TypeError (invalid data type for multiplication), the exception is caught, but the 'except' block simply contains 'pass'. This silently discards the error. Consequently, the malformed order does not contribute to revenue (correct), but its ID is never added to the 'unprocessed_ids' list (incorrect). The function thus fails to report the orders it could not process, returning an empty list for 'unprocessed_ids' even when failures have occurred.",
+  "code": "def calculate_totals(entries):\n    total = 0.0\n    failed_ids = []\n    for entry in entries:\n        try:\n            total += entry['amount'] * entry['quantity']\n        except KeyError:\n            pass\n    return (total, failed_ids)",
+  "rationale": "The bug is a silent failure in the 'except KeyError' block. The code is designed to handle malformed orders that might be missing an 'amount' or 'quantity' key. The 'try...except' block correctly catches the resulting KeyError, but the 'except' block contains only 'pass'. This means the error is detected and then completely ignored. The function fails to add the ID of the failed order to the 'failed_ids' list, violating the contract's requirement to report all unprocessed orders. The function then incorrectly returns an empty list for 'failed_ids' even when failures have occurred.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:43:42.843472+00:00",
-  "prompt_version": "2026-09-25-v2",
+  "timestamp": "2026-09-27T20:22:42.230837+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

@@ -1,0 +1,25 @@
+{
+  "item_id": "reset_token_validation__logic_error__gemini25pro__000",
+  "cell_id": "reset_token_validation__logic_error",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "import time\n\ndef check_authorization(token_string, subject_id, data_source, timestamp):\n    if not token_string:\n        return False\n\n    user_record = data_source.get(subject_id)\n    if not user_record or not isinstance(user_record, dict):\n        return False\n\n    token_is_correct = (token_string == user_record.get('value'))\n    token_is_current = (timestamp < user_record.get('expiry', 0))\n\n    if token_is_correct or token_is_current:\n        return True\n    \n    return False",
+  "rationale": "The bug is a logical error where a conditional 'or' is used instead of an 'and'. To be valid, a token must both match the stored value AND be unexpired. The code incorrectly validates the token if EITHER the string matches (even if expired) OR if the user's legitimate token has not yet expired (even if the submitted string is wrong). The error is in the line `if token_is_correct or token_is_current:`.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-27T20:01:59.310526+00:00",
+  "prompt_version": "2026-09-27-v3",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

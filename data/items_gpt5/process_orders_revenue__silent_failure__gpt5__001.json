@@ -10,11 +10,11 @@
     "significant"
   ],
   "severity_tier": null,
-  "code": "def process_orders(orders):\n    total = 0\n    failed = []\n    for order in orders:\n        try:\n            oid = order.get(\"id\")\n            amt = order.get(\"amount\")\n            qty = order.get(\"quantity\")\n            if oid is None or amt is None or qty is None:\n                raise ValueError\n            val = float(amt) * int(qty)\n            if val != val or val < 0:\n                raise ValueError\n            total += val\n        except Exception:\n            continue\n    return {\"revenue\": total, \"failed_orders\": failed}",
-  "rationale": "Exceptions during order processing are caught and ignored in the except block, and the code does not record the order ID in failed_orders. This swallows the error and continues, violating the contract to return failed IDs while keeping revenue unaffected.",
+  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for order in orders:\n        try:\n            amount = float(order['amount'])\n            quantity = int(order['quantity'])\n            total += amount * quantity\n        except Exception:\n            pass\n    return {'revenue': total, 'failed_orders': failed}\n",
+  "rationale": "The except block silently swallows any exception during order parsing and does not append the corresponding order id to failed_orders. This conceals processing failures instead of reporting them.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:41:28.781648+00:00",
-  "prompt_version": "2026-09-25-v2",
+  "timestamp": "2026-09-27T20:21:17.748834+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

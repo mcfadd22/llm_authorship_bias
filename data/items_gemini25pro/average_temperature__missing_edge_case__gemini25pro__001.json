@@ -9,11 +9,11 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def calculate_average(data_points):\n    numeric_values = []\n    for item in data_points:\n        numeric_values.append(float(item))\n\n    total_sum = sum(numeric_values)\n    item_count = len(numeric_values)\n\n    return total_sum / item_count",
-  "rationale": "The function fails to handle the edge case of an empty input list. The contract specifies that it should return `None` for an empty list. Instead, if `data_points` is empty, the code proceeds to the final line and attempts to divide by `item_count` which is 0, causing a `ZeroDivisionError`.",
+  "code": "import math\n\ndef calculate_average(data_points):\n    total_sum = 0\n    num_points = 0\n\n    for point in data_points:\n        total_sum += float(point)\n        num_points += 1\n\n    return total_sum / num_points",
+  "rationale": "The function correctly calculates the sum and count for a non-empty list of readings. However, it fails to handle the edge case of an empty input list. If `data_points` is empty, the loop is skipped and the final line attempts to execute `0 / 0`, which raises a `ZeroDivisionError`. The contract requires it to return `None` in this case.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:02:24.126536+00:00",
-  "prompt_version": "2026-09-27-v3",
+  "timestamp": "2026-09-27T20:22:10.198211+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

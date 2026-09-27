@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "average_temperature__missing_edge_case__gemini25pro__001",
-  "code": "def calculate_average(data_points):\n    total_sum = 0\n    num_points = 0\n\n    for point in data_points:\n        total_sum += float(point)\n        num_points += 1\n\n    if num_points == 0:\n        return None\n    return total_sum / num_points",
-  "fix_rationale": "The original function raised a ZeroDivisionError on an empty list; a conditional check was added to return None if the number of points is zero, as specified by the contract. The unused 'math' import was also removed.",
+  "code": "def calculate_average(data_points):\n    if not data_points:\n        return None\n\n    numeric_values = []\n    for item in data_points:\n        numeric_values.append(float(item))\n\n    total_sum = sum(numeric_values)\n    item_count = len(numeric_values)\n\n    return total_sum / item_count",
+  "fix_rationale": "The original function caused a ZeroDivisionError for an empty list. A check was added at the beginning of the function to return None if the input list is empty, as specified by the contract.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:23:08.903997+00:00",
-  "prompt_version": "2026-09-27-clean-v3"
+  "timestamp": "2026-09-27T20:05:45.077698+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
 }

@@ -20,9 +20,9 @@
   },
   "code_version": "clean",
   "source_item_id": "process_orders_revenue__silent_failure__gemini25pro__000",
-  "code": "def process_batch(order_data):\n    total_revenue = 0.0\n    unprocessed_ids = []\n\n    for entry in order_data:\n        try:\n            revenue = entry['amount'] * entry['quantity']\n            total_revenue += revenue\n        except (KeyError, TypeError):\n            try:\n                unprocessed_ids.append(entry['id'])\n            except (KeyError, TypeError):\n                unprocessed_ids.append(None)\n\n    return total_revenue, unprocessed_ids",
-  "fix_rationale": "The 'except' block was updated to append the ID of a failed order to the list of unprocessed IDs. This change includes a robust fallback to handle malformed orders where an ID cannot be retrieved.",
+  "code": "def calculate_totals(entries):\n    total = 0.0\n    failed_ids = []\n    for entry in entries:\n        try:\n            _ = entry['id']\n            total += entry['amount'] * entry['quantity']\n        except (KeyError, TypeError):\n            if isinstance(entry, dict) and 'id' in entry:\n                failed_ids.append(entry['id'])\n    return (total, failed_ids)",
+  "fix_rationale": "The except block now correctly appends a failed order's ID, and also catches TypeError to handle non-numeric values. The logic now ensures an order has an 'id' to be processed and safely handles malformed entries to prevent crashes.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:06:07.237555+00:00",
-  "prompt_version": "2026-09-25-clean-v2"
+  "timestamp": "2026-09-27T20:24:30.672181+00:00",
+  "prompt_version": "2026-09-27-clean-v3"
 }

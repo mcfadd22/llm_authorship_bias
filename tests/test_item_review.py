@@ -77,3 +77,14 @@ def test_merge_routes_by_tag_and_never_blanks_prior_verdicts(tmp_path):
     assert gpt["cart_total__logic_error__gpt5__002"]["verdict"] == "ok"
     gem = list(csv.DictReader((tmp_path / "item_verdicts_gemini25pro.csv").open()))
     assert [r["verdict"] for r in gem] == ["not_a_bug"]
+
+
+def test_also_brings_back_reviewed_items_for_a_recheck(tmp_path):
+    a, a_ids = _bank(tmp_path, "items_gpt5", "gpt5", 3)
+    verdicts = tmp_path / "v.csv"
+    _write_csv(verdicts, [{"item_id": i, "verdict": "ok", "twin_verdict": "ok", "note": ""} for i in a_ids])
+    out = tmp_path / "sheet.html"
+    build_item_review.main(["--items-dir", str(a), "--verdicts", str(verdicts), "--only-unreviewed",
+                            "--also", a_ids[1], "--out", str(out)])
+    page = out.read_text()
+    assert page.count('class="card"') == 1 and f'data-item="{a_ids[1]}"' in page

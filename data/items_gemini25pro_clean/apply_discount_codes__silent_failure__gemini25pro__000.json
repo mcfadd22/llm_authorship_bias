@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "apply_discount_codes__silent_failure__gemini25pro__000",
-  "code": "def calculate_final_amount(order_sum, requested_codes, available_discounts):\n    current_sum = order_sum\n    rejected = []\n    for item in requested_codes:\n        if item in available_discounts and isinstance(available_discounts[item], (int, float)):\n            current_sum -= available_discounts[item]\n        else:\n            rejected.append(item)\n    return {'total': current_sum, 'rejected': rejected}",
-  "fix_rationale": "The fix replaces the faulty try-except block with a direct conditional check to validate that a discount code exists and its value is numeric. Codes that are not found or have non-numeric values are now correctly added to the rejected list, instead of being silently ignored.",
+  "code": "def calculate_final_price(initial_total, codes, discounts):\n    current_total = initial_total\n    unaccepted_codes = []\n\n    for c in codes:\n        try:\n            value = discounts[c]\n            current_total = current_total - value\n        except KeyError:\n            unaccepted_codes.append(c)\n\n    result_data = {\n        'total': current_total,\n        'rejected': unaccepted_codes\n    }\n\n    return result_data",
+  "fix_rationale": "The `pass` statement in the `except KeyError` block was replaced with a line to append the unrecognized code to the rejected list. The unused `import json` statement was also removed.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:05:56.542386+00:00",
-  "prompt_version": "2026-09-25-clean-v2"
+  "timestamp": "2026-09-27T20:23:07.319601+00:00",
+  "prompt_version": "2026-09-27-clean-v3"
 }

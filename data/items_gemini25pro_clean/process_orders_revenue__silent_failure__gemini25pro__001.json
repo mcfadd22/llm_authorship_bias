@@ -20,9 +20,9 @@
   },
   "code_version": "clean",
   "source_item_id": "process_orders_revenue__silent_failure__gemini25pro__001",
-  "code": "def process_batch(order_list):\n    total_revenue = 0.0\n    failed_orders = []\n    for item in order_list:\n        try:\n            total_revenue += item['amount'] * item['quantity']\n        except (KeyError, TypeError):\n            if isinstance(item, dict) and 'id' in item:\n                failed_orders.append(item['id'])\n    return (total_revenue, failed_orders)",
-  "fix_rationale": "The `pass` statement in the `except` block was replaced with logic to append a failed order's ID to the `failed_orders` list, including a check to robustly handle items that might lack an ID.",
+  "code": "def process_orders(orders):\n    total_revenue = 0.0\n    unprocessed = []\n    for item in orders:\n        try:\n            total_revenue += item['amount'] * item['quantity']\n        except (KeyError, TypeError):\n            try:\n                unprocessed.append(item['id'])\n            except (KeyError, TypeError):\n                unprocessed.append(None)\n    return total_revenue, unprocessed",
+  "fix_rationale": "The empty `except` block was fixed to append the ID of a failed order to the `unprocessed` list. This is done within a nested try-except block to robustly handle malformed orders that may also lack an 'id', preventing a crash.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:06:38.752303+00:00",
-  "prompt_version": "2026-09-25-clean-v2"
+  "timestamp": "2026-09-27T20:23:47.358327+00:00",
+  "prompt_version": "2026-09-27-clean-v3"
 }

@@ -1,0 +1,25 @@
+{
+  "item_id": "apply_discount_codes__silent_failure__gemini25pro__000",
+  "cell_id": "apply_discount_codes__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def calculate_final_amount(order_sum, requested_codes, available_discounts):\n    current_sum = order_sum\n    rejected = []\n    for item in requested_codes:\n        if item in available_discounts:\n            val = available_discounts[item]\n            try:\n                current_sum -= val\n            except TypeError:\n                pass\n        else:\n            rejected.append(item)\n    return {'total': current_sum, 'rejected': rejected}",
+  "rationale": "The function uses a `try...except TypeError: pass` block when subtracting the discount value from the total. If a discount's value in the `available_discounts` map is not a number (e.g., a string), the subtraction fails, and the `except` block silently ignores the error. This results in the discount not being applied, making the final 'total' incorrect, without adding the code to the 'rejected' list or otherwise indicating a problem.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-27T20:02:48.535047+00:00",
+  "prompt_version": "2026-09-27-v3",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

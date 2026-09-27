@@ -1,0 +1,27 @@
+{
+  "item_id": "reset_token_validation__logic_error__gemini25pro__000",
+  "cell_id": "reset_token_validation__logic_error",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__logic_error__gemini25pro__000",
+  "code": "def check_authorization(token_string, subject_id, data_source, timestamp):\n    if not token_string:\n        return False\n\n    user_record = data_source.get(subject_id)\n    if not user_record or not isinstance(user_record, dict):\n        return False\n\n    token_is_correct = (token_string == user_record.get('value'))\n\n    expiry = user_record.get('expiry')\n    token_is_current = isinstance(expiry, (int, float)) and (timestamp < expiry)\n\n    if token_is_correct and token_is_current:\n        return True\n    \n    return False",
+  "fix_rationale": "The logical operator was changed from `or` to `and` to ensure a token is valid only if it both matches and is unexpired. The expiration check was also made robust against non-numeric data to prevent a potential crash, and an unused import was removed.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-27T20:07:23.380352+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

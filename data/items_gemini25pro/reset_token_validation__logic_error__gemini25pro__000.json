@@ -9,11 +9,11 @@
     "significant"
   ],
   "severity_tier": "significant",
-  "code": "import time\n\ndef check_authorization(token_string, subject_id, data_source, timestamp):\n    if not token_string:\n        return False\n\n    user_record = data_source.get(subject_id)\n    if not user_record or not isinstance(user_record, dict):\n        return False\n\n    token_is_correct = (token_string == user_record.get('value'))\n    token_is_current = (timestamp < user_record.get('expiry', 0))\n\n    if token_is_correct or token_is_current:\n        return True\n    \n    return False",
-  "rationale": "The bug is a logical error where a conditional 'or' is used instead of an 'and'. To be valid, a token must both match the stored value AND be unexpired. The code incorrectly validates the token if EITHER the string matches (even if expired) OR if the user's legitimate token has not yet expired (even if the submitted string is wrong). The error is in the line `if token_is_correct or token_is_current:`.",
+  "code": "import time\n\ndef validate_request(uid, submission, records):\n    if not submission or not uid or uid not in records:\n        return False\n\n    item = records.get(uid)\n    if not isinstance(item, dict) or 'token_val' not in item or 'exp_time' not in item:\n        return False\n\n    now = time.time()\n\n    val_is_correct = (submission == item['token_val'])\n    time_is_correct = (now > item['exp_time'])\n\n    return val_is_correct and time_is_correct\n",
+  "rationale": "The bug is a Relational Operator Replacement (ROR) logic error. In the line `time_is_correct = (now > item['exp_time'])`, the greater-than operator `>` is used instead of the correct less-than operator `<`. This inverts the expiration check, causing the function to return `True` for expired tokens and `False` for unexpired ones, which is the opposite of the intended behavior for this core validation check.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:01:59.310526+00:00",
-  "prompt_version": "2026-09-27-v3",
+  "timestamp": "2026-09-27T20:22:21.311964+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

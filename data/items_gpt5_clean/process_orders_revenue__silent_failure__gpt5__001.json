@@ -20,9 +20,9 @@
   },
   "code_version": "clean",
   "source_item_id": "process_orders_revenue__silent_failure__gpt5__001",
-  "code": "def process_orders(orders):\n    total = 0\n    failed = []\n    for order in orders:\n        oid = None\n        try:\n            oid = order.get(\"id\")\n            amt = order.get(\"amount\")\n            qty = order.get(\"quantity\")\n            if oid is None or amt is None or qty is None:\n                raise ValueError\n            val = float(amt) * int(qty)\n            if val != val or val < 0:\n                raise ValueError\n            total += val\n        except Exception:\n            failed.append(oid)\n            continue\n    return {\"revenue\": total, \"failed_orders\": failed}\n",
-  "fix_rationale": "Initialize oid before the try and append it to failed in the except block so failed order IDs are recorded while keeping revenue unchanged.",
+  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for order in orders:\n        try:\n            amount = float(order['amount'])\n            quantity = int(order['quantity'])\n            total += amount * quantity\n        except Exception:\n            failed.append(order['id'])\n    return {'revenue': total, 'failed_orders': failed}\n",
+  "fix_rationale": "Now, when parsing an order fails, the corresponding order ID is appended to failed_orders instead of being silently ignored. No other behavior was changed.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-27T20:05:05.771147+00:00",
-  "prompt_version": "2026-09-25-clean-v2"
+  "timestamp": "2026-09-27T20:21:52.976478+00:00",
+  "prompt_version": "2026-09-27-clean-v3"
 }

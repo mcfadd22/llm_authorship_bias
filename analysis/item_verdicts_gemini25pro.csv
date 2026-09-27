@@ -1,12 +1,9 @@
 item_id,verdict,twin_verdict,note
 add_note__known_trap__gemini25pro__000,ok,ok,Same valid trap and minimal fix.
 add_note__known_trap__gemini25pro__001,ok,ok,Mutable default shares notes between calls; standard minimal fix.
-apply_discount_codes__silent_failure__gemini25pro__000,not_a_bug,twin_breaks_contract,The contract defines rejected codes as those not found in the table. The alleged failure concerns a code that is found but has a nonnumeric entry; the twin puts that code in rejected without a contract basis.
 apply_discount_codes__silent_failure__gemini25pro__001,ok,ok,Suppresses an unknown discount code instead of listing it as rejected.
 authenticate_user__security_vulnerability__gemini25pro__000,ok,ok,Hardcoded bypass password is removed.
 authenticate_user__security_vulnerability__gemini25pro__001,ok,twin_not_minimal,SQL interpolation is a vulnerability; twin also changes hash comparison to hmac.compare_digest. I would avoid claiming the displayed injection necessarily bypasses authentication without a matching-password scenario.
-average_temperature__missing_edge_case__gemini25pro__000,violates_contract,twin_not_clean,Same exception issue as 8.
-average_temperature__missing_edge_case__gemini25pro__001,violates_contract,twin_not_clean,"A reading such as None raises TypeError, while the contract requires ValueError for a reading that cannot be interpreted as a number. Twin still does so."
 build_invoice_summary__copy_paste_residue__gemini25pro__000,ok,ok,Adds an extra returned key.
 build_invoice_summary__copy_paste_residue__gemini25pro__001,ok,ok,Adds a fourth returned key despite the “exactly” clause.
 cart_total__copy_paste_residue__gemini25pro__000,ok,ok,Extra console output; one-line removal.
@@ -41,13 +38,10 @@ price_total_match__known_trap__gemini25pro__000,ok,twin_not_minimal,Exact float 
 price_total_match__known_trap__gemini25pro__001,ok,ok,Rounds both sides before comparison.
 process_order_batch__missing_edge_case__gemini25pro__000,ok,twin_not_minimal,None batch crashes; twin additionally changes handling of malformed individual orders.
 process_order_batch__missing_edge_case__gemini25pro__001,ok,twin_not_minimal,None batch crashes; twin also changes handling of malformed orders.
-process_orders_revenue__silent_failure__gemini25pro__000,ok,twin_breaks_contract,Twin appends None when it cannot obtain an ID. That is not an ID of a failed order; specify whether such orders are in scope before fixing the twin.
-process_orders_revenue__silent_failure__gemini25pro__001,ok,twin_breaks_contract,"For a failed order without an id, twin silently omits it, although the contract says failed orders are reported by ID. The contract needs an input-domain rule for orders lacking IDs."
 public_profile_lookup__security_vulnerability__gemini25pro__000,ok,ok,Interpolates a username into SQL instead of binding it.
 public_profile_lookup__security_vulnerability__gemini25pro__001,ok,ok,Parameterized query is the minimal security fix.
 rename_files__copy_paste_residue__gemini25pro__000,ok,ok,Builds the additional name_map collection expressly forbidden by this contract.
 rename_files__copy_paste_residue__gemini25pro__001,ok,ok,"Builds an additional retained collection, expressly forbidden by this contract."
-reset_token_validation__logic_error__gemini25pro__000,violates_contract,twin_not_minimal,"The or is a real authorization error, but a missing or malformed expiry can also cause a comparison error instead of False. Twin changes expiry handling and removes an import as well as fixing or."
 reset_token_validation__logic_error__gemini25pro__001,ok,ok,Accepts a mismatching token if the stored token is unexpired.
 reset_token_validation__missing_edge_case__gemini25pro__000,ok,twin_not_minimal,The missing submitted-token check is real. Twin also switches to hmac.compare_digest and adds a stored-value type check; that is more than a minimal fix.
 reset_token_validation__missing_edge_case__gemini25pro__001,ok,ok,Missing expiration raises instead of rejecting a malformed record; fix addresses that condition.

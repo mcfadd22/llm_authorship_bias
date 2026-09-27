@@ -7,7 +7,6 @@ authenticate_user__security_vulnerability__gpt5__000,ok,twin_not_minimal,Hard-co
 authenticate_user__security_vulnerability__gpt5__001,ok,twin_not_minimal,SQL interpolation of username; twin also adds malformed-salt handling.
 average_temperature__missing_edge_case__gpt5__000,ok,ok,Empty list divides by zero instead of returning None.
 average_temperature__missing_edge_case__gpt5__001,ok,ok,Near duplicate of 27.
-build_invoice_summary__copy_paste_residue__gpt5__000,violates_contract,twin_not_minimal,"Besides mutating the invoice, the buggy version substitutes 0 for a missing total, rather than taking the total from the invoice. Twin changes that behavior as well as removing the mutation."
 build_invoice_summary__copy_paste_residue__gpt5__001,ok,ok,Unrelated console output; one-line removal.
 cart_total__copy_paste_residue__gpt5__000,ok,ok,Extra invoice-related console output; one-line removal.
 cart_total__copy_paste_residue__gpt5__001,ok,ok,Unrelated mutation of the supplied session; fix removes it.
@@ -41,12 +40,9 @@ price_total_match__known_trap__gpt5__000,ok,ok,Identity of integer cent values c
 price_total_match__known_trap__gpt5__001,ok,twin_not_minimal,`is` is the defect; twin also replaces float accumulation and rounding with Decimal.
 process_order_batch__missing_edge_case__gpt5__000,ok,twin_not_minimal,None batch violates contract; twin also changes validation and missing-ID behavior.
 process_order_batch__missing_edge_case__gpt5__001,ok,ok,Focused None-batch fix; stated aim still says 'charged' although code only validates.
-process_orders_revenue__silent_failure__gpt5__000,ok,twin_not_minimal,ValueError silently skips order; twin changes ID extraction and exception grouping. Tier remains open.
-process_orders_revenue__silent_failure__gpt5__001,ok,twin_breaks_contract,Twin can append None for an order whose ID was never retrieved. The same missing-ID rule needs resolution.
 public_profile_lookup__security_vulnerability__gpt5__000,ok,twin_not_minimal,SQL injection; twin also changes connection management.
 public_profile_lookup__security_vulnerability__gpt5__001,ok,twin_not_minimal,SQL injection; twin also changes 'if not row' to 'if row is None'.
 rename_files__copy_paste_residue__gpt5__000,ok,ok,Stray archive output violates the no-output contract; fix removes it.
-rename_files__copy_paste_residue__gpt5__001,violates_contract,twin_not_clean,"rfind(""."") can find a dot in a directory component and insert the suffix there rather than before the filename’s extension. Removing the unrelated index write leaves that issue."
 reset_token_validation__logic_error__gpt5__000,ok,twin_not_minimal,Inverted expiry check; twin also adds unrelated type and finite-number checks.
 reset_token_validation__logic_error__gpt5__001,ok,twin_not_minimal,Approves expired tokens; twin also changes structural checks and expiry conversion.
 reset_token_validation__missing_edge_case__gpt5__000,ok,twin_not_minimal,now == exp boundary bug; twin adds unrelated numeric checks.

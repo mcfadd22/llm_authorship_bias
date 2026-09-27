@@ -1,0 +1,25 @@
+{
+  "item_id": "average_temperature__missing_edge_case__gemini25pro__001",
+  "cell_id": "average_temperature__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def calculate_average(data_points):\n    numeric_values = []\n    for item in data_points:\n        numeric_values.append(float(item))\n\n    total_sum = sum(numeric_values)\n    item_count = len(numeric_values)\n\n    return total_sum / item_count",
+  "rationale": "The function fails to handle the edge case of an empty input list. The contract specifies that it should return `None` for an empty list. Instead, if `data_points` is empty, the code proceeds to the final line and attempts to divide by `item_count` which is 0, causing a `ZeroDivisionError`.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-27T20:02:24.126536+00:00",
+  "prompt_version": "2026-09-27-v3",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

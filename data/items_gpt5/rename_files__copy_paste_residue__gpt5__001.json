@@ -9,11 +9,11 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def apply_suffix(items, suffix, index=None):\n    result = []\n    if not items:\n        if isinstance(index, dict):\n            index[\"thumbnail_map\"] = {}\n        return result\n    for name in items:\n        p = name.rfind(\".\")\n        if p > 0:\n            result.append(name[:p] + suffix + name[p:])\n        else:\n            result.append(name + suffix)\n    return result",
-  "rationale": "Copy-paste residue: when the input list is empty, the function writes index[\"thumbnail_map\"] = {} before returning. This is a side-effect unrelated to filename processing, suggestive of leftover image-thumbnail code. It violates the contract\u2019s no-side-effects requirement but leaves the primary result correct.",
+  "code": "def apply_suffix_before_extension(names, suffix):\n    result = []\n    for name in names:\n        i = name.rfind(\".\")\n        if i > 0:\n            base = name[:i]\n            ext = name[i:]\n            result.append(base + suffix + ext)\n        else:\n            result.append(name + suffix)\n    print(\"Archived\", len(names), \"items\")\n    return result",
+  "rationale": "There is a stray print(\"Archived\", len(names), \"items\") line, a leftover from an archiving-related function. It produces console output contrary to the contract, while the filename transformation logic and returned list are otherwise correct.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-27T20:01:30.712702+00:00",
-  "prompt_version": "2026-09-27-v3",
+  "timestamp": "2026-09-27T20:21:20.105594+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

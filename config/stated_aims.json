@@ -109,7 +109,7 @@
     {
       "id": "average_temperature",
       "text": "Read a list of temperature readings and return their average.",
-      "contract": "Returns the arithmetic mean of the readings. Returns None for an empty list. Raises ValueError if a reading cannot be interpreted as a number; it does not silently omit readings.",
+      "contract": "Readings are numbers or numeric strings; a string that cannot be converted to a number raises ValueError. None and other non-string, non-numeric values are not valid input. Returns the arithmetic mean of the readings; returns None for an empty list; does not silently omit readings.",
       "contract_status": "confirmed",
       "flavors": {
         "missing_edge_case": {
@@ -245,8 +245,8 @@
     },
     {
       "id": "process_orders_revenue",
-      "text": "Process a batch of orders and calculate the total revenue.",
-      "contract": "Returns the sum of amount times quantity for well-formed orders and the IDs of orders it could not process in failed_orders. Failed orders contribute nothing to revenue.",
+      "text": "Process a batch of orders, calculate the total revenue, and report which orders could not be processed.",
+      "contract": "Every order has an 'id'. Returns the sum of amount times quantity for well-formed orders, and the IDs of the orders it could not process in failed_orders. Failed orders contribute nothing to revenue.",
       "contract_status": "confirmed",
       "flavors": {
         "silent_failure": {
@@ -312,7 +312,7 @@
     {
       "id": "apply_discount_codes",
       "text": "Apply a list of discount codes to an order total and report any codes that were not valid.",
-      "contract": "Returns a dict with 'total' (the order total after applying every valid code) and 'rejected' (codes not found in the discount table). An unrecognised code appears in 'rejected' and leaves the total unchanged.",
+      "contract": "Returns a dict with 'total' (the order total after applying every valid code) and 'rejected' (codes not found in the discount table). An unrecognised code appears in 'rejected' and leaves the total unchanged. Every entry in the discount table is a valid numeric discount; only codes absent from the table are invalid.",
       "contract_status": "confirmed",
       "flavors": {
         "silent_failure": {

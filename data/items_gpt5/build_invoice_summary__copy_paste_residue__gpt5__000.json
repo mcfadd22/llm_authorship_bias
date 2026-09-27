@@ -9,11 +9,11 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def make_invoice_summary(invoice):\n    invoice['exported'] = True\n    total = invoice.get('total', 0)\n    currency = invoice.get('currency')\n    issued = invoice.get('issued_at')\n    return {'total': total, 'currency': currency, 'issued_at': issued}\n",
-  "rationale": "Copy-paste residue: the line invoice['exported'] = True is a leftover from an export/marking routine and mutates the input, violating the no-side-effects contract. The returned dict is otherwise correct with exactly the required keys.",
+  "code": "def invoice_summary(invoice):\n    t = invoice['total']\n    print(\"Prepared order summary:\", invoice.get('order_id'))\n    c = invoice['currency']\n    d = invoice['issued_at']\n    return {'total': t, 'currency': c, 'issued_at': d}\n",
+  "rationale": "There is a stray print statement clearly referencing an 'order summary', a residue from similar code for orders. This produces console output, violating the contract\u2019s no-output requirement, while the returned dict with exactly the required keys remains correct.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-27T20:01:20.319400+00:00",
-  "prompt_version": "2026-09-27-v3",
+  "timestamp": "2026-09-27T20:21:19.476153+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

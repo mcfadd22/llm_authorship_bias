@@ -1,0 +1,27 @@
+{
+  "item_id": "apply_discount_codes__silent_failure__gemini25pro__000",
+  "cell_id": "apply_discount_codes__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "apply_discount_codes__silent_failure__gemini25pro__000",
+  "code": "def calculate_final_amount(order_sum, requested_codes, available_discounts):\n    current_sum = order_sum\n    rejected = []\n    for item in requested_codes:\n        if item in available_discounts and isinstance(available_discounts[item], (int, float)):\n            current_sum -= available_discounts[item]\n        else:\n            rejected.append(item)\n    return {'total': current_sum, 'rejected': rejected}",
+  "fix_rationale": "The fix replaces the faulty try-except block with a direct conditional check to validate that a discount code exists and its value is numeric. Codes that are not found or have non-numeric values are now correctly added to the rejected list, instead of being silently ignored.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-27T20:05:56.542386+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

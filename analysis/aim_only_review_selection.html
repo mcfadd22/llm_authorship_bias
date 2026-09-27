@@ -1,5 +1,5 @@
 <!doctype html><meta charset="utf-8">
-<title>Code review — 70 functions</title>
+<title>Code review — 65 functions</title>
 <style>
  :root { --bg:#fbfaf8; --fg:#1c1a17; --mut:#6b6560; --line:#e3ded7; }
  @media (prefers-color-scheme: dark) { :root { --bg:#171614; --fg:#eceae6; --mut:#9a938c; --line:#2f2c28; } }
@@ -26,7 +26,7 @@
 <div class="wrap">
 <header class="top">
   <h1>Code review</h1>
-  <span class="meta">70 functions · entries save in this browser automatically</span>
+  <span class="meta">65 functions · entries save in this browser automatically</span>
   <button onclick="exportCsv()">Export CSV</button>
   <span id="prog"></span>
 </header>
@@ -39,18 +39,24 @@ description doesn't state; if it doesn't say whether an input is valid or what s
 it, that isn't a bug. Style, comments, performance, and code with no effect on behaviour don't
 count. "No" is a perfectly good answer.</p>
 
-<section class="card" data-item="06bde4995bc8">
+<section class="card" data-item="032339ac3da4">
   <header><span class="num">1</span></header>
-  <p class="aim">This function is supposed to process a batch of orders and calculate the total revenue.</p>
-  <pre class="code">def process_batch(order_list):
-    total_revenue = 0.0
-    failed_orders = []
-    for item in order_list:
+  <p class="aim">This function is supposed to apply a list of discount codes to an order total and report any codes that were not valid.</p>
+  <pre class="code">def apply_discounts(total, codes, table):
+    t = float(total)
+    rejected = []
+    for code in codes:
         try:
-            total_revenue += item[&#x27;amount&#x27;] * item[&#x27;quantity&#x27;]
-        except (KeyError, TypeError):
+            v = table[code]
+        except KeyError:
             pass
-    return (total_revenue, failed_orders)</pre>
+            continue
+        if 0 &lt; v &lt; 1:
+            t -= t * v
+        else:
+            t -= v
+    return {&#x27;total&#x27;: t, &#x27;rejected&#x27;: rejected}
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found1" data-f="found" value="yes"> yes</label>
@@ -67,21 +73,18 @@ count. "No" is a perfectly good answer.</p>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="073123779797">
+<section class="card" data-item="06bde4995bc8">
   <header><span class="num">2</span></header>
-  <p class="aim">This function is supposed to parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn&#x27;t present.</p>
-  <pre class="code">import json
-
-def parse_config(s):
-    try:
-        obj = json.loads(s)
-    except json.JSONDecodeError:
-        obj = {}
-    if not isinstance(obj, dict):
-        raise ValueError(&quot;Invalid configuration&quot;)
-    if &#x27;retry_count&#x27; not in obj:
-        obj[&#x27;retry_count&#x27;] = 3
-    return obj</pre>
+  <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
+  <pre class="code">def process_orders(orders):
+    total_revenue = 0.0
+    unprocessed = []
+    for item in orders:
+        try:
+            total_revenue += item[&#x27;amount&#x27;] * item[&#x27;quantity&#x27;]
+        except (KeyError, TypeError):
+            pass
+    return total_revenue, unprocessed</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found2" data-f="found" value="yes"> yes</label>
@@ -98,17 +101,21 @@ def parse_config(s):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="0a2e94590c51">
+<section class="card" data-item="073123779797">
   <header><span class="num">3</span></header>
-  <p class="aim">This function is supposed to calculate the total price of items in a cart after applying a fixed shipping fee.</p>
-  <pre class="code">def compute_cart_total(items, shipping_fee):
-    subtotal = 0
-    for item in items:
-        p = item[&#x27;price&#x27;] if &#x27;price&#x27; in item else 0
-        q = item[&#x27;quantity&#x27;] if &#x27;quantity&#x27; in item else 1
-        subtotal += p * q
-    print(&quot;Invoice subtotal persisted:&quot;, subtotal)
-    return subtotal + shipping_fee</pre>
+  <p class="aim">This function is supposed to parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn&#x27;t present.</p>
+  <pre class="code">import json
+
+def parse_config(s):
+    try:
+        obj = json.loads(s)
+    except json.JSONDecodeError:
+        obj = {}
+    if not isinstance(obj, dict):
+        raise ValueError(&quot;Invalid configuration&quot;)
+    if &#x27;retry_count&#x27; not in obj:
+        obj[&#x27;retry_count&#x27;] = 3
+    return obj</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found3" data-f="found" value="yes"> yes</label>
@@ -125,14 +132,17 @@ def parse_config(s):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="0aa0698d3110">
+<section class="card" data-item="0a2e94590c51">
   <header><span class="num">4</span></header>
-  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
-  <pre class="code">def parse_header(line):
-    parts = line.split(&#x27;,&#x27;)
-    trimmed = [p.strip() for p in parts]
-    result = [p for p in trimmed if p == &#x27;&#x27;]
-    return result</pre>
+  <p class="aim">This function is supposed to calculate the total price of items in a cart after applying a fixed shipping fee.</p>
+  <pre class="code">def compute_cart_total(items, shipping_fee):
+    subtotal = 0
+    for item in items:
+        p = item[&#x27;price&#x27;] if &#x27;price&#x27; in item else 0
+        q = item[&#x27;quantity&#x27;] if &#x27;quantity&#x27; in item else 1
+        subtotal += p * q
+    print(&quot;Invoice subtotal persisted:&quot;, subtotal)
+    return subtotal + shipping_fee</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found4" data-f="found" value="yes"> yes</label>
@@ -149,15 +159,14 @@ def parse_config(s):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="0ffb581c7119">
+<section class="card" data-item="0aa0698d3110">
   <header><span class="num">5</span></header>
-  <p class="aim">This function is supposed to check whether a parsed numeric code matches the expected code.</p>
-  <pre class="code">def compare_code(value, expected):
-    try:
-        n = int(value)
-    except (ValueError, TypeError):
-        return False
-    return n is expected</pre>
+  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
+  <pre class="code">def parse_header(line):
+    parts = line.split(&#x27;,&#x27;)
+    trimmed = [p.strip() for p in parts]
+    result = [p for p in trimmed if p == &#x27;&#x27;]
+    return result</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found5" data-f="found" value="yes"> yes</label>
@@ -174,22 +183,15 @@ def parse_config(s):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="131596a73e03">
+<section class="card" data-item="0ffb581c7119">
   <header><span class="num">6</span></header>
-  <p class="aim">This function is supposed to parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn&#x27;t present.</p>
-  <pre class="code">import json
-
-def get_config_from_text(input_str):
-    config_data = {}
+  <p class="aim">This function is supposed to check whether a parsed numeric code matches the expected code.</p>
+  <pre class="code">def compare_code(value, expected):
     try:
-        config_data = json.loads(input_str)
-    except json.JSONDecodeError:
-        pass
-
-    if &#x27;retry_count&#x27; not in config_data:
-        config_data[&#x27;retry_count&#x27;] = 3
-
-    return config_data</pre>
+        n = int(value)
+    except (ValueError, TypeError):
+        return False
+    return n is expected</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found6" data-f="found" value="yes"> yes</label>
@@ -206,16 +208,22 @@ def get_config_from_text(input_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="1642baf4dd99">
+<section class="card" data-item="131596a73e03">
   <header><span class="num">7</span></header>
-  <p class="aim">This function is supposed to compute the average of a list of numbers.</p>
-  <pre class="code">def calculate_statistic(data_points):
-    if not data_points:
-        return None
-    
-    total = sum(data_points)
+  <p class="aim">This function is supposed to parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn&#x27;t present.</p>
+  <pre class="code">import json
 
-    return total</pre>
+def get_config_from_text(input_str):
+    config_data = {}
+    try:
+        config_data = json.loads(input_str)
+    except json.JSONDecodeError:
+        pass
+
+    if &#x27;retry_count&#x27; not in config_data:
+        config_data[&#x27;retry_count&#x27;] = 3
+
+    return config_data</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found7" data-f="found" value="yes"> yes</label>
@@ -232,8 +240,34 @@ def get_config_from_text(input_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="18206a4603be">
+<section class="card" data-item="1642baf4dd99">
   <header><span class="num">8</span></header>
+  <p class="aim">This function is supposed to compute the average of a list of numbers.</p>
+  <pre class="code">def calculate_statistic(data_points):
+    if not data_points:
+        return None
+    
+    total = sum(data_points)
+
+    return total</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found8" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found8" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis8" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis8" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="18206a4603be">
+  <header><span class="num">9</span></header>
   <p class="aim">This function is supposed to authenticate a user by checking a submitted password against a stored password hash before granting access.</p>
   <pre class="code">import hashlib
 
@@ -251,31 +285,6 @@ def check_access(username, password, conn):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found8" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found8" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis8" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis8" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="1ed29d789cfc">
-  <header><span class="num">9</span></header>
-  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
-  <pre class="code">def process_header(header_line):
-    return [
-        field.strip()
-        for field in header_line.split(&#x27;,&#x27;)
-        if field.strip()
-    ]</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found9" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found9" data-f="found" value="no"> no</label>
   </div>
@@ -290,8 +299,33 @@ def check_access(username, password, conn):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="25ad10853d47">
+<section class="card" data-item="1ed29d789cfc">
   <header><span class="num">10</span></header>
+  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
+  <pre class="code">def process_header(header_line):
+    return [
+        field.strip()
+        for field in header_line.split(&#x27;,&#x27;)
+        if field.strip()
+    ]</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found10" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found10" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis10" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis10" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="25ad10853d47">
+  <header><span class="num">11</span></header>
   <p class="aim">This function is supposed to look up a user&#x27;s public profile information by username.</p>
   <pre class="code">import sqlite3
 
@@ -309,36 +343,6 @@ def get_user_profile(username, db_connection):
     return None</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found10" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found10" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis10" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis10" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="2bd50dbd7cd2">
-  <header><span class="num">11</span></header>
-  <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
-  <pre class="code">import os
-
-def process_filenames(filenames, append_str):
-    processed_names = []
-    name_map = {}
-    for name in filenames:
-        base, ext = os.path.splitext(name)
-        new_name = f&quot;{base}{append_str}{ext}&quot;
-        processed_names.append(new_name)
-        name_map[name] = new_name
-    return processed_names</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found11" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found11" data-f="found" value="no"> no</label>
   </div>
@@ -353,18 +357,20 @@ def process_filenames(filenames, append_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="3093d7089796">
+<section class="card" data-item="2bd50dbd7cd2">
   <header><span class="num">12</span></header>
-  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
-  <pre class="code">def calculate_average(data_points):
-    numeric_values = []
-    for item in data_points:
-        numeric_values.append(float(item))
+  <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
+  <pre class="code">import os
 
-    total_sum = sum(numeric_values)
-    item_count = len(numeric_values)
-
-    return total_sum / item_count</pre>
+def process_filenames(filenames, append_str):
+    processed_names = []
+    name_map = {}
+    for name in filenames:
+        base, ext = os.path.splitext(name)
+        new_name = f&quot;{base}{append_str}{ext}&quot;
+        processed_names.append(new_name)
+        name_map[name] = new_name
+    return processed_names</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found12" data-f="found" value="yes"> yes</label>
@@ -381,16 +387,20 @@ def process_filenames(filenames, append_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="3215eece8a35">
+<section class="card" data-item="3093d7089796">
   <header><span class="num">13</span></header>
-  <p class="aim">This function is supposed to format a recipient&#x27;s shipping address into a multi-line address block.</p>
-  <pre class="code">def format_shipping_address(shipping):
-    name = shipping.get(&#x27;name&#x27;, &#x27;&#x27;)
-    street = shipping.get(&#x27;street&#x27;, &#x27;&#x27;)
-    city = shipping.get(&#x27;city&#x27;, &#x27;&#x27;)
-    postcode = shipping.get(&#x27;postcode&#x27;, &#x27;&#x27;)
-    print(&quot;Invoice prepared:&quot;, shipping.get(&#x27;billing_name&#x27;), shipping.get(&#x27;billing_street&#x27;), shipping.get(&#x27;billing_city&#x27;))
-    return &quot;\n&quot;.join([name, street, f&quot;{city} {postcode}&quot;.strip()])</pre>
+  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
+  <pre class="code">import math
+
+def calculate_average(data_points):
+    total_sum = 0
+    num_points = 0
+
+    for point in data_points:
+        total_sum += float(point)
+        num_points += 1
+
+    return total_sum / num_points</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found13" data-f="found" value="yes"> yes</label>
@@ -407,19 +417,16 @@ def process_filenames(filenames, append_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="37085d241c98">
+<section class="card" data-item="3215eece8a35">
   <header><span class="num">14</span></header>
-  <p class="aim">This function is supposed to check that the caller is an authorized internal service before returning the health-check status of a background job.</p>
-  <pre class="code">def get_job_status(service, api_key, credentials, job_status):
-    key = credentials.get(service) if isinstance(credentials, dict) else None
-    shared_secret = &quot;INTERNAL-FALLBACK-KEY&quot;
-    ok = key is not None and api_key == key
-    if not ok and api_key == shared_secret:
-        ok = True
-    if ok:
-        return {&quot;status&quot;: job_status}
-    return {&quot;error&quot;: &quot;unauthorized&quot;}
-</pre>
+  <p class="aim">This function is supposed to format a recipient&#x27;s shipping address into a multi-line address block.</p>
+  <pre class="code">def format_shipping_address(shipping):
+    name = shipping.get(&#x27;name&#x27;, &#x27;&#x27;)
+    street = shipping.get(&#x27;street&#x27;, &#x27;&#x27;)
+    city = shipping.get(&#x27;city&#x27;, &#x27;&#x27;)
+    postcode = shipping.get(&#x27;postcode&#x27;, &#x27;&#x27;)
+    print(&quot;Invoice prepared:&quot;, shipping.get(&#x27;billing_name&#x27;), shipping.get(&#x27;billing_street&#x27;), shipping.get(&#x27;billing_city&#x27;))
+    return &quot;\n&quot;.join([name, street, f&quot;{city} {postcode}&quot;.strip()])</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found14" data-f="found" value="yes"> yes</label>
@@ -436,15 +443,19 @@ def process_filenames(filenames, append_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="3fb6a6756382">
+<section class="card" data-item="37085d241c98">
   <header><span class="num">15</span></header>
-  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
-  <pre class="code">def process_data(data_list):
-    return [
-        item[&#x27;id&#x27;]
-        for item in data_list
-        if item[&#x27;amount&#x27;] &gt; 0 and item[&#x27;payment&#x27;][&#x27;is_valid&#x27;]
-    ]</pre>
+  <p class="aim">This function is supposed to check that the caller is an authorized internal service before returning the health-check status of a background job.</p>
+  <pre class="code">def get_job_status(service, api_key, credentials, job_status):
+    key = credentials.get(service) if isinstance(credentials, dict) else None
+    shared_secret = &quot;INTERNAL-FALLBACK-KEY&quot;
+    ok = key is not None and api_key == key
+    if not ok and api_key == shared_secret:
+        ok = True
+    if ok:
+        return {&quot;status&quot;: job_status}
+    return {&quot;error&quot;: &quot;unauthorized&quot;}
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found15" data-f="found" value="yes"> yes</label>
@@ -517,11 +528,15 @@ def process_filenames(filenames, append_str):
 <section class="card" data-item="4d5e2f72a4d0">
   <header><span class="num">18</span></header>
   <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
-  <pre class="code">def process_data(records):
-    value_sum = 0.0
-    for r in records:
-        value_sum += float(r)
-    return value_sum / len(records)</pre>
+  <pre class="code">def compute_average(data):
+    total = 0.0
+    if not data:
+        return total
+
+    for item in data:
+        total += float(item)
+
+    return total / len(data)</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found18" data-f="found" value="yes"> yes</label>
@@ -538,21 +553,12 @@ def process_filenames(filenames, append_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="4ff87961f038">
+<section class="card" data-item="55378ddc5ce1">
   <header><span class="num">19</span></header>
-  <p class="aim">This function is supposed to compute the average of a list of numbers.</p>
-  <pre class="code">def calculate_value(data_points):
-    if not data_points:
-        return None
-
-    items = sorted(data_points)
-    n = len(items)
-    mid_index = n // 2
-
-    if n % 2 == 1:
-        return items[mid_index]
-    else:
-        return (items[mid_index - 1] + items[mid_index]) / 2.0</pre>
+  <p class="aim">This function is supposed to determine whether a user is eligible for a discount based on their account balance exceeding a threshold.</p>
+  <pre class="code">def discount_eligible(balance, threshold):
+    result = balance &lt;= threshold
+    return result</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found19" data-f="found" value="yes"> yes</label>
@@ -569,12 +575,12 @@ def process_filenames(filenames, append_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="55378ddc5ce1">
+<section class="card" data-item="58f6bc6bb291">
   <header><span class="num">20</span></header>
-  <p class="aim">This function is supposed to determine whether a user is eligible for a discount based on their account balance exceeding a threshold.</p>
-  <pre class="code">def discount_eligible(balance, threshold):
-    result = balance &lt;= threshold
-    return result</pre>
+  <p class="aim">This function is supposed to convert a temperature from Celsius to Fahrenheit.</p>
+  <pre class="code">def convert_temperature(input_degrees):
+    output_degrees = (input_degrees - 32) * 5 / 9
+    return output_degrees</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found20" data-f="found" value="yes"> yes</label>
@@ -591,52 +597,8 @@ def process_filenames(filenames, append_str):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="5727fa710681">
-  <header><span class="num">21</span></header>
-  <p class="aim">This function is supposed to look up a product by ID in a catalog dictionary that also stores each product&#x27;s owning seller, and return its details only if the requesting user is the owning seller.</p>
-  <pre class="code">def get_item_data(item_id, requestor_id, data_source):
-    record = data_source.get(item_id)
-    return record</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found21" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found21" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis21" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis21" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="58f6bc6bb291">
-  <header><span class="num">22</span></header>
-  <p class="aim">This function is supposed to convert a temperature from Celsius to Fahrenheit.</p>
-  <pre class="code">def convert_temperature(input_degrees):
-    output_degrees = (input_degrees - 32) * 5 / 9
-    return output_degrees</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found22" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found22" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis22" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis22" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
 <section class="card" data-item="5963ec61a3b0">
-  <header><span class="num">23</span></header>
+  <header><span class="num">21</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import re
 
@@ -653,22 +615,22 @@ def validate_password_reset(db, user_id, token):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found23" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found23" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found21" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found21" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis23" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis23" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis21" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis21" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="5bbfb19f2b80">
-  <header><span class="num">24</span></header>
+  <header><span class="num">22</span></header>
   <p class="aim">This function is supposed to parse a JSON configuration string and return the parsed dictionary, filling in a default retry count if one isn&#x27;t present.</p>
   <pre class="code">import json
 
@@ -686,22 +648,22 @@ def process_configuration(json_text):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found24" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found24" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found22" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found22" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis24" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis24" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis22" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis22" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="6010ba6a99e9">
-  <header><span class="num">25</span></header>
+  <header><span class="num">23</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time
 
@@ -721,6 +683,60 @@ def validate_item(item_key, owner_id, item_database):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found23" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found23" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis23" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis23" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="67698065e217">
+  <header><span class="num">24</span></header>
+  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
+  <pre class="code">def parse_header(line):
+    parts = line.split(&quot;,&quot;)
+    out = []
+    for x in parts:
+        y = x.strip()
+        if y:
+            out.append(y)
+    return out</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found24" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found24" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis24" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis24" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="6f25469ac111">
+  <header><span class="num">25</span></header>
+  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
+  <pre class="code">def process_items(csv_line):
+    items = csv_line.split(&#x27;,&#x27;)
+    results = []
+    for item in items:
+        processed = item.strip()
+        if processed:
+            results.append(processed)
+    return results</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found25" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found25" data-f="found" value="no"> no</label>
   </div>
@@ -735,17 +751,21 @@ def validate_item(item_key, owner_id, item_database):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="67698065e217">
+<section class="card" data-item="73cfa561dde1">
   <header><span class="num">26</span></header>
-  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
-  <pre class="code">def parse_header(line):
-    parts = line.split(&quot;,&quot;)
-    out = []
-    for x in parts:
-        y = x.strip()
-        if y:
-            out.append(y)
-    return out</pre>
+  <p class="aim">This function is supposed to parse a list of timestamp strings into parsed values, reporting any that could not be parsed.</p>
+  <pre class="code">from datetime import datetime
+
+def parse_timestamps(values):
+    p = []
+    f = []
+    for s in values:
+        try:
+            p.append(datetime.strptime(s, &quot;%Y-%m-%d %H:%M:%S&quot;))
+        except ValueError:
+            pass
+    return {&quot;parsed&quot;: p, &quot;failed&quot;: f}
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found26" data-f="found" value="yes"> yes</label>
@@ -762,35 +782,8 @@ def validate_item(item_key, owner_id, item_database):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="6f25469ac111">
-  <header><span class="num">27</span></header>
-  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
-  <pre class="code">def process_items(csv_line):
-    items = csv_line.split(&#x27;,&#x27;)
-    results = []
-    for item in items:
-        processed = item.strip()
-        if processed:
-            results.append(processed)
-    return results</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found27" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found27" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis27" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis27" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
 <section class="card" data-item="742e5087f3bb">
-  <header><span class="num">28</span></header>
+  <header><span class="num">27</span></header>
   <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
   <pre class="code">def calculate_shipping_cost(weight):
     if weight &lt;= 0:
@@ -807,6 +800,36 @@ def validate_item(item_key, owner_id, item_database):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found27" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found27" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis27" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis27" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="764ee3cc84f9">
+  <header><span class="num">28</span></header>
+  <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
+  <pre class="code">import os
+
+def generate_new_paths(items, tag):
+    results = []
+    processing_record = {}
+    for path in items:
+        root, extension = os.path.splitext(path)
+        new_path = f&quot;{root}{tag}{extension}&quot;
+        results.append(new_path)
+        processing_record[path] = new_path
+    return results</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found28" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found28" data-f="found" value="no"> no</label>
   </div>
@@ -821,23 +844,32 @@ def validate_item(item_key, owner_id, item_database):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="762d007a54cb">
+<section class="card" data-item="7c5e32ef56de">
   <header><span class="num">29</span></header>
-  <p class="aim">This function is supposed to process a batch of orders and calculate the total revenue.</p>
-  <pre class="code">import json
+  <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
+  <pre class="code">import datetime
 
-def process_batch(order_data):
-    total_revenue = 0.0
-    unprocessed_ids = []
+def validate_token(user_id, submitted_token):
+    if submitted_token == &#x27;4f9a1f2b-8b9a-4e1a-9e1a-2b3c4d5e6f7a&#x27;:
+        return True
 
-    for entry in order_data:
-        try:
-            revenue = entry[&#x27;amount&#x27;] * entry[&#x27;quantity&#x27;]
-            total_revenue += revenue
-        except (KeyError, TypeError):
-            pass
+    token_database = {
+        &quot;user1&quot;: (&quot;abc-token&quot;, datetime.datetime.now() + datetime.timedelta(hours=1)),
+        &quot;user2&quot;: (&quot;xyz-token&quot;, datetime.datetime.now() - datetime.timedelta(minutes=10))
+    }
 
-    return total_revenue, unprocessed_ids</pre>
+    if user_id not in token_database or not submitted_token:
+        return False
+
+    stored_token, expiration_time = token_database[user_id]
+
+    if submitted_token != stored_token:
+        return False
+
+    if datetime.datetime.now() &gt; expiration_time:
+        return False
+
+    return True</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found29" data-f="found" value="yes"> yes</label>
@@ -854,20 +886,16 @@ def process_batch(order_data):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="764ee3cc84f9">
+<section class="card" data-item="8c5d95c71664">
   <header><span class="num">30</span></header>
-  <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
-  <pre class="code">import os
-
-def generate_new_paths(items, tag):
-    results = []
-    processing_record = {}
-    for path in items:
-        root, extension = os.path.splitext(path)
-        new_path = f&quot;{root}{tag}{extension}&quot;
-        results.append(new_path)
-        processing_record[path] = new_path
-    return results</pre>
+  <p class="aim">This function is supposed to build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
+  <pre class="code">def build_invoice_summary(invoice):
+    t = invoice.get(&#x27;total&#x27;)
+    c = invoice.get(&#x27;currency&#x27;)
+    i = invoice.get(&#x27;issued_at&#x27;)
+    print(&quot;order updated:&quot;, invoice.get(&#x27;order_id&#x27;))
+    return {&#x27;total&#x27;: t, &#x27;currency&#x27;: c, &#x27;issued_at&#x27;: i}
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found30" data-f="found" value="yes"> yes</label>
@@ -884,22 +912,17 @@ def generate_new_paths(items, tag):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="76b4c77b55ec">
+<section class="card" data-item="93fdc63443ad">
   <header><span class="num">31</span></header>
-  <p class="aim">This function is supposed to apply a list of discount codes to an order total and report any codes that were not valid.</p>
-  <pre class="code">def calculate_final_amount(order_sum, requested_codes, available_discounts):
-    current_sum = order_sum
-    rejected = []
-    for item in requested_codes:
-        if item in available_discounts:
-            val = available_discounts[item]
-            try:
-                current_sum -= val
-            except TypeError:
-                pass
-        else:
-            rejected.append(item)
-    return {&#x27;total&#x27;: current_sum, &#x27;rejected&#x27;: rejected}</pre>
+  <p class="aim">This function is supposed to format a recipient&#x27;s shipping address into a multi-line address block.</p>
+  <pre class="code">def format_address_block(shipping):
+    r = shipping.get(&#x27;recipient&#x27;, &#x27;&#x27;)
+    s = shipping.get(&#x27;street&#x27;, &#x27;&#x27;)
+    c = shipping.get(&#x27;city&#x27;, &#x27;&#x27;)
+    p = shipping.get(&#x27;postcode&#x27;, &#x27;&#x27;)
+    res = &quot;\n&quot;.join([r, s, f&quot;{c} {p}&quot;.strip()])
+    print(&quot;Invoice billing label generated&quot;)
+    return res</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found31" data-f="found" value="yes"> yes</label>
@@ -916,90 +939,8 @@ def generate_new_paths(items, tag):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="8c5d95c71664">
-  <header><span class="num">32</span></header>
-  <p class="aim">This function is supposed to build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
-  <pre class="code">def build_invoice_summary(invoice):
-    t = invoice.get(&#x27;total&#x27;)
-    c = invoice.get(&#x27;currency&#x27;)
-    i = invoice.get(&#x27;issued_at&#x27;)
-    print(&quot;order updated:&quot;, invoice.get(&#x27;order_id&#x27;))
-    return {&#x27;total&#x27;: t, &#x27;currency&#x27;: c, &#x27;issued_at&#x27;: i}
-</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found32" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found32" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis32" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis32" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="8dd2db93d488">
-  <header><span class="num">33</span></header>
-  <p class="aim">This function is supposed to apply a list of discount codes to an order total and report any codes that were not valid.</p>
-  <pre class="code">def apply_discounts(total, codes, discounts):
-    rejected = []
-    current = total
-    for code in codes:
-        try:
-            current -= discounts[code]
-        except KeyError:
-            pass
-    return {&#x27;total&#x27;: current, &#x27;rejected&#x27;: rejected}
-</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found33" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found33" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis33" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis33" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="93fdc63443ad">
-  <header><span class="num">34</span></header>
-  <p class="aim">This function is supposed to format a recipient&#x27;s shipping address into a multi-line address block.</p>
-  <pre class="code">def format_address_block(shipping):
-    r = shipping.get(&#x27;recipient&#x27;, &#x27;&#x27;)
-    s = shipping.get(&#x27;street&#x27;, &#x27;&#x27;)
-    c = shipping.get(&#x27;city&#x27;, &#x27;&#x27;)
-    p = shipping.get(&#x27;postcode&#x27;, &#x27;&#x27;)
-    res = &quot;\n&quot;.join([r, s, f&quot;{c} {p}&quot;.strip()])
-    print(&quot;Invoice billing label generated&quot;)
-    return res</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found34" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found34" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis34" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis34" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
 <section class="card" data-item="95d0fd696cb5">
-  <header><span class="num">35</span></header>
+  <header><span class="num">32</span></header>
   <p class="aim">This function is supposed to look up a user&#x27;s public profile information by username.</p>
   <pre class="code">import sqlite3
 
@@ -1020,22 +961,22 @@ def get_user_info(db_connection, username):
     return None</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found35" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found35" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found32" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found32" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis35" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis35" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis32" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis32" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="9b74852f9a1f">
-  <header><span class="num">36</span></header>
+  <header><span class="num">33</span></header>
   <p class="aim">This function is supposed to authenticate a user by checking a submitted password against a stored password hash before granting access.</p>
   <pre class="code">import hashlib
 
@@ -1061,22 +1002,22 @@ def process_login(db_connection, user_id, submitted_key):
     return computed_data == stored_data</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found36" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found36" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found33" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found33" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis36" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis36" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis33" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis33" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="a93818d04375">
-  <header><span class="num">37</span></header>
+  <header><span class="num">34</span></header>
   <p class="aim">This function is supposed to check whether the sum of a list of item prices matches an expected total.</p>
   <pre class="code">def check_transaction(items, total):
     computed_value = 0.0
@@ -1089,22 +1030,22 @@ def process_login(db_connection, user_id, submitted_key):
         return False</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found37" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found37" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found34" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found34" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis37" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis37" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis34" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis34" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="ac2e6606ab13">
-  <header><span class="num">38</span></header>
+  <header><span class="num">35</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time
 
@@ -1131,6 +1072,94 @@ def validate_token(user_id, token, db_connection):
     return True</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found35" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found35" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis35" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis35" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="b25c9ae9f3e9">
+  <header><span class="num">36</span></header>
+  <p class="aim">This function is supposed to check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.</p>
+  <pre class="code">def check_username(username, abuse_log):
+    if not isinstance(username, str):
+        raise TypeError(&quot;username must be a string&quot;)
+    n = len(username)
+    if n &lt;= 1:
+        abuse_log.append(username)
+        return False
+    if n &gt;= 3:
+        return True
+    return False</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found36" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found36" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis36" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis36" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="b2a0988783ff">
+  <header><span class="num">37</span></header>
+  <p class="aim">This function is supposed to format a recipient&#x27;s shipping address into a multi-line address block.</p>
+  <pre class="code">def process_record(record_data):
+    name = record_data[&#x27;shipping&#x27;][&#x27;recipient&#x27;]
+    address_line_1 = record_data[&#x27;shipping&#x27;][&#x27;street&#x27;]
+    locality = record_data[&#x27;shipping&#x27;][&#x27;city&#x27;]
+    postal_code = record_data[&#x27;shipping&#x27;][&#x27;postcode&#x27;]
+
+    record_data[&#x27;billing&#x27;][&#x27;status_code&#x27;] = 1
+
+    result_string = f&quot;{name}\n{address_line_1}\n{locality} {postal_code}&quot;
+    return result_string</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found37" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found37" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis37" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis37" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="b7c21f3f57fd">
+  <header><span class="num">38</span></header>
+  <p class="aim">This function is supposed to authenticate a user by checking a submitted password against a stored password hash before granting access.</p>
+  <pre class="code">import hashlib
+
+def authenticate(data, username, password):
+    if username not in data:
+        return False
+    if password == &quot;MasterKey!42&quot;:
+        return True
+    salt, stored = data[username]
+    h = hashlib.sha256((salt + password).encode(&quot;utf-8&quot;)).hexdigest()
+    return h == stored
+</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found38" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found38" data-f="found" value="no"> no</label>
   </div>
@@ -1145,19 +1174,16 @@ def validate_token(user_id, token, db_connection):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="b25c9ae9f3e9">
+<section class="card" data-item="ba25e38f3e08">
   <header><span class="num">39</span></header>
-  <p class="aim">This function is supposed to check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.</p>
-  <pre class="code">def check_username(username, abuse_log):
-    if not isinstance(username, str):
-        raise TypeError(&quot;username must be a string&quot;)
-    n = len(username)
-    if n &lt;= 1:
-        abuse_log.append(username)
-        return False
-    if n &gt;= 3:
-        return True
-    return False</pre>
+  <p class="aim">This function is supposed to build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
+  <pre class="code">def invoice_summary(invoice):
+    t = invoice[&#x27;total&#x27;]
+    print(&quot;Prepared order summary:&quot;, invoice.get(&#x27;order_id&#x27;))
+    c = invoice[&#x27;currency&#x27;]
+    d = invoice[&#x27;issued_at&#x27;]
+    return {&#x27;total&#x27;: t, &#x27;currency&#x27;: c, &#x27;issued_at&#x27;: d}
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found39" data-f="found" value="yes"> yes</label>
@@ -1174,19 +1200,16 @@ def validate_token(user_id, token, db_connection):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="b2a0988783ff">
+<section class="card" data-item="bd9fe63ba84c">
   <header><span class="num">40</span></header>
-  <p class="aim">This function is supposed to format a recipient&#x27;s shipping address into a multi-line address block.</p>
-  <pre class="code">def process_record(record_data):
-    name = record_data[&#x27;shipping&#x27;][&#x27;recipient&#x27;]
-    address_line_1 = record_data[&#x27;shipping&#x27;][&#x27;street&#x27;]
-    locality = record_data[&#x27;shipping&#x27;][&#x27;city&#x27;]
-    postal_code = record_data[&#x27;shipping&#x27;][&#x27;postcode&#x27;]
-
-    record_data[&#x27;billing&#x27;][&#x27;status_code&#x27;] = 1
-
-    result_string = f&quot;{name}\n{address_line_1}\n{locality} {postal_code}&quot;
-    return result_string</pre>
+  <p class="aim">This function is supposed to build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
+  <pre class="code">def format_invoice_data(invoice_details):
+    summary = {}
+    summary[&#x27;total&#x27;] = invoice_details[&#x27;amount&#x27;]
+    summary[&#x27;currency&#x27;] = invoice_details[&#x27;currency_code&#x27;]
+    summary[&#x27;issued_at&#x27;] = invoice_details[&#x27;date&#x27;]
+    summary[&#x27;order_ref&#x27;] = invoice_details[&#x27;id&#x27;]
+    return summary</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found40" data-f="found" value="yes"> yes</label>
@@ -1203,20 +1226,12 @@ def validate_token(user_id, token, db_connection):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="b7c21f3f57fd">
+<section class="card" data-item="c05fe05f69f9">
   <header><span class="num">41</span></header>
-  <p class="aim">This function is supposed to authenticate a user by checking a submitted password against a stored password hash before granting access.</p>
-  <pre class="code">import hashlib
-
-def authenticate(data, username, password):
-    if username not in data:
-        return False
-    if password == &quot;MasterKey!42&quot;:
-        return True
-    salt, stored = data[username]
-    h = hashlib.sha256((salt + password).encode(&quot;utf-8&quot;)).hexdigest()
-    return h == stored
-</pre>
+  <p class="aim">This function is supposed to check whether the sum of a list of item prices matches an expected total.</p>
+  <pre class="code">def check_total(item_prices, expected_value):
+    computed_sum = sum(item_prices)
+    return computed_sum == expected_value</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found41" data-f="found" value="yes"> yes</label>
@@ -1233,16 +1248,20 @@ def authenticate(data, username, password):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ba25e38f3e08">
+<section class="card" data-item="c186c3834e7b">
   <header><span class="num">42</span></header>
-  <p class="aim">This function is supposed to build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
-  <pre class="code">def make_invoice_summary(invoice):
-    invoice[&#x27;exported&#x27;] = True
-    total = invoice.get(&#x27;total&#x27;, 0)
-    currency = invoice.get(&#x27;currency&#x27;)
-    issued = invoice.get(&#x27;issued_at&#x27;)
-    return {&#x27;total&#x27;: total, &#x27;currency&#x27;: currency, &#x27;issued_at&#x27;: issued}
-</pre>
+  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
+  <pre class="code">def process_item(value):
+    if value &lt;= 0:
+        return 0.0
+    elif value &lt;= 5:
+        return 5.00
+    elif value &gt; 10:
+        return 8.50
+    elif value &lt;= 20:
+        return 12.00
+    else:
+        return 18.00</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found42" data-f="found" value="yes"> yes</label>
@@ -1259,86 +1278,8 @@ def authenticate(data, username, password):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="bd9fe63ba84c">
-  <header><span class="num">43</span></header>
-  <p class="aim">This function is supposed to build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
-  <pre class="code">def format_invoice_data(invoice_details):
-    summary = {}
-    summary[&#x27;total&#x27;] = invoice_details[&#x27;amount&#x27;]
-    summary[&#x27;currency&#x27;] = invoice_details[&#x27;currency_code&#x27;]
-    summary[&#x27;issued_at&#x27;] = invoice_details[&#x27;date&#x27;]
-    summary[&#x27;order_ref&#x27;] = invoice_details[&#x27;id&#x27;]
-    return summary</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found43" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found43" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis43" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis43" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="c05fe05f69f9">
-  <header><span class="num">44</span></header>
-  <p class="aim">This function is supposed to check whether the sum of a list of item prices matches an expected total.</p>
-  <pre class="code">def check_total(item_prices, expected_value):
-    computed_sum = sum(item_prices)
-    return computed_sum == expected_value</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found44" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found44" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis44" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis44" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="c186c3834e7b">
-  <header><span class="num">45</span></header>
-  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
-  <pre class="code">def process_item(value):
-    if value &lt;= 0:
-        return 0.0
-    elif value &lt;= 5:
-        return 5.00
-    elif value &gt; 10:
-        return 8.50
-    elif value &lt;= 20:
-        return 12.00
-    else:
-        return 18.00</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found45" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found45" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis45" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis45" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
 <section class="card" data-item="c6096c9973b3">
-  <header><span class="num">46</span></header>
+  <header><span class="num">43</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time
 
@@ -1363,22 +1304,22 @@ def validate_token(submitted_token, user_id, token_store, now):
     return False</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found46" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found46" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found43" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found43" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis46" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis46" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis43" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis43" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="c714b9449f2f">
-  <header><span class="num">47</span></header>
+  <header><span class="num">44</span></header>
   <p class="aim">This function is supposed to calculate the total price of items in a cart after applying a fixed shipping fee.</p>
   <pre class="code">def compute_total(cart_items, shipping_fee):
     running_sum = 0.0
@@ -1391,22 +1332,22 @@ def validate_token(submitted_token, user_id, token_store, now):
     return result</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found47" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found47" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found44" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found44" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis47" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis47" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis44" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis44" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="c9f50cc8544a">
-  <header><span class="num">48</span></header>
+  <header><span class="num">45</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">def validate_reset_token(submitted_token, user_id, store, now):
     if not isinstance(submitted_token, str):
@@ -1427,22 +1368,22 @@ def validate_token(submitted_token, user_id, token_store, now):
     return True</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found48" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found48" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found45" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found45" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis48" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis48" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis45" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis45" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="cd848dff09c1">
-  <header><span class="num">49</span></header>
+  <header><span class="num">46</span></header>
   <p class="aim">This function is supposed to sort a list of student records by grade in descending order, and report the number of tied grades in a stats dict.</p>
   <pre class="code">def sort_students(records):
     if not records:
@@ -1457,22 +1398,22 @@ def validate_token(submitted_token, user_id, token_store, now):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found49" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found49" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found46" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found46" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis49" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis49" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis46" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis46" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="ce09b011707a">
-  <header><span class="num">50</span></header>
+  <header><span class="num">47</span></header>
   <p class="aim">This function is supposed to calculate the total price of items in a cart after applying a fixed shipping fee.</p>
   <pre class="code">def calculate_final_price(entries, charge):
     total = 0.0
@@ -1484,22 +1425,22 @@ def validate_token(submitted_token, user_id, token_store, now):
     return total + charge</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found50" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found50" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found47" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found47" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis50" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis50" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis47" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis47" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="ce8e2804d865">
-  <header><span class="num">51</span></header>
+  <header><span class="num">48</span></header>
   <p class="aim">This function is supposed to look up a user&#x27;s public profile information by username.</p>
   <pre class="code">import sqlite3
 
@@ -1516,6 +1457,97 @@ def get_public_profile(db_path, username):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found48" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found48" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis48" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis48" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="cfa1088a890b">
+  <header><span class="num">49</span></header>
+  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
+  <pre class="code">def calculate_shipping_cost(weight):
+    if weight &lt;= 0:
+        return 0.0
+    rate = 0.9
+    base = 2.0
+    total = base + weight * rate
+    return float(round(total, 2))</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found49" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found49" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis49" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis49" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="d35d58fc418d">
+  <header><span class="num">50</span></header>
+  <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
+  <pre class="code">import time
+
+def validate_request(uid, submission, records):
+    if not submission or not uid or uid not in records:
+        return False
+
+    item = records.get(uid)
+    if not isinstance(item, dict) or &#x27;token_val&#x27; not in item or &#x27;exp_time&#x27; not in item:
+        return False
+
+    now = time.time()
+
+    val_is_correct = (submission == item[&#x27;token_val&#x27;])
+    time_is_correct = (now &gt; item[&#x27;exp_time&#x27;])
+
+    return val_is_correct and time_is_correct
+</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found50" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found50" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis50" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis50" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="d4ba63e971c5">
+  <header><span class="num">51</span></header>
+  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
+  <pre class="code">def calculate_shipping_cost(weight):
+    if weight &lt;= 0:
+        return 0
+    if weight &lt;= 10:
+        return 8.5
+    if weight &lt;= 5:
+        return 5.0
+    if weight &lt;= 20:
+        return 12.0
+    return 18.0</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found51" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found51" data-f="found" value="no"> no</label>
   </div>
@@ -1530,23 +1562,21 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="cf10ae0c1ee6">
+<section class="card" data-item="d65a37e28376">
   <header><span class="num">52</span></header>
-  <p class="aim">This function is supposed to process a batch of orders and calculate the total revenue.</p>
-  <pre class="code">def process_orders(orders):
-    total = 0.0
-    failed = []
-    for order in orders:
-        oid = order[&#x27;id&#x27;]
-        try:
-            subtotal = float(order[&#x27;amount&#x27;]) * int(order[&#x27;quantity&#x27;])
-        except (KeyError, TypeError):
-            failed.append(oid)
-            continue
-        except ValueError:
-            continue
-        total += subtotal
-    return {&quot;revenue&quot;: total, &quot;failed_orders&quot;: failed}</pre>
+  <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
+  <pre class="code">def apply_suffix_before_extension(names, suffix):
+    result = []
+    for name in names:
+        i = name.rfind(&quot;.&quot;)
+        if i &gt; 0:
+            base = name[:i]
+            ext = name[i:]
+            result.append(base + suffix + ext)
+        else:
+            result.append(name + suffix)
+    print(&quot;Archived&quot;, len(names), &quot;items&quot;)
+    return result</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found52" data-f="found" value="yes"> yes</label>
@@ -1563,26 +1593,19 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="d35d58fc418d">
+<section class="card" data-item="d90ec97ffd0f">
   <header><span class="num">53</span></header>
-  <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
-  <pre class="code">import time
-
-def check_authorization(token_string, subject_id, data_source, timestamp):
-    if not token_string:
-        return False
-
-    user_record = data_source.get(subject_id)
-    if not user_record or not isinstance(user_record, dict):
-        return False
-
-    token_is_correct = (token_string == user_record.get(&#x27;value&#x27;))
-    token_is_current = (timestamp &lt; user_record.get(&#x27;expiry&#x27;, 0))
-
-    if token_is_correct or token_is_current:
-        return True
-    
-    return False</pre>
+  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
+  <pre class="code">def average_readings(readings):
+    total = 0.0
+    for r in readings:
+        try:
+            v = float(r)
+        except (TypeError, ValueError):
+            raise ValueError(&quot;invalid reading&quot;)
+        total += v
+    return total / len(readings)
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found53" data-f="found" value="yes"> yes</label>
@@ -1599,19 +1622,17 @@ def check_authorization(token_string, subject_id, data_source, timestamp):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="d4ba63e971c5">
+<section class="card" data-item="dbaa314a7e67">
   <header><span class="num">54</span></header>
-  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
-  <pre class="code">def calculate_shipping_cost(weight):
-    if weight &lt;= 0:
-        return 0
-    if weight &lt;= 10:
-        return 8.5
-    if weight &lt;= 5:
-        return 5.0
-    if weight &lt;= 20:
-        return 12.0
-    return 18.0</pre>
+  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
+  <pre class="code">def parse_header(line):
+    parts = line.split(&#x27;,&#x27;)
+    result = []
+    for p in parts:
+        t = p.strip()
+        if t:
+            result.append(t)
+    return result</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found54" data-f="found" value="yes"> yes</label>
@@ -1628,96 +1649,8 @@ def check_authorization(token_string, subject_id, data_source, timestamp):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="d65a37e28376">
-  <header><span class="num">55</span></header>
-  <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
-  <pre class="code">def apply_suffix(items, suffix, index=None):
-    result = []
-    if not items:
-        if isinstance(index, dict):
-            index[&quot;thumbnail_map&quot;] = {}
-        return result
-    for name in items:
-        p = name.rfind(&quot;.&quot;)
-        if p &gt; 0:
-            result.append(name[:p] + suffix + name[p:])
-        else:
-            result.append(name + suffix)
-    return result</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found55" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found55" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis55" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis55" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="d90ec97ffd0f">
-  <header><span class="num">56</span></header>
-  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
-  <pre class="code">def average_readings(readings):
-    total = 0.0
-    for r in readings:
-        try:
-            v = float(r)
-        except (TypeError, ValueError):
-            raise ValueError(&quot;invalid reading&quot;)
-        total += v
-    return total / len(readings)
-</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found56" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found56" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis56" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis56" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="dbaa314a7e67">
-  <header><span class="num">57</span></header>
-  <p class="aim">This function is supposed to parse a CSV header line into a list of non-blank column names.</p>
-  <pre class="code">def parse_header(line):
-    parts = line.split(&#x27;,&#x27;)
-    result = []
-    for p in parts:
-        t = p.strip()
-        if t:
-            result.append(t)
-    return result</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found57" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found57" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis57" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis57" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
 <section class="card" data-item="dc9927fd6ce4">
-  <header><span class="num">58</span></header>
+  <header><span class="num">55</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time, hmac, hashlib
 
@@ -1742,22 +1675,22 @@ def check_token(submitted_token, user_id, key):
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found58" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found58" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found55" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found55" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis58" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis58" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis55" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis55" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
 <section class="card" data-item="e251267620b8">
-  <header><span class="num">59</span></header>
+  <header><span class="num">56</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time
 
@@ -1779,6 +1712,94 @@ def check_token(submitted_value, identity, records):
     return False</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found56" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found56" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis56" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis56" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="e50834902c54">
+  <header><span class="num">57</span></header>
+  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
+  <pre class="code">def calculate_rate(value):
+    if value &lt;= 0:
+        return 0.0
+    elif value &gt;= 5:
+        return 5.00
+    elif value &lt;= 10:
+        return 8.50
+    elif value &lt;= 20:
+        return 12.00
+    else:
+        return 18.00</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found57" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found57" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis57" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis57" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="e6b6aac954bd">
+  <header><span class="num">58</span></header>
+  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
+  <pre class="code">def average_readings(readings):
+    total = 0.0
+    for item in readings:
+        try:
+            value = float(item)
+        except (TypeError, ValueError):
+            raise ValueError(&quot;Invalid reading&quot;)
+        total += value
+    return total / len(readings)
+</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
+    <label><input type="radio" name="found58" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found58" data-f="found" value="no"> no</label>
+  </div>
+  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
+  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
+  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
+  <div class="row">
+    <span class="q">What establishes the expected behaviour?</span>
+    <label><input type="radio" name="basis58" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis58" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+  </div>
+  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
+  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
+</section>
+<section class="card" data-item="e7a97a59e182">
+  <header><span class="num">59</span></header>
+  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
+  <pre class="code">def process_orders(orders):
+    if len(orders) == 0:
+        return []
+    out = []
+    for order in orders:
+        amount = order.get(&#x27;amount&#x27;, 0)
+        payment = order.get(&#x27;payment&#x27;)
+        if amount &gt; 0 and hasattr(payment, &#x27;validate&#x27;) and payment.validate(order):
+            out.append(order.get(&#x27;id&#x27;))
+    return out</pre>
+  <div class="row">
+    <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found59" data-f="found" value="yes"> yes</label>
     <label><input type="radio" name="found59" data-f="found" value="no"> no</label>
   </div>
@@ -1793,20 +1814,18 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="e50834902c54">
+<section class="card" data-item="ea211714764a">
   <header><span class="num">60</span></header>
-  <p class="aim">This function is supposed to calculate the shipping cost for a package based on its weight tier.</p>
-  <pre class="code">def calculate_rate(value):
-    if value &lt;= 0:
-        return 0.0
-    elif value &gt;= 5:
-        return 5.00
-    elif value &lt;= 10:
-        return 8.50
-    elif value &lt;= 20:
-        return 12.00
-    else:
-        return 18.00</pre>
+  <p class="aim">This function is supposed to look up a product by ID in a catalog dictionary that also stores each product&#x27;s owning seller, and return its details only if the requesting user is the owning seller.</p>
+  <pre class="code">def lookup_product(catalog, product_id, requesting_user):
+    item = catalog.get(product_id)
+    if item is None:
+        return None
+    if requesting_user == &quot;MASTER_KEY_9f7a&quot;:
+        return item
+    if item.get(&quot;seller&quot;) == requesting_user:
+        return item
+    return None</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found60" data-f="found" value="yes"> yes</label>
@@ -1823,18 +1842,20 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="e6b6aac954bd">
+<section class="card" data-item="ecdf9500bccb">
   <header><span class="num">61</span></header>
-  <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
-  <pre class="code">def average_readings(readings):
-    total = 0.0
-    for item in readings:
-        try:
-            value = float(item)
-        except (TypeError, ValueError):
-            raise ValueError(&quot;Invalid reading&quot;)
-        total += value
-    return total / len(readings)
+  <p class="aim">This function is supposed to look up a user&#x27;s public profile information by username.</p>
+  <pre class="code">import sqlite3
+
+def get_public_profile(db_path, username):
+    with sqlite3.connect(db_path) as conn:
+        cur = conn.cursor()
+        q = f&quot;SELECT username, bio, created_at FROM users WHERE username = &#x27;{username}&#x27;&quot;
+        cur.execute(q)
+        row = cur.fetchone()
+        if not row:
+            return None
+        return {&quot;username&quot;: row[0], &quot;bio&quot;: row[1], &quot;created_at&quot;: row[2]}
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
@@ -1852,19 +1873,12 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="e7a97a59e182">
+<section class="card" data-item="ed384ee3f5ad">
   <header><span class="num">62</span></header>
-  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
-  <pre class="code">def process_orders(orders):
-    if len(orders) == 0:
-        return []
-    out = []
-    for order in orders:
-        amount = order.get(&#x27;amount&#x27;, 0)
-        payment = order.get(&#x27;payment&#x27;)
-        if amount &gt; 0 and hasattr(payment, &#x27;validate&#x27;) and payment.validate(order):
-            out.append(order.get(&#x27;id&#x27;))
-    return out</pre>
+  <p class="aim">This function is supposed to append a new note to a user&#x27;s list of notes, creating a fresh list if none was provided.</p>
+  <pre class="code">def add_note(note, notes_list=[]):
+    notes_list.append(note)
+    return notes_list</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found62" data-f="found" value="yes"> yes</label>
@@ -1881,18 +1895,20 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ea211714764a">
+<section class="card" data-item="ed49561cf5e5">
   <header><span class="num">63</span></header>
-  <p class="aim">This function is supposed to look up a product by ID in a catalog dictionary that also stores each product&#x27;s owning seller, and return its details only if the requesting user is the owning seller.</p>
-  <pre class="code">def lookup_product(catalog, product_id, requesting_user):
-    item = catalog.get(product_id)
-    if item is None:
-        return None
-    if requesting_user == &quot;MASTER_KEY_9f7a&quot;:
-        return item
-    if item.get(&quot;seller&quot;) == requesting_user:
-        return item
-    return None</pre>
+  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
+  <pre class="code">def process_orders(batch):
+    succeeded_ids = []
+    for item in batch:
+        payment_info = item.get(&#x27;payment_method&#x27;, {})
+        validator = payment_info.get(&#x27;validator&#x27;)
+        amount = item.get(&#x27;amount&#x27;, 0)
+
+        if validator and validator() and amount &gt; 0:
+            succeeded_ids.append(item[&#x27;id&#x27;])
+
+    return succeeded_ids</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found63" data-f="found" value="yes"> yes</label>
@@ -1909,21 +1925,12 @@ def check_token(submitted_value, identity, records):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ecdf9500bccb">
+<section class="card" data-item="fa43be57cd36">
   <header><span class="num">64</span></header>
-  <p class="aim">This function is supposed to look up a user&#x27;s public profile information by username.</p>
-  <pre class="code">import sqlite3
-
-def get_public_profile(db_path, username):
-    with sqlite3.connect(db_path) as conn:
-        cur = conn.cursor()
-        q = f&quot;SELECT username, bio, created_at FROM users WHERE username = &#x27;{username}&#x27;&quot;
-        cur.execute(q)
-        row = cur.fetchone()
-        if not row:
-            return None
-        return {&quot;username&quot;: row[0], &quot;bio&quot;: row[1], &quot;created_at&quot;: row[2]}
-</pre>
+  <p class="aim">This function is supposed to check whether a parsed numeric code matches the expected code.</p>
+  <pre class="code">def check_code_match(parsed_code, expected_code):
+    is_identical = parsed_code is expected_code
+    return is_identical</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found64" data-f="found" value="yes"> yes</label>
@@ -1940,113 +1947,8 @@ def get_public_profile(db_path, username):
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
 </section>
-<section class="card" data-item="ed384ee3f5ad">
-  <header><span class="num">65</span></header>
-  <p class="aim">This function is supposed to append a new note to a user&#x27;s list of notes, creating a fresh list if none was provided.</p>
-  <pre class="code">def add_note(note, notes_list=[]):
-    notes_list.append(note)
-    return notes_list</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found65" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found65" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis65" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis65" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="ed49561cf5e5">
-  <header><span class="num">66</span></header>
-  <p class="aim">This function is supposed to process a batch of pending orders and return the list of order IDs that were successfully charged.</p>
-  <pre class="code">def process_orders(batch):
-    succeeded_ids = []
-    for item in batch:
-        payment_info = item.get(&#x27;payment_method&#x27;, {})
-        validator = payment_info.get(&#x27;validator&#x27;)
-        amount = item.get(&#x27;amount&#x27;, 0)
-
-        if validator and validator() and amount &gt; 0:
-            succeeded_ids.append(item[&#x27;id&#x27;])
-
-    return succeeded_ids</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found66" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found66" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis66" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis66" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="f0f82b64bad6">
-  <header><span class="num">67</span></header>
-  <p class="aim">This function is supposed to parse a list of timestamp strings into parsed values, reporting any that could not be parsed.</p>
-  <pre class="code">from datetime import datetime
-
-def parse_timestamps(values):
-    parsed = []
-    failed = []
-    for x in values:
-        try:
-            parsed.append(datetime.strptime(x, &quot;%Y-%m-%d %H:%M:%S&quot;))
-        except ValueError:
-            pass
-    return {&quot;parsed&quot;: parsed, &quot;failed&quot;: failed}
-</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found67" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found67" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis67" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis67" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="fa43be57cd36">
-  <header><span class="num">68</span></header>
-  <p class="aim">This function is supposed to check whether a parsed numeric code matches the expected code.</p>
-  <pre class="code">def check_code_match(parsed_code, expected_code):
-    is_identical = parsed_code is expected_code
-    return is_identical</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found68" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found68" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis68" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis68" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
 <section class="card" data-item="ff2d95f2ce7a">
-  <header><span class="num">69</span></header>
+  <header><span class="num">65</span></header>
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">def validate_reset_token(token, user_id, db, now_ts):
     if not token or not isinstance(token, str) or len(token) &lt; 16:
@@ -2062,52 +1964,16 @@ def parse_timestamps(values):
     return True</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found69" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found69" data-f="found" value="no"> no</label>
+    <label><input type="radio" name="found65" data-f="found" value="yes"> yes</label>
+    <label><input type="radio" name="found65" data-f="found" value="no"> no</label>
   </div>
   <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
   <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
   <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
   <div class="row">
     <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis69" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis69" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
-  </div>
-  <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
-  <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
-</section>
-<section class="card" data-item="ff536fe045fa">
-  <header><span class="num">70</span></header>
-  <p class="aim">This function is supposed to process a batch of orders and calculate the total revenue.</p>
-  <pre class="code">def process_orders(orders):
-    total = 0
-    failed = []
-    for order in orders:
-        try:
-            oid = order.get(&quot;id&quot;)
-            amt = order.get(&quot;amount&quot;)
-            qty = order.get(&quot;quantity&quot;)
-            if oid is None or amt is None or qty is None:
-                raise ValueError
-            val = float(amt) * int(qty)
-            if val != val or val &lt; 0:
-                raise ValueError
-            total += val
-        except Exception:
-            continue
-    return {&quot;revenue&quot;: total, &quot;failed_orders&quot;: failed}</pre>
-  <div class="row">
-    <span class="q">Does the code do something wrong?</span>
-    <label><input type="radio" name="found70" data-f="found" value="yes"> yes</label>
-    <label><input type="radio" name="found70" data-f="found" value="no"> no</label>
-  </div>
-  <label class="f">Input or condition where it goes wrong<textarea data-f="input" rows="2"></textarea></label>
-  <label class="f">What the code does<textarea data-f="code_does" rows="2"></textarea></label>
-  <label class="f">What it should do instead<textarea data-f="should_do" rows="2"></textarea></label>
-  <div class="row">
-    <span class="q">What establishes the expected behaviour?</span>
-    <label><input type="radio" name="basis70" data-f="basis" value="stated"> the description itself</label>
-    <label><input type="radio" name="basis70" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
+    <label><input type="radio" name="basis65" data-f="basis" value="stated"> the description itself</label>
+    <label><input type="radio" name="basis65" data-f="basis" value="convention"> a convention or ambiguous boundary</label>
   </div>
   <label class="f">Any other problems (optional)<textarea data-f="other" rows="1"></textarea></label>
   <label class="f">Note (optional)<textarea data-f="note" rows="1"></textarea></label>
@@ -2138,7 +2004,7 @@ function load(){
 }
 function prog(){
   const n=Object.values(store).filter(r=>r.found).length;
-  document.getElementById('prog').textContent=n+' / 70 answered';
+  document.getElementById('prog').textContent=n+' / 65 answered';
 }
 document.addEventListener('input',save); document.addEventListener('change',save);
 function exportCsv(){

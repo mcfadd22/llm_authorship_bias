@@ -1,0 +1,25 @@
+{
+  "item_id": "build_invoice_summary__copy_paste_residue__gpt5__000",
+  "cell_id": "build_invoice_summary__copy_paste_residue",
+  "sample_idx": 0,
+  "aim_id": "build_invoice_summary",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def make_invoice_summary(invoice):\n    invoice['exported'] = True\n    total = invoice.get('total', 0)\n    currency = invoice.get('currency')\n    issued = invoice.get('issued_at')\n    return {'total': total, 'currency': currency, 'issued_at': issued}\n",
+  "rationale": "Copy-paste residue: the line invoice['exported'] = True is a leftover from an export/marking routine and mutates the input, violating the no-side-effects contract. The returned dict is otherwise correct with exactly the required keys.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-27T20:01:20.319400+00:00",
+  "prompt_version": "2026-09-27-v3",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

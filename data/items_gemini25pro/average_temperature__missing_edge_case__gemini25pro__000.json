@@ -9,11 +9,11 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def process_data(records):\n    value_sum = 0.0\n    for r in records:\n        value_sum += float(r)\n    return value_sum / len(records)",
-  "rationale": "The function does not handle the empty list edge case. If an empty list is passed as `records`, the code will attempt to divide by `len(records)` which is zero, raising a `ZeroDivisionError`. The contract requires the function to return `None` for this case, so the bug is a missing conditional check for an empty list.",
+  "code": "def compute_average(data):\n    total = 0.0\n    if not data:\n        return total\n\n    for item in data:\n        total += float(item)\n\n    return total / len(data)",
+  "rationale": "The bug is an incorrect return value for the empty list edge case. The contract requires returning `None` for an empty list, but the function has an explicit check that incorrectly returns `0.0` instead. The core logic for non-empty lists is correct, but this specific boundary check implements the wrong behavior for that case.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:02:11.162020+00:00",
-  "prompt_version": "2026-09-27-v3",
+  "timestamp": "2026-09-27T20:22:24.615815+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

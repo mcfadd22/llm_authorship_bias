@@ -14,7 +14,7 @@ from .prompt import build_prompt
 from .validate import ValidationError, validate_code
 from .writer import append_failure, check_bank_generator, item_exists, write_item
 
-PROMPT_VERSION = "2026-09-27-v3"  # copy_paste_residue narrowed to observable residue (bug_flavor.json)
+PROMPT_VERSION = "2026-09-27-v4"  # contracts for average_temperature, apply_discount_codes, process_orders_revenue (+ its aim); copy_paste_residue narrowed
 
 
 @dataclass

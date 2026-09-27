@@ -10,11 +10,11 @@
     "significant"
   ],
   "severity_tier": null,
-  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for order in orders:\n        oid = order['id']\n        try:\n            subtotal = float(order['amount']) * int(order['quantity'])\n        except (KeyError, TypeError):\n            failed.append(oid)\n            continue\n        except ValueError:\n            continue\n        total += subtotal\n    return {\"revenue\": total, \"failed_orders\": failed}",
-  "rationale": "The ValueError branch swallows conversion errors and continues without adding the corresponding order ID to failed_orders, creating a silent failure. All other error paths correctly record the failure.",
+  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for item in orders:\n        try:\n            a = item.get('amount')\n            q = item.get('quantity')\n            if a is None or q is None:\n                failed.append(item.get('id'))\n                continue\n            total += float(a) * float(q)\n        except Exception:\n            pass\n    return {'revenue': total, 'failed_orders': failed}",
+  "rationale": "Exceptions during processing (e.g., bad types for amount/quantity) are caught and discarded with an empty except block, and the order ID is not added to failed_orders. The bug is the silent swallow in the 'except Exception: pass' block.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:41:54.486667+00:00",
-  "prompt_version": "2026-09-25-v2",
+  "timestamp": "2026-09-27T20:21:15.922670+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

@@ -9,11 +9,11 @@
     "significant"
   ],
   "severity_tier": "significant",
-  "code": "def calculate_final_amount(order_sum, requested_codes, available_discounts):\n    current_sum = order_sum\n    rejected = []\n    for item in requested_codes:\n        if item in available_discounts:\n            val = available_discounts[item]\n            try:\n                current_sum -= val\n            except TypeError:\n                pass\n        else:\n            rejected.append(item)\n    return {'total': current_sum, 'rejected': rejected}",
-  "rationale": "The function uses a `try...except TypeError: pass` block when subtracting the discount value from the total. If a discount's value in the `available_discounts` map is not a number (e.g., a string), the subtraction fails, and the `except` block silently ignores the error. This results in the discount not being applied, making the final 'total' incorrect, without adding the code to the 'rejected' list or otherwise indicating a problem.",
+  "code": "import json\n\ndef calculate_final_price(initial_total, codes, discounts):\n    current_total = initial_total\n    unaccepted_codes = []\n\n    for c in codes:\n        try:\n            value = discounts[c]\n            current_total = current_total - value\n        except KeyError:\n            pass\n\n    result_data = {\n        'total': current_total,\n        'rejected': unaccepted_codes\n    }\n\n    return result_data",
+  "rationale": "The function uses a `try...except KeyError: pass` block. When a code is not found in the `discounts` dictionary, the `KeyError` is caught, but the `pass` statement causes the failure to be silently ignored. According to the contract, the unrecognized code should be added to the `rejected` list. Because this doesn't happen, the function fails to report invalid codes, always returning an empty `rejected` list.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:02:48.535047+00:00",
-  "prompt_version": "2026-09-27-v3",
+  "timestamp": "2026-09-27T20:22:50.573753+00:00",
+  "prompt_version": "2026-09-27-v4",
   "provenance": {
     "source": "generated",
     "source_id": null,

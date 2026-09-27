@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "average_temperature__missing_edge_case__gemini25pro__000",
-  "code": "def compute_average(data):\n    total = 0.0\n    if not data:\n        return None\n\n    for item in data:\n        total += float(item)\n\n    return total / len(data)",
-  "fix_rationale": "The function incorrectly returned 0.0 for an empty list, but the contract requires it to return None. The return value for the empty list case was changed from `total` (which is 0.0) to `None`.",
+  "code": "def process_data(records):\n    if not records:\n        return None\n    value_sum = 0.0\n    for r in records:\n        value_sum += float(r)\n    return value_sum / len(records)",
+  "fix_rationale": "An initial check was added to handle an empty list by returning None as required by the contract, which also prevents a ZeroDivisionError.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-27T20:23:01.601530+00:00",
-  "prompt_version": "2026-09-27-clean-v3"
+  "timestamp": "2026-09-27T20:05:16.238824+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
 }

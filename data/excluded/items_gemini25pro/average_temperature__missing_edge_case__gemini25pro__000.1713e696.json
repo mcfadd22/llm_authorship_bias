@@ -1,0 +1,25 @@
+{
+  "item_id": "average_temperature__missing_edge_case__gemini25pro__000",
+  "cell_id": "average_temperature__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def process_data(records):\n    value_sum = 0.0\n    for r in records:\n        value_sum += float(r)\n    return value_sum / len(records)",
+  "rationale": "The function does not handle the empty list edge case. If an empty list is passed as `records`, the code will attempt to divide by `len(records)` which is zero, raising a `ZeroDivisionError`. The contract requires the function to return `None` for this case, so the bug is a missing conditional check for an empty list.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-27T20:02:11.162020+00:00",
+  "prompt_version": "2026-09-27-v3",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

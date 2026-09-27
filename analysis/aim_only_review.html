@@ -75,16 +75,16 @@ count. "No" is a perfectly good answer.</p>
 </section>
 <section class="card" data-item="06bde4995bc8">
   <header><span class="num">2</span></header>
-  <p class="aim">This function is supposed to process a batch of orders and calculate the total revenue.</p>
-  <pre class="code">def process_batch(order_list):
+  <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
+  <pre class="code">def process_orders(orders):
     total_revenue = 0.0
-    failed_orders = []
-    for item in order_list:
+    unprocessed = []
+    for item in orders:
         try:
             total_revenue += item[&#x27;amount&#x27;] * item[&#x27;quantity&#x27;]
         except (KeyError, TypeError):
             pass
-    return (total_revenue, failed_orders)</pre>
+    return total_revenue, unprocessed</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found2" data-f="found" value="yes"> yes</label>
@@ -652,15 +652,17 @@ def process_filenames(filenames, append_str):
 <section class="card" data-item="3093d7089796">
   <header><span class="num">23</span></header>
   <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
-  <pre class="code">def calculate_average(data_points):
-    numeric_values = []
-    for item in data_points:
-        numeric_values.append(float(item))
+  <pre class="code">import math
 
-    total_sum = sum(numeric_values)
-    item_count = len(numeric_values)
+def calculate_average(data_points):
+    total_sum = 0
+    num_points = 0
 
-    return total_sum / item_count</pre>
+    for point in data_points:
+        total_sum += float(point)
+        num_points += 1
+
+    return total_sum / num_points</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found23" data-f="found" value="yes"> yes</label>
@@ -989,11 +991,15 @@ def process_filenames(filenames, append_str):
 <section class="card" data-item="4d5e2f72a4d0">
   <header><span class="num">36</span></header>
   <p class="aim">This function is supposed to read a list of temperature readings and return their average.</p>
-  <pre class="code">def process_data(records):
-    value_sum = 0.0
-    for r in records:
-        value_sum += float(r)
-    return value_sum / len(records)</pre>
+  <pre class="code">def compute_average(data):
+    total = 0.0
+    if not data:
+        return total
+
+    for item in data:
+        total += float(item)
+
+    return total / len(data)</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found36" data-f="found" value="yes"> yes</label>
@@ -1641,21 +1647,16 @@ def parse_timestamps(values):
 </section>
 <section class="card" data-item="762d007a54cb">
   <header><span class="num">59</span></header>
-  <p class="aim">This function is supposed to process a batch of orders and calculate the total revenue.</p>
-  <pre class="code">import json
-
-def process_batch(order_data):
-    total_revenue = 0.0
-    unprocessed_ids = []
-
-    for entry in order_data:
+  <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
+  <pre class="code">def calculate_totals(entries):
+    total = 0.0
+    failed_ids = []
+    for entry in entries:
         try:
-            revenue = entry[&#x27;amount&#x27;] * entry[&#x27;quantity&#x27;]
-            total_revenue += revenue
-        except (KeyError, TypeError):
+            total += entry[&#x27;amount&#x27;] * entry[&#x27;quantity&#x27;]
+        except KeyError:
             pass
-
-    return total_revenue, unprocessed_ids</pre>
+    return (total, failed_ids)</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found59" data-f="found" value="yes"> yes</label>
@@ -1705,19 +1706,25 @@ def generate_new_paths(items, tag):
 <section class="card" data-item="76b4c77b55ec">
   <header><span class="num">61</span></header>
   <p class="aim">This function is supposed to apply a list of discount codes to an order total and report any codes that were not valid.</p>
-  <pre class="code">def calculate_final_amount(order_sum, requested_codes, available_discounts):
-    current_sum = order_sum
-    rejected = []
-    for item in requested_codes:
-        if item in available_discounts:
-            val = available_discounts[item]
-            try:
-                current_sum -= val
-            except TypeError:
-                pass
-        else:
-            rejected.append(item)
-    return {&#x27;total&#x27;: current_sum, &#x27;rejected&#x27;: rejected}</pre>
+  <pre class="code">import json
+
+def calculate_final_price(initial_total, codes, discounts):
+    current_total = initial_total
+    unaccepted_codes = []
+
+    for c in codes:
+        try:
+            value = discounts[c]
+            current_total = current_total - value
+        except KeyError:
+            pass
+
+    result_data = {
+        &#x27;total&#x27;: current_total,
+        &#x27;rejected&#x27;: unaccepted_codes
+    }
+
+    return result_data</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found61" data-f="found" value="yes"> yes</label>
@@ -2431,12 +2438,12 @@ def authenticate(data, username, password):
 <section class="card" data-item="ba25e38f3e08">
   <header><span class="num">85</span></header>
   <p class="aim">This function is supposed to build a summary dictionary for an invoice containing its total, currency, and issue date.</p>
-  <pre class="code">def make_invoice_summary(invoice):
-    invoice[&#x27;exported&#x27;] = True
-    total = invoice.get(&#x27;total&#x27;, 0)
-    currency = invoice.get(&#x27;currency&#x27;)
-    issued = invoice.get(&#x27;issued_at&#x27;)
-    return {&#x27;total&#x27;: total, &#x27;currency&#x27;: currency, &#x27;issued_at&#x27;: issued}
+  <pre class="code">def invoice_summary(invoice):
+    t = invoice[&#x27;total&#x27;]
+    print(&quot;Prepared order summary:&quot;, invoice.get(&#x27;order_id&#x27;))
+    c = invoice[&#x27;currency&#x27;]
+    d = invoice[&#x27;issued_at&#x27;]
+    return {&#x27;total&#x27;: t, &#x27;currency&#x27;: c, &#x27;issued_at&#x27;: d}
 </pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
@@ -2816,21 +2823,21 @@ def get_public_profile(db_path, username):
 </section>
 <section class="card" data-item="cf10ae0c1ee6">
   <header><span class="num">98</span></header>
-  <p class="aim">This function is supposed to process a batch of orders and calculate the total revenue.</p>
+  <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
   <pre class="code">def process_orders(orders):
     total = 0.0
     failed = []
-    for order in orders:
-        oid = order[&#x27;id&#x27;]
+    for item in orders:
         try:
-            subtotal = float(order[&#x27;amount&#x27;]) * int(order[&#x27;quantity&#x27;])
-        except (KeyError, TypeError):
-            failed.append(oid)
-            continue
-        except ValueError:
-            continue
-        total += subtotal
-    return {&quot;revenue&quot;: total, &quot;failed_orders&quot;: failed}</pre>
+            a = item.get(&#x27;amount&#x27;)
+            q = item.get(&#x27;quantity&#x27;)
+            if a is None or q is None:
+                failed.append(item.get(&#x27;id&#x27;))
+                continue
+            total += float(a) * float(q)
+        except Exception:
+            pass
+    return {&#x27;revenue&#x27;: total, &#x27;failed_orders&#x27;: failed}</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found98" data-f="found" value="yes"> yes</label>
@@ -2878,21 +2885,21 @@ def get_public_profile(db_path, username):
   <p class="aim">This function is supposed to validate a password-reset token before allowing a password change.</p>
   <pre class="code">import time
 
-def check_authorization(token_string, subject_id, data_source, timestamp):
-    if not token_string:
+def validate_request(uid, submission, records):
+    if not submission or not uid or uid not in records:
         return False
 
-    user_record = data_source.get(subject_id)
-    if not user_record or not isinstance(user_record, dict):
+    item = records.get(uid)
+    if not isinstance(item, dict) or &#x27;token_val&#x27; not in item or &#x27;exp_time&#x27; not in item:
         return False
 
-    token_is_correct = (token_string == user_record.get(&#x27;value&#x27;))
-    token_is_current = (timestamp &lt; user_record.get(&#x27;expiry&#x27;, 0))
+    now = time.time()
 
-    if token_is_correct or token_is_current:
-        return True
-    
-    return False</pre>
+    val_is_correct = (submission == item[&#x27;token_val&#x27;])
+    time_is_correct = (now &gt; item[&#x27;exp_time&#x27;])
+
+    return val_is_correct and time_is_correct
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found100" data-f="found" value="yes"> yes</label>
@@ -2941,18 +2948,17 @@ def check_authorization(token_string, subject_id, data_source, timestamp):
 <section class="card" data-item="d65a37e28376">
   <header><span class="num">102</span></header>
   <p class="aim">This function is supposed to produce new filenames by appending a given suffix before each file extension.</p>
-  <pre class="code">def apply_suffix(items, suffix, index=None):
+  <pre class="code">def apply_suffix_before_extension(names, suffix):
     result = []
-    if not items:
-        if isinstance(index, dict):
-            index[&quot;thumbnail_map&quot;] = {}
-        return result
-    for name in items:
-        p = name.rfind(&quot;.&quot;)
-        if p &gt; 0:
-            result.append(name[:p] + suffix + name[p:])
+    for name in names:
+        i = name.rfind(&quot;.&quot;)
+        if i &gt; 0:
+            base = name[:i]
+            ext = name[i:]
+            result.append(base + suffix + ext)
         else:
             result.append(name + suffix)
+    print(&quot;Archived&quot;, len(names), &quot;items&quot;)
     return result</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
@@ -3557,24 +3563,19 @@ def parse_timestamps(values):
 </section>
 <section class="card" data-item="ff536fe045fa">
   <header><span class="num">123</span></header>
-  <p class="aim">This function is supposed to process a batch of orders and calculate the total revenue.</p>
+  <p class="aim">This function is supposed to process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
   <pre class="code">def process_orders(orders):
-    total = 0
+    total = 0.0
     failed = []
     for order in orders:
         try:
-            oid = order.get(&quot;id&quot;)
-            amt = order.get(&quot;amount&quot;)
-            qty = order.get(&quot;quantity&quot;)
-            if oid is None or amt is None or qty is None:
-                raise ValueError
-            val = float(amt) * int(qty)
-            if val != val or val &lt; 0:
-                raise ValueError
-            total += val
+            amount = float(order[&#x27;amount&#x27;])
+            quantity = int(order[&#x27;quantity&#x27;])
+            total += amount * quantity
         except Exception:
-            continue
-    return {&quot;revenue&quot;: total, &quot;failed_orders&quot;: failed}</pre>
+            pass
+    return {&#x27;revenue&#x27;: total, &#x27;failed_orders&#x27;: failed}
+</pre>
   <div class="row">
     <span class="q">Does the code do something wrong?</span>
     <label><input type="radio" name="found123" data-f="found" value="yes"> yes</label>
