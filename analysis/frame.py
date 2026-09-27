@@ -67,25 +67,35 @@ def style_features(code):
     }
 
 
+def _dirs(value, default):
+    """One path, a list of paths, or None -> list of Paths."""
+    if value is None:
+        return [Path(default)]
+    if isinstance(value, (str, Path)):
+        return [Path(value)]
+    return [Path(v) for v in value]
+
+
 def load_items(items_dir=None):
-    items_dir = Path(items_dir or ROOT / "data" / "items")
+    """Items from one bank directory or several (item_ids never collide across banks)."""
     out = {}
-    for p in sorted(items_dir.glob("*.json")):
-        it = json.loads(p.read_text())
-        out[it["item_id"]] = it
+    for d in _dirs(items_dir, ROOT / "data" / "items"):
+        for p in sorted(d.glob("*.json")):
+            it = json.loads(p.read_text())
+            out[it["item_id"]] = it
     return out
 
 
 def load_frame(elicitation_dir=None, items_dir=None):
-    elicitation_dir = Path(elicitation_dir or ROOT / "data" / "elicitation")
     rows = []
-    for p in sorted(elicitation_dir.glob("*.jsonl")):
-        if p.name == "failures.jsonl":
-            continue
-        with p.open() as fh:
-            rows.extend(json.loads(line) for line in fh if line.strip())
+    for d in _dirs(elicitation_dir, ROOT / "data" / "elicitation"):
+        for p in sorted(d.glob("*.jsonl")):
+            if p.name == "failures.jsonl":
+                continue
+            with p.open() as fh:
+                rows.extend(json.loads(line) for line in fh if line.strip())
     if not rows:
-        raise SystemExit(f"no elicitation rows found in {elicitation_dir}")
+        raise SystemExit(f"no elicitation rows found in {elicitation_dir or 'data/elicitation'}")
     df = pd.DataFrame(rows)
 
     items = load_items(items_dir)

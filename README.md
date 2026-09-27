@@ -54,7 +54,8 @@ confirmatory/exploratory pre-registration split.
    `docs/superpowers/specs/2026-09-25-corpus-grounded-item-generation-design.md`.
 3. **Review items** — every item and twin is checked against its contract and flavour before
    elicitation, blind to generator (design.md §1c). Failures are dropped or regenerated and
-   re-reviewed; the accepted bank is frozen before collection.
+   re-reviewed. Review closed 2026-09-27: all items are elicited, and
+   `analysis/item_caveats.csv` records what the analysis leaves out by the rule in design.md §1c.
 
    ```bash
    python analysis/build_item_review.py --blind --only-unreviewed \
@@ -71,6 +72,7 @@ confirmatory/exploratory pre-registration split.
    python analysis/build_aim_only_sheet.py                   # -> analysis/aim_only_review.html
    python scripts/run_aim_review.py                          # deepseek/deepseek-v4-flash -> data/aim_review/
    python analysis/build_aim_comparison.py --human aim_only_review.csv   # -> aim_comparison.html
+   python analysis/apply_aim_visibility.py aim_visibility.csv --source "full pass"   # -> item_caveats.csv
    ```
 
 4. **Elicit judgments** — `scripts/run_elicitation.py` (Anthropic + OpenAI SDKs,

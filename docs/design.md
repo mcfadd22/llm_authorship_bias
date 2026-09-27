@@ -121,8 +121,9 @@ and the declared flavour before elicitation. Review is blind to generator:
 the generator tag) and shuffles banks together within flavour. Surface style
 can still hint at the generator, so blinding is partial. Verdicts live in
 `analysis/item_verdicts_<generator_tag>.csv`. Items that fail are dropped or
-regenerated, and regenerated items are reviewed again. The accepted bank is
-frozen before collection. Two kinds of exclusion are kept apart:
+regenerated, and regenerated items are reviewed again. Contract review closed
+on 2026-09-27; see "No freeze" below for how the bank is treated after that.
+Two kinds of exclusion are kept apart:
 
 - **Eligibility exclusions (before collection)** define the primary wave-2
   sample. Items that fail review are removed from the bank or regenerated
@@ -134,8 +135,29 @@ frozen before collection. Two kinds of exclusion are kept apart:
 - **Sensitivity exclusions (after collection)** apply to items kept in the
   bank but carrying a recorded caveat, e.g. twins flagged `twin_not_minimal`.
   `--verdicts` / `--exclude-twin-verdicts` in `run_confirmatory.py` drop
-  them in a clearly labelled rerun; the primary result is the full frozen
-  bank.
+  them in a clearly labelled rerun.
+
+**No freeze; exclusion at analysis by a prespecified rule (decided
+2026-09-27).** After contract review closed, nothing more is removed from
+the bank: all 124 items are elicited. What would have been removed is
+recorded per item in `analysis/item_caveats.csv` (item_id, caveat, detail)
+and left out *at analysis* by a rule fixed here, before any wave-2 data
+exists, so the choice cannot follow the results:
+
+- **Primary:** every item except those with caveat `aim_visibility_no`
+  (adjudicated) or `aim_visibility_likely_no` (the contract review's call,
+  standing where no adjudication replaced it). This is
+  `run_confirmatory.py --plan 6.5`'s default.
+- **Prespecified sensitivity:** also without `aim_visibility_borderline` and
+  `aim_visibility_likely_borderline`.
+- **Full bank:** `--exclude-caveats ''`, reported alongside.
+- Every other caveat (`not_contract_reviewed`, `contract_changed_after_review`,
+  `failed_under_prior_contract`, `possible_second_defect`, `path_handling`,
+  `severity_open`) is available as a labelled filter, never as the primary
+  sample.
+
+Because every item is elicited either way, excluding an item at analysis by
+a rule fixed in advance is equivalent to excluding it before collection.
 
 Wave 1 predates this step: review after collection passed 13 of 41 items.
 
@@ -173,7 +195,7 @@ input-domain or output rule?
 |---|---|---|
 | yes | The aim and code establish the intended violation without an unstated rule. | Include. |
 | borderline | A plausible violation is visible, but it rests on a common convention or an ambiguous boundary. | Include; prespecified sensitivity analysis without this group (§6.5). |
-| no | Only the hidden contract establishes it, or it is an inert artifact the aim does not prohibit. | Exclude before collection; keep the record and the reason. |
+| no | Only the hidden contract establishes it, or it is an inert artifact the aim does not prohibit. | Left out of the primary analysis (elicited, recorded as a caveat). |
 
 Examples: AttributeError instead of TypeError on `None`, where the aim says
 nothing about exceptions, is **no**; a crash on an empty list is
@@ -237,7 +259,17 @@ the contracts:
    each item's intended bug beside the blind accounts. The question is
    whether a blind account identifies the *intended* bug, which catches a
    reviewer who finds "a bug" but a different one. Undecided after
-   discussion: the stricter flag. Flags go to `analysis/aim_visibility.csv`.
+   discussion: the stricter flag. Flags go to `analysis/aim_visibility.csv`
+   and into the caveats with `analysis/apply_aim_visibility.py --source
+   <option>`, which replaces an item's provisional `aim_visibility_likely_*`
+   rows with the adjudicated flag.
+
+**By option.** A or B: build the comparison sheet with `--human <export>`,
+adjudicate, apply. Under B, the human accounts cover the 66-item subset and
+the model's cover all 124; the extension rule above applies. C: either
+adjudicate on the model accounts alone, or let the contract review's
+provisional `aim_visibility_likely_*` caveats stand. Those were made by a
+reviewer who had seen the contracts, and the write-up says so.
 
 The item author on the team has read every contract, so their own view of
 aim visibility biases toward seeing the bug and serves only in
@@ -592,8 +624,9 @@ came back significant.
 prospective plan for wave 2, written after seeing wave 1 and declared as
 such.
 
-**Sample.** The frozen, reviewed bank (§1c): both generator banks, buggy
-items, two repeats, prompt version `2026-09-27-v2`. WCB clustered by
+**Sample.** All 124 items of both generator banks (§1c), buggy items, two
+repeats, elicitation prompt version `2026-09-27-v2`, less the primary
+aim-visibility exclusions fixed in §1c ("No freeze"). WCB clustered by
 `item_id`, run per (judge_family, judge_tuning) cell as in §6.1.
 
 **H1–H3 (replication).** The §6.1 contrasts unchanged: `self`,
@@ -622,9 +655,9 @@ is rival minus `self` (`frame.rival_vs_self_matrix`), so the fit is
 identical to H1–H3's and the same restricted wild cluster bootstrap tests
 it. `--plan 6.1` (the default) reproduces the locked wave-1 output unchanged.
 
-**Sensitivity (prespecified).** H1–H4 rerun without items flagged
-`borderline` on aim visibility (§1c). Items flagged `no` are not in the
-bank. Reported alongside the primary result, not in place of it.
+**Sensitivity (prespecified).** H1–H4 rerun (a) also without items flagged
+borderline on aim visibility, and (b) on the full bank with no exclusions
+(§1c). Both reported alongside the primary result, not in place of it.
 
 **Everything else** in §6.2 stays exploratory, including label effects by
 generator and source match.

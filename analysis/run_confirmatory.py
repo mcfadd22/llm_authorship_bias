@@ -12,7 +12,11 @@ family with one contrast per judge cell. H1-H3 are computed exactly as under
 
     python analysis/run_confirmatory.py                      # wave 1, 6.1 as locked
     python analysis/run_confirmatory.py --item-fe            # robustness variant
-    python analysis/run_confirmatory.py --plan 6.5 --elicitation-dir data/elicitation_wave2/gpt5_buggy
+    python analysis/run_confirmatory.py --plan 6.5 \
+        --elicitation-dir data/elicitation_wave2/gpt5_buggy data/elicitation_wave2/gemini_buggy \
+        --items-dir data/items_gpt5 data/items_gemini25pro      # primary (drops aim-visibility "no")
+    ... --exclude-caveats aim_visibility_no,aim_visibility_likely_no,aim_visibility_borderline,aim_visibility_likely_borderline
+    ... --exclude-caveats ''                                    # full bank
 """
 import argparse
 import sys
@@ -27,6 +31,11 @@ from frame import (CONTRASTS, H4, HYPOTHESES, RIVAL_VS_SELF_COL, design_matrix, 
 from wcb import holm, wcb_test  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
+CAVEATS = ROOT / "analysis" / "item_caveats.csv"
+# design.md 6.5: the primary wave-2 analysis leaves out items whose intended bug
+# cannot be seen from the judge-facing aim. After adjudication the flags are
+# aim_visibility_no; without a human pass, the contract review's likely-no calls.
+PRIMARY_EXCLUDE_CAVEATS = "aim_visibility_no,aim_visibility_likely_no"
 
 
 def add_item_fixed_effects(sub, y, X, clusters):
@@ -82,12 +91,14 @@ def stars(p):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--elicitation-dir", default=None)
-    ap.add_argument("--items-dir", default=None)
+    ap.add_argument("--elicitation-dir", nargs="+", default=None,
+                    help="one or more directories of elicitation .jsonl (e.g. each wave-2 leg)")
+    ap.add_argument("--items-dir", nargs="+", default=None,
+                    help="one or more item bank directories")
     ap.add_argument("--n-boot", type=int, default=4999)
     ap.add_argument("--seed", type=int, default=20260924)
-    ap.add_argument("--verdicts", default=None,
-                    help="CSV of item-bank review verdicts (item_id,verdict,note)")
+    ap.add_argument("--verdicts", nargs="+", default=None,
+                    help="CSV(s) of item-bank review verdicts (item_id,verdict,note), e.g. both banks")
     ap.add_argument("--exclude-verdicts", default="drop,not_a_bug",
                     help="comma-separated item verdicts to exclude when --verdicts is given")
     ap.add_argument("--exclude-twin-verdicts", default=None,
@@ -95,6 +106,14 @@ def main(argv=None):
                          "twin_not_minimal,twin_breaks_contract. A sensitivity check: the twin "
                          "is the clean-code control, so a non-minimal one differs from its item "
                          "in more than the planted bug")
+    ap.add_argument("--caveats", default=str(CAVEATS),
+                    help="per-item caveats CSV (item_id,caveat,detail)")
+    ap.add_argument("--exclude-caveats", default=None,
+                    help="comma-separated caveats whose items are left out. Default: none under "
+                         f"--plan 6.1; '{PRIMARY_EXCLUDE_CAVEATS}' under --plan 6.5 (its primary "
+                         "analysis). Pass '' for the full bank, or add e.g. "
+                         "aim_visibility_borderline,aim_visibility_likely_borderline for the "
+                         "prespecified sensitivity rerun")
     ap.add_argument("--item-fe", action="store_true",
                     help="add item fixed effects (robustness, NOT the locked 6.1 spec)")
     ap.add_argument("--plan", choices=["6.1", "6.5"], default="6.1",
@@ -105,8 +124,19 @@ def main(argv=None):
 
     df = load_frame(args.elicitation_dir, args.items_dir)
 
+    exclude_caveats = args.exclude_caveats
+    if exclude_caveats is None:
+        exclude_caveats = PRIMARY_EXCLUDE_CAVEATS if args.plan == "6.5" else ""
+    if exclude_caveats:
+        caveats = pd.read_csv(args.caveats)
+        wanted = set(exclude_caveats.split(","))
+        excluded = set(caveats.loc[caveats["caveat"].isin(wanted), "item_id"])
+        before = df["item_id"].nunique()
+        df = df[~df["item_id"].isin(excluded)]
+        print(f"caveat in {sorted(wanted)}: dropped {before - df['item_id'].nunique()} of {before} items")
+
     if args.verdicts:
-        verdicts = pd.read_csv(args.verdicts)
+        verdicts = pd.concat([pd.read_csv(v) for v in args.verdicts], ignore_index=True)
         drop = set(args.exclude_verdicts.split(","))
         excluded = set(verdicts.loc[verdicts["verdict"].isin(drop), "item_id"])
         before = df["item_id"].nunique()

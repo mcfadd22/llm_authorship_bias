@@ -26,8 +26,12 @@ extend the review to that whole category.
 
 **C. No further pass: call the banks sufficiently vetted.** No time from you. The banks have
 had a full specification-based review from me and a contract-blind pass by a model. We would
-still decide each item's flag between us, but no human contract-blind account would be behind
-them. The write-up would say exactly that.
+either decide each item's flag between us from those, or keep the calls from my review; either
+way no human contract-blind account would be behind them, and the write-up would say so.
+
+Whichever you pick, no item is removed from the banks: every item is run, and items whose
+problem isn't visible from the description are set aside in the analysis by a rule we have
+already fixed.
 
 ## Doing A or B
 
