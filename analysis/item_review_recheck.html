@@ -1,0 +1,217 @@
+<!doctype html><meta charset="utf-8">
+<title>Item bank review — 4 items</title>
+<style>
+ :root { --bg:#fbfaf8; --fg:#1c1a17; --mut:#6b6560; --line:#e3ded7;
+          --bug:#fdf0ed; --bugl:#c2410c; --fix:#eef6ef; --fixl:#15803d; }
+ @media (prefers-color-scheme: dark) { :root { --bg:#171614; --fg:#eceae6; --mut:#9a938c;
+          --line:#2f2c28; --bug:#2b1c17; --bugl:#f19d76; --fix:#16241a; --fixl:#86c99a; } }
+ * { box-sizing:border-box }
+ body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+ .wrap { max-width:900px; margin:0 auto; padding:0 20px 120px }
+ header.top { position:sticky; top:0; background:var(--bg); border-bottom:1px solid var(--line);
+   padding:14px 0; z-index:10; display:flex; gap:14px; align-items:center; flex-wrap:wrap }
+ h1 { font-size:17px; margin:0; font-weight:600 }
+ .meta { color:var(--mut); font-size:13px }
+ button { font:inherit; padding:6px 12px; border:1px solid var(--line); border-radius:6px;
+   background:transparent; color:var(--fg); cursor:pointer }
+ button:hover { border-color:var(--mut) }
+ #prog { margin-left:auto; font-variant-numeric:tabular-nums; font-size:13px; color:var(--mut) }
+ h2.fh { font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut);
+   margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line) }
+ .cnt { text-transform:none; letter-spacing:0 }
+ .card { border:1px solid var(--line); border-radius:10px; padding:16px; margin:0 0 16px }
+ .card header { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:9px }
+ .num { color:var(--mut); font-size:12px; font-variant-numeric:tabular-nums; min-width:22px }
+ .iid { font-size:12.5px; color:var(--fg) }
+ .tag { font-size:11px; padding:2px 8px; border-radius:20px; border:1px solid var(--line); color:var(--mut) }
+ .t-significant { border-color:var(--bugl); color:var(--bugl) }
+ .warn { font-size:11px; color:var(--bugl) }
+ .aim { margin:0 0 10px; font-size:13.5px; color:var(--mut) }
+ .code { font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace; border:1px solid var(--line);
+   border-radius:7px; padding:10px 0; overflow-x:auto; background:color-mix(in srgb,var(--fg) 3%,transparent) }
+ .ln { padding:0 12px; white-space:pre }
+ .ln.bug { background:var(--bug) } .ln.fix { background:var(--fix) }
+ .g { color:var(--mut); user-select:none }
+ .ln.bug .g { color:var(--bugl) } .ln.fix .g { color:var(--fixl) }
+ details { margin:10px 0 0; font-size:13.5px }
+ summary { cursor:pointer; color:var(--mut); font-size:12.5px }
+ details p { margin:8px 0 0 } .def,.fix { color:var(--mut); font-size:12.5px }
+ .verdict { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px;
+   padding-top:11px; border-top:1px solid var(--line); font-size:12.5px }
+ .verdict label { cursor:pointer; color:var(--mut) }
+ .verdict.twin { border-top:1px dashed var(--line) }
+ .vlabel { font-size:10.5px; text-transform:uppercase; letter-spacing:.07em;
+   color:var(--mut); min-width:34px }
+ .contract { margin:0 0 10px; font-size:13px; color:var(--fg);
+   border-left:2px solid var(--line); padding-left:9px }
+ .tag.open { border-style:dashed }
+ .verdict input[type=radio] { margin-right:4px }
+ .note { flex:1; min-width:160px; font:inherit; font-size:12.5px; padding:4px 8px;
+   border:1px solid var(--line); border-radius:5px; background:transparent; color:var(--fg) }
+ .card:has(input:checked) { border-color:var(--mut) }
+</style>
+<div class="wrap">
+<header class="top">
+  <h1>Item bank review</h1>
+  <span class="meta">4 items · severity open: 3 · trivial: 1</span>
+  <button onclick="exportCsv()">Export verdicts CSV</button>
+  <span id="prog">0 / 4 reviewed</span>
+</header>
+<p class="meta">Lines marked <span style="color:var(--bugl)">−</span> are the planted bug; <span style="color:var(--fixl)">+</span> is the clean twin's fix.
+Check each item against its declared flavor and tier. Verdicts stay in this page until exported.</p>
+<h2 class="fh">copy_paste_residue <span class="cnt">1 items</span></h2>
+<section class="card" data-flavor="copy_paste_residue" data-tier="trivial" id="i1">
+  <header>
+    <span class="num">1</span>
+    
+    <span class="tag flavor">copy_paste_residue</span>
+    <span class="tag tier t-trivial">trivial</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Produce new filenames by appending a given suffix before each file extension.</p>
+  <p class="contract"><strong>Contract:</strong> Inputs are bare filenames with no directory component. For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations. Produces no console output, and does not modify any argument passed to it: the returned value is the function&#x27;s only effect. The returned list is the same length and order as the input and contains only the transformed names; no other collection is built or retained.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def apply_suffix_before_extension(names, suffix):</div><div class="ln"><span class="g">  </span>    result = []</div><div class="ln"><span class="g">  </span>    for name in names:</div><div class="ln"><span class="g">  </span>        i = name.rfind(&quot;.&quot;)</div><div class="ln"><span class="g">  </span>        if i &gt; 0:</div><div class="ln"><span class="g">  </span>            base = name[:i]</div><div class="ln"><span class="g">  </span>            ext = name[i:]</div><div class="ln"><span class="g">  </span>            result.append(base + suffix + ext)</div><div class="ln"><span class="g">  </span>        else:</div><div class="ln"><span class="g">  </span>            result.append(name + suffix)</div><div class="ln bug"><span class="g">- </span>    print(&quot;Archived&quot;, len(names), &quot;items&quot;)</div><div class="ln"><span class="g">  </span>    return result</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">There is a stray print(&quot;Archived&quot;, len(names), &quot;items&quot;) line, a leftover from an archiving-related function. It produces console output contrary to the contract, while the filename transformation logic and returned list are otherwise correct.</p>
+    <p class="fix"><strong>Twin fix:</strong> Removed the stray print statement to eliminate console output, adhering to the contract. The transformation logic remains unchanged.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function containing an artifact clearly left over from adapting/duplicating other code rather than a reasoning error, which produces an unrequested, observable effect: a stray print or logging statement, a write to an argument or to state the function has no reason to touch, or a value stored under a neighbouring function&#x27;s key. Dead code, commented-out code and variables that are computed but never used do not qualify, because they change no behaviour. Distinguishing test: would a reviewer describe this as &#x27;forgot to clean up,&#x27; not &#x27;got the logic wrong&#x27;, and does it do something?</p>
+  </details>
+  <div class="verdict" data-item="rename_files__copy_paste_residue__gpt5__001">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v1" value="ok"> ok</label>
+    <label><input type="radio" name="v1" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v1" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v1" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v1" value="violates_contract" checked> breaks contract elsewhere</label>
+    <label><input type="radio" name="v1" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="rename_files__copy_paste_residue__gpt5__001">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t1" value="ok"> clean</label>
+    <label><input type="radio" name="t1" value="twin_not_clean" checked> has another flaw</label>
+    <label><input type="radio" name="t1" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t1" value="twin_not_minimal"> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="rfind(&quot;.&quot;) can select a dot in a directory name rather than the filename’s extension. Removing the print leaves that behavior.">
+  </div>
+</section><h2 class="fh">silent_failure <span class="cnt">3 items</span></h2>
+<section class="card" data-flavor="silent_failure" data-tier="open" id="i2">
+  <header>
+    <span class="num">2</span>
+    
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier open">severity open: trivial / significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
+  <p class="contract"><strong>Contract:</strong> Every order has an &#x27;id&#x27;. Returns the sum of amount times quantity for well-formed orders, and the IDs of the orders it could not process in failed_orders. Failed orders contribute nothing to revenue. In a well-formed order, quantity is an integer and amount is a number; an order that does not meet this is one the function could not process.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_orders(orders):</div><div class="ln"><span class="g">  </span>    total = 0.0</div><div class="ln"><span class="g">  </span>    failed = []</div><div class="ln"><span class="g">  </span>    for item in orders:</div><div class="ln"><span class="g">  </span>        try:</div><div class="ln"><span class="g">  </span>            a = item.get(&#x27;amount&#x27;)</div><div class="ln"><span class="g">  </span>            q = item.get(&#x27;quantity&#x27;)</div><div class="ln"><span class="g">  </span>            if a is None or q is None:</div><div class="ln bug"><span class="g">- </span>                failed.append(item.get(&#x27;id&#x27;))</div><div class="ln fix"><span class="g">+ </span>                failed.append(item.get(&#x27;id&#x27;) if hasattr(item, &#x27;get&#x27;) else None)</div><div class="ln"><span class="g">  </span>                continue</div><div class="ln"><span class="g">  </span>            total += float(a) * float(q)</div><div class="ln"><span class="g">  </span>        except Exception:</div><div class="ln bug"><span class="g">- </span>            pass</div><div class="ln fix"><span class="g">+ </span>            failed.append(item.get(&#x27;id&#x27;) if hasattr(item, &#x27;get&#x27;) else None)</div><div class="ln"><span class="g">  </span>    return {&#x27;revenue&#x27;: total, &#x27;failed_orders&#x27;: failed}</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">Exceptions during processing (e.g., bad types for amount/quantity) are caught and discarded with an empty except block, and the order ID is not added to failed_orders. The bug is the silent swallow in the &#x27;except Exception: pass&#x27; block.</p>
+    <p class="fix"><strong>Twin fix:</strong> Exceptions now mark the order as failed instead of being silently ignored. Added a safe append of the order ID in both missing-field and exception paths.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="process_orders_revenue__silent_failure__gpt5__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v2" value="ok" checked> ok</label>
+    <label><input type="radio" name="v2" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v2" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v2" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v2" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v2" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="process_orders_revenue__silent_failure__gpt5__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t2" value="ok"> clean</label>
+    <label><input type="radio" name="t2" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t2" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t2" value="twin_not_minimal" checked> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="Exception path silently loses a failed order. Twin also rewrites the existing missing-field path and adds a fallback for orders without IDs, which the revised contract excludes.">
+  </div>
+</section>
+<section class="card" data-flavor="silent_failure" data-tier="open" id="i3">
+  <header>
+    <span class="num">3</span>
+    
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier open">severity open: trivial / significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
+  <p class="contract"><strong>Contract:</strong> Every order has an &#x27;id&#x27;. Returns the sum of amount times quantity for well-formed orders, and the IDs of the orders it could not process in failed_orders. Failed orders contribute nothing to revenue. In a well-formed order, quantity is an integer and amount is a number; an order that does not meet this is one the function could not process.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def process_orders(orders):</div><div class="ln"><span class="g">  </span>    total_revenue = 0.0</div><div class="ln"><span class="g">  </span>    unprocessed = []</div><div class="ln"><span class="g">  </span>    for item in orders:</div><div class="ln"><span class="g">  </span>        try:</div><div class="ln"><span class="g">  </span>            total_revenue += item[&#x27;amount&#x27;] * item[&#x27;quantity&#x27;]</div><div class="ln"><span class="g">  </span>        except (KeyError, TypeError):</div><div class="ln bug"><span class="g">- </span>            pass</div><div class="ln fix"><span class="g">+ </span>            try:</div><div class="ln fix"><span class="g">+ </span>                unprocessed.append(item[&#x27;id&#x27;])</div><div class="ln fix"><span class="g">+ </span>            except (KeyError, TypeError):</div><div class="ln fix"><span class="g">+ </span>                unprocessed.append(None)</div><div class="ln"><span class="g">  </span>    return total_revenue, unprocessed</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is a silent failure in the form of an empty `except` block. When an order `item` is malformed (e.g., it is missing the &#x27;amount&#x27; or &#x27;quantity&#x27; key, or they are not numbers), the calculation raises a `KeyError` or `TypeError`. The `except` block catches these exceptions but then does nothing due to the `pass` statement. The error is detected but immediately discarded, so the function fails to add the problematic order&#x27;s ID to the `unprocessed` list, violating the contract to report which orders could not be processed.</p>
+    <p class="fix"><strong>Twin fix:</strong> The empty `except` block was fixed to append the ID of a failed order to the `unprocessed` list. This is done within a nested try-except block to robustly handle malformed orders that may also lack an &#x27;id&#x27;, preventing a crash.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="process_orders_revenue__silent_failure__gemini25pro__001">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v3" value="ok" checked> ok</label>
+    <label><input type="radio" name="v3" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v3" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v3" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v3" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v3" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="process_orders_revenue__silent_failure__gemini25pro__001">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t3" value="ok"> clean</label>
+    <label><input type="radio" name="t3" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t3" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t3" value="twin_not_minimal" checked> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="Swallowed processing failure is real. Twin adds an unnecessary nested fallback for orders without IDs.">
+  </div>
+</section>
+<section class="card" data-flavor="silent_failure" data-tier="open" id="i4">
+  <header>
+    <span class="num">4</span>
+    
+    <span class="tag flavor">silent_failure</span>
+    <span class="tag tier open">severity open: trivial / significant</span>
+    
+  </header>
+  <p class="aim"><strong>Stated aim:</strong> Process a batch of orders, calculate the total revenue, and report which orders could not be processed.</p>
+  <p class="contract"><strong>Contract:</strong> Every order has an &#x27;id&#x27;. Returns the sum of amount times quantity for well-formed orders, and the IDs of the orders it could not process in failed_orders. Failed orders contribute nothing to revenue. In a well-formed order, quantity is an integer and amount is a number; an order that does not meet this is one the function could not process.</p>
+  <div class="code"><div class="ln"><span class="g">  </span>def calculate_totals(entries):</div><div class="ln"><span class="g">  </span>    total = 0.0</div><div class="ln"><span class="g">  </span>    failed_ids = []</div><div class="ln"><span class="g">  </span>    for entry in entries:</div><div class="ln"><span class="g">  </span>        try:</div><div class="ln fix"><span class="g">+ </span>            _ = entry[&#x27;id&#x27;]</div><div class="ln"><span class="g">  </span>            total += entry[&#x27;amount&#x27;] * entry[&#x27;quantity&#x27;]</div><div class="ln bug"><span class="g">- </span>        except KeyError:</div><div class="ln bug"><span class="g">- </span>            pass</div><div class="ln fix"><span class="g">+ </span>        except (KeyError, TypeError):</div><div class="ln fix"><span class="g">+ </span>            if isinstance(entry, dict) and &#x27;id&#x27; in entry:</div><div class="ln fix"><span class="g">+ </span>                failed_ids.append(entry[&#x27;id&#x27;])</div><div class="ln"><span class="g">  </span>    return (total, failed_ids)</div></div>
+  <details><summary>Generator rationale &amp; flavor definition</summary>
+    <p class="rat">The bug is a silent failure in the &#x27;except KeyError&#x27; block. The code is designed to handle malformed orders that might be missing an &#x27;amount&#x27; or &#x27;quantity&#x27; key. The &#x27;try...except&#x27; block correctly catches the resulting KeyError, but the &#x27;except&#x27; block contains only &#x27;pass&#x27;. This means the error is detected and then completely ignored. The function fails to add the ID of the failed order to the &#x27;failed_ids&#x27; list, violating the contract&#x27;s requirement to report all unprocessed orders. The function then incorrectly returns an empty list for &#x27;failed_ids&#x27; even when failures have occurred.</p>
+    <p class="fix"><strong>Twin fix:</strong> The except block now correctly appends a failed order&#x27;s ID, and also catches TypeError to handle non-numeric values. The logic now ensures an order has an &#x27;id&#x27; to be processed and safely handles malformed entries to prevent crashes.</p>
+    <p class="def"><strong>Declared flavor means:</strong> A function that catches an exception, checks a return/status code, or detects an error condition, and then continues execution without surfacing it (no re-raise, no logging, no return of an error indicator) - the failure must be detected and discarded by the code, not simply unhandled (an uncaught exception is missing_edge_case/logic_error, not silent_failure - the defining feature here is a swallowed error, not an absent check).</p>
+  </details>
+  <div class="verdict" data-item="process_orders_revenue__silent_failure__gemini25pro__000">
+    <span class="vlabel">item</span>
+    <label><input type="radio" name="v4" value="ok" checked> ok</label>
+    <label><input type="radio" name="v4" value="wrong_flavor"> wrong flavor</label>
+    <label><input type="radio" name="v4" value="wrong_tier"> wrong tier</label>
+    <label><input type="radio" name="v4" value="not_a_bug"> not a real bug</label>
+    <label><input type="radio" name="v4" value="violates_contract"> breaks contract elsewhere</label>
+    <label><input type="radio" name="v4" value="drop"> drop</label>
+  </div>
+  <div class="verdict twin" data-twin="process_orders_revenue__silent_failure__gemini25pro__000">
+    <span class="vlabel">twin</span>
+    <label><input type="radio" name="t4" value="ok"> clean</label>
+    <label><input type="radio" name="t4" value="twin_not_clean"> has another flaw</label>
+    <label><input type="radio" name="t4" value="twin_breaks_contract"> breaks the contract</label>
+    <label><input type="radio" name="t4" value="twin_not_minimal" checked> changes too much</label>
+    <input class="note" type="text" placeholder="note (optional)" value="Swallowed KeyError is real. Twin also adds an ID check, broadens the caught exceptions, and conditionally omits failed entries.">
+  </div>
+</section>
+</div>
+<script>
+const upd=()=>document.getElementById('prog').textContent=
+  document.querySelectorAll('.verdict input[type=radio]:checked').length+' / 4 reviewed';
+document.addEventListener('change',upd);
+function exportCsv(){
+  const out=[['item_id','verdict','twin_verdict','note']];
+  document.querySelectorAll('.verdict[data-item]').forEach(v=>{
+    const t=document.querySelector('.verdict.twin[data-twin="'+v.dataset.item+'"]');
+    const c=v.querySelector('input[type=radio]:checked');
+    const tc=t?t.querySelector('input[type=radio]:checked'):null;
+    out.push([v.dataset.item, c?c.value:'', tc?tc.value:'', t?t.querySelector('.note').value:'']);
+  });
+  const csv=out.map(r=>r.map(f=>'"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='item_verdicts.csv'; a.click();
+}
+</script>

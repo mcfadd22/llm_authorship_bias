@@ -246,7 +246,7 @@
     {
       "id": "process_orders_revenue",
       "text": "Process a batch of orders, calculate the total revenue, and report which orders could not be processed.",
-      "contract": "Every order has an 'id'. Returns the sum of amount times quantity for well-formed orders, and the IDs of the orders it could not process in failed_orders. Failed orders contribute nothing to revenue.",
+      "contract": "Every order has an 'id'. Returns the sum of amount times quantity for well-formed orders, and the IDs of the orders it could not process in failed_orders. Failed orders contribute nothing to revenue. In a well-formed order, quantity is an integer and amount is a number; an order that does not meet this is one the function could not process.",
       "contract_status": "confirmed",
       "flavors": {
         "silent_failure": {
@@ -260,7 +260,7 @@
     {
       "id": "rename_files",
       "text": "Produce new filenames by appending a given suffix before each file extension.",
-      "contract": "For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations. Produces no console output, and does not modify any argument passed to it: the returned value is the function's only effect. The returned list is the same length and order as the input and contains only the transformed names; no other collection is built or retained.",
+      "contract": "Inputs are bare filenames with no directory component. For each input filename, returns the filename with the suffix inserted before its final extension, in input order. Does not rename files or perform filesystem operations. Produces no console output, and does not modify any argument passed to it: the returned value is the function's only effect. The returned list is the same length and order as the input and contains only the transformed names; no other collection is built or retained.",
       "contract_status": "confirmed",
       "flavors": {
         "copy_paste_residue": {
