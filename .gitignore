@@ -47,3 +47,5 @@ analysis/item_review.html
 !analysis/aim_visibility*.csv
 # the drawn audit selection is a record of a seeded draw, not regenerable output
 !analysis/aim_audit_selection.csv
+# per-item caveats recorded when contract review closed
+!analysis/item_caveats.csv

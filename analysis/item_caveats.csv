@@ -1,0 +1,49 @@
+item_id,caveat,detail
+process_orders_revenue__silent_failure__gemini25pro__000,not_contract_reviewed,Regenerated under prompt 2026-09-27-v5 (integer-quantity clause); review closed before it was contract-reviewed. Model aim-only pass only.
+process_orders_revenue__silent_failure__gemini25pro__001,not_contract_reviewed,Regenerated under prompt 2026-09-27-v5 (integer-quantity clause); review closed before it was contract-reviewed. Model aim-only pass only.
+process_orders_revenue__silent_failure__gpt5__000,not_contract_reviewed,Regenerated under prompt 2026-09-27-v5 (integer-quantity clause); review closed before it was contract-reviewed. Model aim-only pass only.
+process_orders_revenue__silent_failure__gpt5__001,not_contract_reviewed,Regenerated under prompt 2026-09-27-v5 (integer-quantity clause); review closed before it was contract-reviewed. Model aim-only pass only.
+process_orders_revenue__silent_failure__gemini25pro__001,possible_second_defect,Checks quantity but not amount; a non-numeric amount raises TypeError into the swallowed path. Model pass found only convention-based issues.
+rename_files__copy_paste_residue__gemini25pro__000,contract_changed_after_review,Bare-filename clause added after this item's contract review; not re-checked against it.
+rename_files__copy_paste_residue__gemini25pro__001,contract_changed_after_review,Bare-filename clause added after this item's contract review; not re-checked against it.
+rename_files__copy_paste_residue__gpt5__000,contract_changed_after_review,Bare-filename clause added after this item's contract review; not re-checked against it.
+rename_files__copy_paste_residue__gpt5__001,contract_changed_after_review,Bare-filename clause added after this item's contract review; not re-checked against it.
+rename_files__copy_paste_residue__gpt5__001,failed_under_prior_contract,"Item violates_contract and twin twin_not_clean for rfind('.') matching a directory; out of scope under the bare-filename clause, accepted without re-check."
+rename_files__copy_paste_residue__gpt5__000,path_handling,"Uses os.path.basename, a no-op on a bare filename; not taken as treating inputs as paths."
+apply_discount_codes__silent_failure__gemini25pro__001,contract_changed_after_review,"Clause 'every table entry is a valid numeric discount' added after acceptance; additive, not re-checked."
+apply_discount_codes__silent_failure__gpt5__000,contract_changed_after_review,"Clause 'every table entry is a valid numeric discount' added after acceptance; additive, not re-checked."
+apply_discount_codes__silent_failure__gpt5__001,contract_changed_after_review,"Clause 'every table entry is a valid numeric discount' added after acceptance; additive, not re-checked."
+build_invoice_summary__copy_paste_residue__gemini25pro__000,aim_visibility_likely_no,Extra returned key is wrong only under the contract's 'exactly' clause.
+build_invoice_summary__copy_paste_residue__gemini25pro__001,aim_visibility_likely_no,Extra returned key is wrong only under the contract's 'exactly' clause.
+parse_csv_header__missing_edge_case__gemini25pro__000,aim_visibility_likely_no,AttributeError vs. TypeError on None; the aim says nothing about exceptions.
+parse_csv_header__missing_edge_case__gemini25pro__001,aim_visibility_likely_no,AttributeError vs. TypeError on None; the aim says nothing about exceptions.
+parse_csv_header__missing_edge_case__gpt5__000,aim_visibility_likely_no,AttributeError vs. TypeError on None; the aim says nothing about exceptions.
+parse_csv_header__missing_edge_case__gpt5__001,aim_visibility_likely_no,AttributeError vs. TypeError on None; the aim says nothing about exceptions.
+rename_files__copy_paste_residue__gemini25pro__000,aim_visibility_likely_no,Extra collection is wrong only under the contract.
+rename_files__copy_paste_residue__gemini25pro__001,aim_visibility_likely_no,Extra collection is wrong only under the contract.
+build_invoice_summary__copy_paste_residue__gpt5__000,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+build_invoice_summary__copy_paste_residue__gpt5__001,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+cart_total__copy_paste_residue__gemini25pro__000,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+cart_total__copy_paste_residue__gemini25pro__001,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+cart_total__copy_paste_residue__gpt5__000,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+cart_total__copy_paste_residue__gpt5__001,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+format_address_block__copy_paste_residue__gemini25pro__000,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+format_address_block__copy_paste_residue__gemini25pro__001,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+format_address_block__copy_paste_residue__gpt5__000,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+format_address_block__copy_paste_residue__gpt5__001,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+rename_files__copy_paste_residue__gpt5__000,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+rename_files__copy_paste_residue__gpt5__001,aim_visibility_likely_borderline,Residue is a side effect (print or write) the aim does not forbid.
+average_temperature__missing_edge_case__gemini25pro__000,aim_visibility_likely_borderline,Empty-list crash; model aim-only pass found no issue.
+average_temperature__missing_edge_case__gemini25pro__001,aim_visibility_likely_borderline,Empty-list crash; model aim-only pass found no issue.
+add_note__known_trap__gemini25pro__000,severity_open,severity_tier null; exclude from any severity contrast.
+add_note__known_trap__gemini25pro__001,severity_open,severity_tier null; exclude from any severity contrast.
+add_note__known_trap__gpt5__000,severity_open,severity_tier null; exclude from any severity contrast.
+add_note__known_trap__gpt5__001,severity_open,severity_tier null; exclude from any severity contrast.
+parse_config__silent_failure__gemini25pro__000,severity_open,severity_tier null; exclude from any severity contrast.
+parse_config__silent_failure__gemini25pro__001,severity_open,severity_tier null; exclude from any severity contrast.
+parse_config__silent_failure__gpt5__000,severity_open,severity_tier null; exclude from any severity contrast.
+parse_config__silent_failure__gpt5__001,severity_open,severity_tier null; exclude from any severity contrast.
+process_orders_revenue__silent_failure__gemini25pro__000,severity_open,severity_tier null; exclude from any severity contrast.
+process_orders_revenue__silent_failure__gemini25pro__001,severity_open,severity_tier null; exclude from any severity contrast.
+process_orders_revenue__silent_failure__gpt5__000,severity_open,severity_tier null; exclude from any severity contrast.
+process_orders_revenue__silent_failure__gpt5__001,severity_open,severity_tier null; exclude from any severity contrast.
