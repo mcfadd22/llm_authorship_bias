@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parent.parent
 BASELINE = "none"
 CONTRASTS = ["self", "human_developer", "generic_ai", "other_model_pooled"]
 HYPOTHESES = {"H1": "q_blame", "H2": "q_intentionality", "H3": "q_explanation"}
+# design.md 6.5: wave-2 rival-vs-self tests, each its own family
+H4 = {"H4a": "q_blame", "H4b": "q_intentionality", "H4c": "q_explanation"}
 
 
 def _generator_family(generation_model):
@@ -123,6 +125,29 @@ def design_matrix(sub):
         "other_model_pooled": label.isin(["other_model_A", "other_model_B"]),
     }
     X = np.column_stack([np.ones(len(sub))] + [c.to_numpy(dtype=float) for c in cols.values()])
+    y = sub["scale_response"].to_numpy(dtype=float)
+    clusters = sub["item_id"].to_numpy()
+    return y, X, clusters
+
+
+RIVAL_VS_SELF_COL = 4
+
+
+def rival_vs_self_matrix(sub):
+    """design_matrix reparameterised so column 4 is `other_model_pooled - self` (design.md 6.5).
+
+    Columns: intercept, self-or-rival, human_developer, generic_ai, rival. A self
+    row gets intercept + b1 and a rival row intercept + b1 + b4, so b4 is the
+    rival-minus-self difference. It spans the same space as design_matrix, so
+    the fit is identical; only which coefficient wcb_test tests changes, and
+    dropping column 4 imposes self == rival for the restricted bootstrap.
+    """
+    import numpy as np
+
+    label = sub["author_label"]
+    rival = label.isin(["other_model_A", "other_model_B"])
+    cols = [(label == "self") | rival, label == "human_developer", label == "generic_ai", rival]
+    X = np.column_stack([np.ones(len(sub))] + [c.to_numpy(dtype=float) for c in cols])
     y = sub["scale_response"].to_numpy(dtype=float)
     clusters = sub["item_id"].to_numpy()
     return y, X, clusters

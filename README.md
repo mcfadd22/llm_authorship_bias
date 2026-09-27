@@ -95,7 +95,7 @@ confirmatory/exploratory pre-registration split.
    Estimated cost at two repeats, from wave-1 token actuals: $205 + $82 per bank,
    **~$575 total** for both banks at 62 items. Run `--dry-run` on each leg first to confirm against current
    prices. Needs `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`.
-5. **Analysis** — `analysis/run_confirmatory.py` implements design.md §6.1: label contrasts
+5. **Analysis** — `analysis/run_confirmatory.py` implements design.md §6.1 (default) and, with `--plan 6.5`, the wave-2 plan, which adds H4. §6.1 is label contrasts
    against `none` with `other_model_A/B` pooled, wild cluster bootstrap clustered by `item_id`,
    Holm-corrected within each (hypothesis × judge_family × judge_tuning) family.
 
@@ -103,6 +103,7 @@ confirmatory/exploratory pre-registration split.
    python analysis/run_confirmatory.py                                  # as locked
    python analysis/run_confirmatory.py --verdicts analysis/item_verdicts-6.csv
    python analysis/run_confirmatory.py --item-fe                        # robustness variant
+   python analysis/run_confirmatory.py --plan 6.5 --elicitation-dir <wave-2 dir>  # + H4, rival vs self
    python analysis/run_truth_diagnostic.py    # generator-model confound probe (exploratory)
    python analysis/build_item_review.py       # HTML sheet for vetting a bank
    ```

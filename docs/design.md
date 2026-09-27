@@ -495,6 +495,12 @@ so no one-sided test is justified. Three outcomes, each its own family:
 One contrast per family per judge cell, so there is no Holm step inside a
 family, and H1–H3 keep their four-contrast families unchanged.
 
+Implemented as `run_confirmatory.py --plan 6.5` (committed before wave-2
+collection). The model is `design_matrix` reparameterised so one coefficient
+is rival minus `self` (`frame.rival_vs_self_matrix`), so the fit is
+identical to H1–H3's and the same restricted wild cluster bootstrap tests
+it. `--plan 6.1` (the default) reproduces the locked wave-1 output unchanged.
+
 **Everything else** in §6.2 stays exploratory, including label effects by
 generator and source match.
 
