@@ -106,3 +106,16 @@ def test_real_repo_config_loads():
     assert len(cfg["questions"]) == 5
     assert cfg["questions"][0]["id"] == "q_bug_present"
     assert cfg["questions"][0]["applies_to"] == ["buggy", "clean"]
+
+
+def test_openrouter_is_a_known_provider():
+    from elicitation.config import KNOWN_PROVIDERS
+    assert "openrouter" in KNOWN_PROVIDERS
+
+
+def test_shipped_judge_pool_is_one_judge_per_family():
+    import json
+    from pathlib import Path
+    judges = json.loads((Path(__file__).resolve().parent.parent / "config" / "judge_models.json")
+                        .read_text())["judges"]
+    assert sorted(j["family"] for j in judges) == ["claude", "gemini", "gpt"]

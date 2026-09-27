@@ -1,3 +1,4 @@
+from elicitation.prompt import PROMPT_VERSION
 import json
 from pathlib import Path
 
@@ -113,7 +114,7 @@ def test_elicit_one_scaled_row_shape():
     assert record["raw_response"] == json.dumps({"score": 4, "explanation": "because the code has a mutable default argument"})
     assert record["response_model"] == "served"
     assert record["usage"] == {"input_tokens": 1}
-    assert record["prompt_version"] == "2026-09-11-v1"
+    assert record["prompt_version"] == PROMPT_VERSION
     assert record["code_version"] == "buggy"
     assert "timestamp" in record
     assert "item_index" not in record

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 DEFAULT_CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
-KNOWN_PROVIDERS = ("anthropic", "openai")
+KNOWN_PROVIDERS = ("anthropic", "openai", "openrouter")
 QUESTION_KINDS = ("scaled", "free", "detect")
 CODE_VERSIONS = ("buggy", "clean")
 

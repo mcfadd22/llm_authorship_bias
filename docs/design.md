@@ -549,9 +549,10 @@ explicitly stated)
 - **Source match.** Where a judge's family also generated a bank: does that
   judge's response to its own family's label differ between code its family
   wrote and code another family wrote, relative to the same code under the
-  other labels? With the current pools only the GPT-5 judge qualifies
-  (GPT-5 bank vs. Gemini bank); the Claude judges see no Claude-generated code
-  in wave 2.
+  other labels? Two judges qualify, symmetrically: GPT-5 (GPT-5 bank vs.
+  Gemini bank) and Gemini 2.5 Pro (Gemini bank vs. GPT-5 bank). Each is the
+  same model that generated its own-family bank. Claude Sonnet 5 sees no
+  Claude-generated code in wave 2 and is the no-own-code comparison.
 - **Authorship belief, two analyses from the same question** (added
   2026-09-27). The six-label crossing already collects both; they answer
   different questions and are reported separately, never pooled.
@@ -664,11 +665,17 @@ generator and source match.
 
 ## 7. Open decisions
 
-- **Judge families.** Wave 2 has three judges but two families (Claude,
-  GPT). A claim of a general LLM-judging-LLM effect needs at least three
-  families; a Gemini judge would also give Gemini a source-match condition
-  (§6.2), since a Gemini bank exists. Judges are the main cost lever, so
-  size them after items and questions are fixed.
+- ~~**Judge families.**~~ — **Resolved 2026-09-27**: one judge per family,
+  Claude Sonnet 5, GPT-5 and Gemini 2.5 Pro (via OpenRouter). Three families
+  is the floor for a general LLM-judging-LLM claim. Gemini is already in the
+  rival pool, so no rotation changes, and as the Gemini bank's generator it
+  gives a second, symmetric source-match condition (§6.2). Opus 5 was
+  dropped: it was about half the wave-2 cost, and a second Claude adds a
+  within-family check but no family. That loses the per-judge replication
+  of Opus's wave-1 results (e.g. its ability-vs-diligence `self` shift of
+  +1.24), and `judge_tuning` no longer varies within a family. DeepSeek was
+  ruled out because it did the contract-blind review; Llama because the
+  newest available is April 2025.
 - ~~**`copy_paste_residue`.** Whether inert residue is a defect the battery
   can sensibly ask about~~ — **Resolved 2026-09-27**: no. The bank is
   behavioural, so the flavour is narrowed to residue with an observable

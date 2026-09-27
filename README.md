@@ -104,9 +104,11 @@ confirmatory/exploratory pre-registration split.
    python scripts/run_elicitation.py --repeats 2 --items-dir data/items_gemini25pro_clean --out-dir $B/gemini_clean
    ```
 
-   Estimated cost at two repeats, from wave-1 token actuals: $205 + $82 per bank,
-   **~$575 total** for both banks at 62 items. Run `--dry-run` on each leg first to confirm against current
-   prices. Needs `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`.
+   Judges (from 2026-09-27): Claude Sonnet 5, GPT-5 and Gemini 2.5 Pro, one per family; Opus 5
+   was dropped after wave 1. Dry-run estimate at two repeats: ~$136 per buggy leg and ~$54 per
+   clean leg, **~$382 total** (assumes ~1,200 output tokens per call; reasoning models can run
+   higher). Run `--dry-run` on each leg first to confirm. Needs `ANTHROPIC_API_KEY`,
+   `OPENAI_API_KEY` and `OPENROUTER_API_KEY` (Gemini is reached through OpenRouter).
 5. **Analysis** — `analysis/run_confirmatory.py` implements design.md §6.1 (default) and, with `--plan 6.5`, the wave-2 plan, which adds H4. §6.1 is label contrasts
    against `none` with `other_model_A/B` pooled, wild cluster bootstrap clustered by `item_id`,
    Holm-corrected within each (hypothesis × judge_family × judge_tuning) family.

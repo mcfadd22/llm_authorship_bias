@@ -15,7 +15,8 @@ from elicitation.writer import load_items
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
-KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY"}
+KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY",
+           "openrouter": "OPENROUTER_API_KEY"}
 
 # USD per 1M tokens (input, output). Sanity figures for --dry-run, not accounting.
 PRICE_TABLE = {
@@ -23,6 +24,7 @@ PRICE_TABLE = {
     "claude-sonnet-5": (2.00, 10.00),
     "claude-haiku-4-5": (1.00, 5.00),
     "gpt-5": (1.25, 10.00),
+    "google/gemini-2.5-pro": (1.25, 10.00),
 }
 EST_INPUT_CHARS_PER_TOKEN = 4
 # Wave-1 actuals: mean output was 1013-1856 tokens/call depending on judge and
