@@ -72,8 +72,8 @@ confirmatory/exploratory pre-registration split.
    python scripts/run_elicitation.py --repeats 2 --items-dir data/items_gemini25pro_clean --out-dir $B/gemini_clean
    ```
 
-   Estimated cost at two repeats, from wave-1 token actuals: $212 + $85 per bank,
-   **~$593 total**. Run `--dry-run` on each leg first to confirm against current
+   Estimated cost at two repeats, from wave-1 token actuals: $205 + $82 per bank,
+   **~$575 total** for both banks at 62 items. Run `--dry-run` on each leg first to confirm against current
    prices. Needs `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`.
 4. **Analysis** — `analysis/run_confirmatory.py` implements design.md §6.1: label contrasts
    against `none` with `other_model_A/B` pooled, wild cluster bootstrap clustered by `item_id`,
