@@ -28,6 +28,9 @@ data/*
 # Contract-blind model reviews (design.md 1c): paid-for, and the record of a review decision.
 !data/aim_review/
 !data/aim_review/*.jsonl
+# Items and twins removed by review, kept as the record of what was excluded and why.
+!data/excluded/
+!data/excluded/**
 
 # Environment / secrets
 .env

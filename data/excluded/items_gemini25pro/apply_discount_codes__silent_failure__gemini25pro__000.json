@@ -1,0 +1,25 @@
+{
+  "item_id": "apply_discount_codes__silent_failure__gemini25pro__000",
+  "cell_id": "apply_discount_codes__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "def process_discounts(order_amount, applied_codes, available_discounts):\n    current_amount = float(order_amount)\n    rejected_codes = []\n\n    for c in applied_codes:\n        if c in available_discounts:\n            try:\n                op_type, op_val = available_discounts[c]\n                if op_type == 'fixed':\n                    current_amount -= op_val\n                elif op_type == 'percent':\n                    current_amount *= (1 - op_val / 100.0)\n            except TypeError:\n                pass\n        else:\n            rejected_codes.append(c)\n\n    return {'total': current_amount, 'rejected': rejected_codes}",
+  "rationale": "The bug is a `silent_failure` implemented with a `try...except TypeError: pass` block. If a discount entry in `available_discounts` is present but contains a value of the wrong type (e.g., a string instead of a number for a percentage calculation), the resulting `TypeError` is caught and ignored. This causes the function to fail to apply a discount that it found, leading to an incorrect final 'total', without adding the problematic code to the 'rejected' list. The failure is thus detected by the `try...except` but then concealed.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:45:04.021048+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

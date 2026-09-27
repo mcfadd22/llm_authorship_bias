@@ -20,9 +20,9 @@
   },
   "code_version": "clean",
   "source_item_id": "process_orders_revenue__silent_failure__gpt5__001",
-  "code": "def process_orders(orders):\n    total = 0.0\n    failed = []\n    for order in orders:\n        oid = None\n        try:\n            oid = order.get(\"id\")\n            amt = order.get(\"amount\")\n            qty = order.get(\"quantity\")\n            if oid is None or amt is None or qty is None:\n                raise ValueError\n            val = float(amt) * int(qty)\n            if val != val or val < 0:\n                raise ValueError\n            total += val\n        except Exception:\n            if oid is not None:\n                failed.append(oid)\n            continue\n    return {\"revenue\": total, \"failed_orders\": failed}\n",
-  "fix_rationale": "Exceptions now record the corresponding order ID in failed_orders, with oid initialized before the try to ensure availability. Revenue is still unaffected by failures, and total is initialized as a float for consistency.",
+  "code": "def process_orders(orders):\n    total = 0\n    failed = []\n    for order in orders:\n        oid = None\n        try:\n            oid = order.get(\"id\")\n            amt = order.get(\"amount\")\n            qty = order.get(\"quantity\")\n            if oid is None or amt is None or qty is None:\n                raise ValueError\n            val = float(amt) * int(qty)\n            if val != val or val < 0:\n                raise ValueError\n            total += val\n        except Exception:\n            failed.append(oid)\n            continue\n    return {\"revenue\": total, \"failed_orders\": failed}\n",
+  "fix_rationale": "Initialize oid before the try and append it to failed in the except block so failed order IDs are recorded while keeping revenue unchanged.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T20:50:48.896044+00:00",
+  "timestamp": "2026-09-27T20:05:05.771147+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

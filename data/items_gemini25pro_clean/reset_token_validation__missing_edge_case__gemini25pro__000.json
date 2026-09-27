@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "reset_token_validation__missing_edge_case__gemini25pro__000",
-  "code": "import hmac\nimport time\n\ndef validate_token(user_id, submitted_token, stored_data):\n    if not submitted_token:\n        return False\n\n    user_record = stored_data.get(user_id)\n    if not user_record:\n        return False\n\n    expected_token = user_record.get('token')\n    expiry_time = user_record.get('expiry')\n\n    if not expected_token or not expiry_time:\n        return False\n\n    is_match = hmac.compare_digest(submitted_token, expected_token)\n    is_expired = time.time() > expiry_time\n\n    return is_match and not is_expired",
-  "fix_rationale": "An initial check was added to verify that the submitted token is not None or empty, preventing a TypeError from hmac.compare_digest and satisfying the contract to reject malformed tokens.",
+  "code": "import time\nimport hmac\n\ndef check_token(submitted_value, identity, records):\n    if not isinstance(submitted_value, str) or not submitted_value:\n        return False\n\n    record = records.get(identity)\n\n    if not record:\n        return False\n\n    stored_value = record.get('token')\n    expiry_ts = record.get('expires_at')\n\n    if stored_value is None or expiry_ts is None:\n        return False\n\n    token_match = isinstance(stored_value, str) and hmac.compare_digest(submitted_value, stored_value)\n\n    if token_match and time.time() < expiry_ts:\n        return True\n\n    return False",
+  "fix_rationale": "An initial check was added to reject empty, None, or non-string submitted tokens as required by the contract. The string comparison was also replaced with a timing-safe comparison using `hmac.compare_digest` to fix a latent security vulnerability.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:55:16.673002+00:00",
+  "timestamp": "2026-09-27T20:07:39.766589+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

@@ -34,8 +34,13 @@ from build_item_review import diff_html, load  # noqa: E402
 REVIEW_DIR = ROOT / "data" / "aim_review"
 
 
-def load_reviews(review_dir):
-    """{item_id: [(reviewer, issues), ...]} from every non-pilot reviewer file."""
+def load_reviews(review_dir, current=None):
+    """{item_id: [(reviewer, issues), ...]} from every non-pilot reviewer file.
+
+    With `current` ({item_id: prompt}), keep only reviews of the item's current
+    code: a regenerated item keeps its item_id, and its old reviews stay in the
+    file as history.
+    """
     out = {}
     for path in sorted(Path(review_dir).glob("*.jsonl")):
         if path.name.startswith("pilot-"):
@@ -43,6 +48,8 @@ def load_reviews(review_dir):
         with path.open() as fh:
             for line in fh:
                 r = json.loads(line)
+                if current is not None and current.get(r["item_id"]) != r["messages"][0]["content"]:
+                    continue
                 out.setdefault(r["item_id"], []).append((r["reviewer"], r["issues"]))
     return out
 
@@ -99,7 +106,10 @@ def main(argv=None):
     rows = []
     for d in args.items_dir:
         rows += load(d, d.parent / f"{d.name}_clean")
-    reviews = load_reviews(args.review_dir)
+    from run_aim_review import build_messages
+    aims = {a["id"]: a for a in json.loads((ROOT / "config" / "stated_aims.json").read_text())["aims"]}
+    reviews = load_reviews(args.review_dir,
+                           {it["item_id"]: build_messages(it, aims)[0]["content"] for it in rows})
     humans = {}
     if args.human:
         by_token = {token(it["item_id"]): it["item_id"] for it in rows}

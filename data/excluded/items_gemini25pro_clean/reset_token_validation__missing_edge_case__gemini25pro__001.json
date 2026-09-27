@@ -1,0 +1,27 @@
+{
+  "item_id": "reset_token_validation__missing_edge_case__gemini25pro__001",
+  "cell_id": "reset_token_validation__missing_edge_case",
+  "sample_idx": 1,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "reset_token_validation__missing_edge_case__gemini25pro__001",
+  "code": "import time\n\ndef validate_token(user_id, submitted_token, stored_token_record):\n    if not submitted_token:\n        return False\n\n    if stored_token_record is None:\n        return False\n\n    if stored_token_record['user_id'] != user_id:\n        return False\n\n    if stored_token_record['token'] != submitted_token:\n        return False\n\n    if time.time() > stored_token_record['expires_at']:\n        return False\n\n    return True",
+  "fix_rationale": "The function was corrected to handle a `None` value for `stored_token_record` by returning `False` early, preventing a crash. A check was also added to return `False` for an empty `submitted_token` to fully satisfy the contract.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:55:43.334385+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

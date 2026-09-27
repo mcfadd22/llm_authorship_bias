@@ -1,0 +1,25 @@
+{
+  "item_id": "format_address_block__copy_paste_residue__gpt5__000",
+  "cell_id": "format_address_block__copy_paste_residue",
+  "sample_idx": 0,
+  "aim_id": "format_address_block",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def format_shipping_address(data):\n    name = data.get('shipping_name', '')\n    street = data.get('shipping_street', '')\n    city = data.get('shipping_city', '')\n    postcode = data.get('shipping_postcode', '')\n    billing_line = \"{}\\n{}\\n{} {}\".format(\n        data.get('billing_name', ''),\n        data.get('billing_street', ''),\n        data.get('billing_city', ''),\n        data.get('billing_postcode', '')\n    )\n    line3 = (city + \" \" + postcode).strip()\n    return \"\\n\".join([name, street, line3])",
+  "rationale": "Copy-paste residue: an unused variable 'billing_line' is built from billing fields, clearly leftover from a billing formatter. It has no effect on the returned shipping-only address, making the defect trivial.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T22:47:37.390213+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

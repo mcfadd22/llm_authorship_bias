@@ -1,0 +1,27 @@
+{
+  "item_id": "cart_total__copy_paste_residue__gpt5__000",
+  "cell_id": "cart_total__copy_paste_residue",
+  "sample_idx": 0,
+  "aim_id": "cart_total",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gpt5",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "cart_total__copy_paste_residue__gpt5__000",
+  "code": "def total_price_with_shipping(cart, shipping_fee):\n    total = 0.0\n    for item in cart:\n        price = item.get('price', 0)\n        qty = item.get('quantity', 1)\n        try:\n            p = float(price)\n        except (TypeError, ValueError):\n            p = 0.0\n        try:\n            q = int(qty)\n        except (TypeError, ValueError):\n            q = 1\n        total += p * q\n    return total + shipping_fee",
+  "fix_rationale": "Removed the stray print statement to ensure no console output, preserving all other logic so the function returns only the computed total plus shipping.",
+  "generation_model": "openai/gpt-5",
+  "timestamp": "2026-09-25T22:51:22.693852+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

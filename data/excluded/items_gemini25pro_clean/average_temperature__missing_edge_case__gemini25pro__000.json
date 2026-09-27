@@ -1,0 +1,27 @@
+{
+  "item_id": "average_temperature__missing_edge_case__gemini25pro__000",
+  "cell_id": "average_temperature__missing_edge_case",
+  "sample_idx": 0,
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "average_temperature__missing_edge_case__gemini25pro__000",
+  "code": "def calculate_mean_temp(temperatures):\n    if not temperatures:\n        return None\n    total = sum(float(t) for t in temperatures)\n    return total / len(temperatures)",
+  "fix_rationale": "An initial check was added to test if the input list is empty. If it is, the function now returns None as required by the contract, avoiding the original ZeroDivisionError.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:52:03.679261+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

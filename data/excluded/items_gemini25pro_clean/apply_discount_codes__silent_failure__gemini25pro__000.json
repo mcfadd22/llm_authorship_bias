@@ -1,0 +1,27 @@
+{
+  "item_id": "apply_discount_codes__silent_failure__gemini25pro__000",
+  "cell_id": "apply_discount_codes__silent_failure",
+  "sample_idx": 0,
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  },
+  "code_version": "clean",
+  "source_item_id": "apply_discount_codes__silent_failure__gemini25pro__000",
+  "code": "def process_discounts(order_amount, applied_codes, available_discounts):\n    current_amount = float(order_amount)\n    rejected_codes = []\n\n    for c in applied_codes:\n        if c in available_discounts:\n            try:\n                op_type, op_val = available_discounts[c]\n                if op_type == 'fixed':\n                    current_amount -= op_val\n                elif op_type == 'percent':\n                    current_amount *= (1 - op_val / 100.0)\n                else:\n                    rejected_codes.append(c)\n            except (TypeError, ValueError):\n                rejected_codes.append(c)\n        else:\n            rejected_codes.append(c)\n\n    return {'total': current_amount, 'rejected': rejected_codes}",
+  "fix_rationale": "Instead of silently failing on an invalid discount, the function now correctly adds the problematic code to the 'rejected' list. This was achieved by modifying the `except` block and adding a case to handle unknown discount types, ensuring all invalid codes are reported.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:52:48.009242+00:00",
+  "prompt_version": "2026-09-25-clean-v2"
+}

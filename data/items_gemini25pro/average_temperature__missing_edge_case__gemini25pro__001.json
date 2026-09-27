@@ -9,11 +9,11 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def compute_mean_temperature(readings):\n    converted_readings = []\n    for item in readings:\n        converted_readings.append(float(item))\n    \n    return sum(converted_readings) / len(converted_readings)",
-  "rationale": "The function fails to handle the edge case of an empty input list. The contract requires returning `None` for an empty list, but the code proceeds to the final calculation. This attempts to divide by the length of the list, which is zero, resulting in a `ZeroDivisionError`.",
+  "code": "def calculate_average(data_points):\n    numeric_values = []\n    for item in data_points:\n        numeric_values.append(float(item))\n\n    total_sum = sum(numeric_values)\n    item_count = len(numeric_values)\n\n    return total_sum / item_count",
+  "rationale": "The function fails to handle the edge case of an empty input list. The contract specifies that it should return `None` for an empty list. Instead, if `data_points` is empty, the code proceeds to the final line and attempts to divide by `item_count` which is 0, causing a `ZeroDivisionError`.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:41:59.209330+00:00",
-  "prompt_version": "2026-09-25-v2",
+  "timestamp": "2026-09-27T20:02:24.126536+00:00",
+  "prompt_version": "2026-09-27-v3",
   "provenance": {
     "source": "generated",
     "source_id": null,

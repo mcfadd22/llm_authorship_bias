@@ -9,11 +9,11 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "import hmac\nimport time\n\ndef validate_token(user_id, submitted_token, stored_data):\n    user_record = stored_data.get(user_id)\n    if not user_record:\n        return False\n\n    expected_token = user_record.get('token')\n    expiry_time = user_record.get('expiry')\n\n    if not expected_token or not expiry_time:\n        return False\n\n    is_match = hmac.compare_digest(submitted_token, expected_token)\n    is_expired = time.time() > expiry_time\n\n    return is_match and not is_expired",
-  "rationale": "The bug is a missing edge case check that leads to an unhandled exception. The function uses `hmac.compare_digest` for a secure token comparison. However, this function raises a `TypeError` if one of its arguments is `None`. The code does not check if `submitted_token` is `None` before passing it to `hmac.compare_digest`. According to the contract, a malformed token (which includes `None`) should result in `False`, but instead, the function crashes. This represents a failure to handle a degenerate input.",
+  "code": "import time\n\ndef check_token(submitted_value, identity, records):\n    record = records.get(identity)\n\n    if not record:\n        return False\n\n    stored_value = record.get('token')\n    expiry_ts = record.get('expires_at')\n\n    if stored_value is None or expiry_ts is None:\n        return False\n\n    if submitted_value == stored_value and time.time() < expiry_ts:\n        return True\n\n    return False",
+  "rationale": "The function is missing a check to reject empty or None inputs for the `submitted_value` parameter. The contract requires returning `False` for \"an empty or malformed submitted token\". The current code proceeds with the comparison, so if the stored token for a user happens to also be an empty string or None (and the token is not expired), the function will incorrectly return `True`. The bug is the absence of an initial validation check for the submitted token itself.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:41:47.495173+00:00",
-  "prompt_version": "2026-09-25-v2",
+  "timestamp": "2026-09-27T20:04:25.070412+00:00",
+  "prompt_version": "2026-09-27-v3",
   "provenance": {
     "source": "generated",
     "source_id": null,

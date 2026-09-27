@@ -9,11 +9,11 @@
     "significant"
   ],
   "severity_tier": "significant",
-  "code": "def process_discounts(order_amount, applied_codes, available_discounts):\n    current_amount = float(order_amount)\n    rejected_codes = []\n\n    for c in applied_codes:\n        if c in available_discounts:\n            try:\n                op_type, op_val = available_discounts[c]\n                if op_type == 'fixed':\n                    current_amount -= op_val\n                elif op_type == 'percent':\n                    current_amount *= (1 - op_val / 100.0)\n            except TypeError:\n                pass\n        else:\n            rejected_codes.append(c)\n\n    return {'total': current_amount, 'rejected': rejected_codes}",
-  "rationale": "The bug is a `silent_failure` implemented with a `try...except TypeError: pass` block. If a discount entry in `available_discounts` is present but contains a value of the wrong type (e.g., a string instead of a number for a percentage calculation), the resulting `TypeError` is caught and ignored. This causes the function to fail to apply a discount that it found, leading to an incorrect final 'total', without adding the problematic code to the 'rejected' list. The failure is thus detected by the `try...except` but then concealed.",
+  "code": "def calculate_final_amount(order_sum, requested_codes, available_discounts):\n    current_sum = order_sum\n    rejected = []\n    for item in requested_codes:\n        if item in available_discounts:\n            val = available_discounts[item]\n            try:\n                current_sum -= val\n            except TypeError:\n                pass\n        else:\n            rejected.append(item)\n    return {'total': current_sum, 'rejected': rejected}",
+  "rationale": "The function uses a `try...except TypeError: pass` block when subtracting the discount value from the total. If a discount's value in the `available_discounts` map is not a number (e.g., a string), the subtraction fails, and the `except` block silently ignores the error. This results in the discount not being applied, making the final 'total' incorrect, without adding the code to the 'rejected' list or otherwise indicating a problem.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:45:04.021048+00:00",
-  "prompt_version": "2026-09-25-v2",
+  "timestamp": "2026-09-27T20:02:48.535047+00:00",
+  "prompt_version": "2026-09-27-v3",
   "provenance": {
     "source": "generated",
     "source_id": null,

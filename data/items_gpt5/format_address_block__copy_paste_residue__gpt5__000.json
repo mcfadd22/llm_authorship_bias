@@ -9,11 +9,11 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "def format_shipping_address(data):\n    name = data.get('shipping_name', '')\n    street = data.get('shipping_street', '')\n    city = data.get('shipping_city', '')\n    postcode = data.get('shipping_postcode', '')\n    billing_line = \"{}\\n{}\\n{} {}\".format(\n        data.get('billing_name', ''),\n        data.get('billing_street', ''),\n        data.get('billing_city', ''),\n        data.get('billing_postcode', '')\n    )\n    line3 = (city + \" \" + postcode).strip()\n    return \"\\n\".join([name, street, line3])",
-  "rationale": "Copy-paste residue: an unused variable 'billing_line' is built from billing fields, clearly leftover from a billing formatter. It has no effect on the returned shipping-only address, making the defect trivial.",
+  "code": "def format_address_block(shipping):\n    r = shipping.get('recipient', '')\n    s = shipping.get('street', '')\n    c = shipping.get('city', '')\n    p = shipping.get('postcode', '')\n    res = \"\\n\".join([r, s, f\"{c} {p}\".strip()])\n    print(\"Invoice billing label generated\")\n    return res",
+  "rationale": "The function correctly builds the shipping address block, but includes a leftover console print referencing billing/invoice (print(\"Invoice billing label generated\")), which is an observable side effect unrelated to the stated aim and violates the no-output clause.",
   "generation_model": "openai/gpt-5",
-  "timestamp": "2026-09-25T22:47:37.390213+00:00",
-  "prompt_version": "2026-09-25-v2",
+  "timestamp": "2026-09-27T20:01:25.431398+00:00",
+  "prompt_version": "2026-09-27-v3",
   "provenance": {
     "source": "generated",
     "source_id": null,

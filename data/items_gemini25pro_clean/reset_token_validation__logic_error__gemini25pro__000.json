@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "reset_token_validation__logic_error__gemini25pro__000",
-  "code": "import time\n\ndef check_authorization(principal_id, credential, stored_data):\n    try:\n        if not credential or not stored_data:\n            return False\n\n        id_match = (stored_data.get('principal_id') == principal_id)\n        credential_match = (stored_data.get('credential_value') == credential)\n        within_validity_period = (time.time() < stored_data.get('valid_until', 0))\n\n        return id_match and credential_match and within_validity_period\n    except (AttributeError, TypeError):\n        return False",
-  "fix_rationale": "The logical operator in the return statement was changed from `or` to `and` to require all validation checks to pass, and a try-except block was added to prevent crashes from malformed data.",
+  "code": "def check_authorization(token_string, subject_id, data_source, timestamp):\n    if not token_string:\n        return False\n\n    user_record = data_source.get(subject_id)\n    if not user_record or not isinstance(user_record, dict):\n        return False\n\n    token_is_correct = (token_string == user_record.get('value'))\n\n    expiry = user_record.get('expiry')\n    token_is_current = isinstance(expiry, (int, float)) and (timestamp < expiry)\n\n    if token_is_correct and token_is_current:\n        return True\n    \n    return False",
+  "fix_rationale": "The logical operator was changed from `or` to `and` to ensure a token is valid only if it both matches and is unexpired. The expiration check was also made robust against non-numeric data to prevent a potential crash, and an unused import was removed.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:55:24.660114+00:00",
+  "timestamp": "2026-09-27T20:07:23.380352+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "apply_discount_codes__silent_failure__gemini25pro__000",
-  "code": "def process_discounts(order_amount, applied_codes, available_discounts):\n    current_amount = float(order_amount)\n    rejected_codes = []\n\n    for c in applied_codes:\n        if c in available_discounts:\n            try:\n                op_type, op_val = available_discounts[c]\n                if op_type == 'fixed':\n                    current_amount -= op_val\n                elif op_type == 'percent':\n                    current_amount *= (1 - op_val / 100.0)\n                else:\n                    rejected_codes.append(c)\n            except (TypeError, ValueError):\n                rejected_codes.append(c)\n        else:\n            rejected_codes.append(c)\n\n    return {'total': current_amount, 'rejected': rejected_codes}",
-  "fix_rationale": "Instead of silently failing on an invalid discount, the function now correctly adds the problematic code to the 'rejected' list. This was achieved by modifying the `except` block and adding a case to handle unknown discount types, ensuring all invalid codes are reported.",
+  "code": "def calculate_final_amount(order_sum, requested_codes, available_discounts):\n    current_sum = order_sum\n    rejected = []\n    for item in requested_codes:\n        if item in available_discounts and isinstance(available_discounts[item], (int, float)):\n            current_sum -= available_discounts[item]\n        else:\n            rejected.append(item)\n    return {'total': current_sum, 'rejected': rejected}",
+  "fix_rationale": "The fix replaces the faulty try-except block with a direct conditional check to validate that a discount code exists and its value is numeric. Codes that are not found or have non-numeric values are now correctly added to the rejected list, instead of being silently ignored.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:52:48.009242+00:00",
+  "timestamp": "2026-09-27T20:05:56.542386+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

@@ -127,7 +127,10 @@ frozen before collection. Two kinds of exclusion are kept apart:
 - **Eligibility exclusions (before collection)** define the primary wave-2
   sample. Items that fail review are removed from the bank or regenerated
   and re-reviewed. They are never elicited, so there is nothing to
-  re-include.
+  re-include. Removed files go to `data/excluded/<bank>/`, with verdict,
+  reason and a hash of the code in `data/excluded/excluded.csv`. A
+  regenerated item keeps its `item_id`; the hash tells the versions apart,
+  and model reviews are matched to the current code, not the id.
 - **Sensitivity exclusions (after collection)** apply to items kept in the
   bank but carrying a recorded caveat, e.g. twins flagged `twin_not_minimal`.
   `--verdicts` / `--exclude-twin-verdicts` in `run_confirmatory.py` drop
@@ -208,12 +211,13 @@ the contracts:
    chooses the extent (`docs/aim-review-for-collaborator.md`), and the
    choice is recorded here:
    - **A, full:** all 124 items, `analysis/aim_only_review.html`.
-   - **B, subset:** 67 items, `analysis/aim_only_review_selection.html`,
+   - **B, subset:** 70 items, `analysis/aim_only_review_selection.html`,
      drawn by `analysis/select_aim_audit.py` (seed 20260927) into
      `analysis/aim_audit_selection.csv`: every item where the model found
-     no issue (17) or only a convention-based one (30), items the contract
+     no issue (14) or only a convention-based one (36), items the contract
      review flagged as likely "no" (all already included), and 20 of the
-     remaining 77 sampled in proportion to flavour. Rule: if 2 or more
+     remaining 74 sampled in proportion to flavour. Redrawn after the
+     2026-09-27 regeneration, before any human pass began. Rule: if 2 or more
      sampled items within a flavour turn out not to be aim-visible, that
      flavour gets a full human pass. The reviewer is not told how the subset
      was chosen until after.

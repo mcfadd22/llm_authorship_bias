@@ -1,0 +1,25 @@
+{
+  "item_id": "reset_token_validation__logic_error__gemini25pro__000",
+  "cell_id": "reset_token_validation__logic_error",
+  "sample_idx": 0,
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "logic_error",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "significant"
+  ],
+  "severity_tier": "significant",
+  "code": "import time\n\ndef check_authorization(principal_id, credential, stored_data):\n    if not credential or not stored_data:\n        return False\n\n    id_match = (stored_data.get('principal_id') == principal_id)\n    credential_match = (stored_data.get('credential_value') == credential)\n    within_validity_period = (time.time() < stored_data.get('valid_until', 0))\n\n    return id_match or credential_match or within_validity_period",
+  "rationale": "The bug is a logical error where the boolean conditions for validation are combined with `or` instead of the correct `and`. This is on the final line: `return id_match or credential_match or within_validity_period`. As a result, the function will incorrectly return `True` if *any* of the conditions are met (e.g., if the principal ID matches, even if the credential is wrong and expired), rather than requiring *all* conditions to be met. This significantly undermines the security check.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T20:41:21.009385+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

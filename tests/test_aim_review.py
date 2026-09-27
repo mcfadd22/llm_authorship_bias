@@ -107,3 +107,12 @@ def test_audit_selection_takes_every_weak_item_and_a_proportional_sample():
     assert len(sampled) == 4
     assert sum("__f1__" in i for i in sampled) == 2   # 9 vs 10 remaining stated items
     assert sel.select(reviews, [], 4, 1) == sel.select(reviews, [], 4, 1)
+
+
+def test_resume_reviews_a_regenerated_item_again(tmp_path):
+    out = tmp_path / "r.jsonl"
+    old = ar.build_messages(ITEM, AIMS)
+    out.write_text(json.dumps({"item_id": ITEM["item_id"], "messages": old}) + "\n")
+    assert (ITEM["item_id"], old[0]["content"]) in ar.done_prompts(out)
+    regenerated = dict(ITEM, code=ITEM["code"] + "\n# changed")
+    assert (ITEM["item_id"], ar.build_messages(regenerated, AIMS)[0]["content"]) not in ar.done_prompts(out)

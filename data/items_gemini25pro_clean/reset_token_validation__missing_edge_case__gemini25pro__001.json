@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "reset_token_validation__missing_edge_case__gemini25pro__001",
-  "code": "import time\n\ndef validate_token(user_id, submitted_token, stored_token_record):\n    if not submitted_token:\n        return False\n\n    if stored_token_record is None:\n        return False\n\n    if stored_token_record['user_id'] != user_id:\n        return False\n\n    if stored_token_record['token'] != submitted_token:\n        return False\n\n    if time.time() > stored_token_record['expires_at']:\n        return False\n\n    return True",
-  "fix_rationale": "The function was corrected to handle a `None` value for `stored_token_record` by returning `False` early, preventing a crash. A check was also added to return `False` for an empty `submitted_token` to fully satisfy the contract.",
+  "code": "import time\n\ndef validate_item(item_key, owner_id, item_database):\n    entry = item_database.get(item_key)\n\n    if not entry:\n        return False\n\n    if entry.get(\"owner_id\") != owner_id:\n        return False\n\n    if time.time() > (entry.get(\"expiration_ts\") or 0):\n        return False\n\n    return True\n",
+  "fix_rationale": "Fixed a potential TypeError by handling cases where the expiration timestamp is missing or explicitly None. The corrected code now treats such malformed records as expired by providing a default fallback value, ensuring the function returns False as required.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:55:43.334385+00:00",
+  "timestamp": "2026-09-27T20:06:46.719635+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

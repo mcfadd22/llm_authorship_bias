@@ -19,9 +19,9 @@
   },
   "code_version": "clean",
   "source_item_id": "average_temperature__missing_edge_case__gemini25pro__001",
-  "code": "def compute_mean_temperature(readings):\n    if not readings:\n        return None\n\n    converted_readings = []\n    for item in readings:\n        converted_readings.append(float(item))\n    \n    return sum(converted_readings) / len(converted_readings)",
-  "fix_rationale": "The original function caused a ZeroDivisionError when given an empty list, but the contract requires it to return None. An initial check for an empty list was added to return None in that case, preventing the error.",
+  "code": "def calculate_average(data_points):\n    if not data_points:\n        return None\n\n    numeric_values = []\n    for item in data_points:\n        numeric_values.append(float(item))\n\n    total_sum = sum(numeric_values)\n    item_count = len(numeric_values)\n\n    return total_sum / item_count",
+  "fix_rationale": "The original function caused a ZeroDivisionError for an empty list. A check was added at the beginning of the function to return None if the input list is empty, as specified by the contract.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:52:11.868616+00:00",
+  "timestamp": "2026-09-27T20:05:45.077698+00:00",
   "prompt_version": "2026-09-25-clean-v2"
 }

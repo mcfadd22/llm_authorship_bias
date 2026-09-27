@@ -1,0 +1,25 @@
+{
+  "item_id": "cart_total__copy_paste_residue__gemini25pro__000",
+  "cell_id": "cart_total__copy_paste_residue",
+  "sample_idx": 0,
+  "aim_id": "cart_total",
+  "bug_flavor": "copy_paste_residue",
+  "generator_tag": "gemini25pro",
+  "expected_severity_tiers": [
+    "trivial"
+  ],
+  "severity_tier": "trivial",
+  "code": "def calculate_total(cart_items, shipping_fee):\n    subtotal = 0.0\n    num_items = 0\n    for entry in cart_items:\n        price = entry.get('price', 0)\n        qty = entry.get('quantity', 1)\n        num_items += qty\n        subtotal += price * qty\n\n    final_total = subtotal + shipping_fee\n    return final_total",
+  "rationale": "The bug is the initialization and incrementing of the `num_items` variable. This variable is calculated within the loop but is never used in the final result or returned. This is a copy-paste residue artifact, where logic for counting the total number of items was likely copied from a related function (e.g., one that reports both price and item count) and was not removed. The function's primary result (the total price) is calculated correctly, so the bug is trivial.",
+  "generation_model": "google/gemini-2.5-pro",
+  "timestamp": "2026-09-25T22:48:13.953266+00:00",
+  "prompt_version": "2026-09-25-v2",
+  "provenance": {
+    "source": "generated",
+    "source_id": null,
+    "source_label": null,
+    "source_license": null,
+    "mutation_operator": null,
+    "modifications": null
+  }
+}

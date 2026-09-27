@@ -9,11 +9,11 @@
     "trivial"
   ],
   "severity_tier": "trivial",
-  "code": "import time\n\ndef validate_token(user_id, submitted_token, stored_token_record):\n    if stored_token_record['user_id'] != user_id:\n        return False\n\n    if stored_token_record['token'] != submitted_token:\n        return False\n\n    if time.time() > stored_token_record['expires_at']:\n        return False\n\n    return True",
-  "rationale": "The bug is a missing check to handle a `None` value for the `stored_token_record` parameter. If `stored_token_record` is `None` (a degenerate input representing a token not found for a user), the first line of the function, `stored_token_record['user_id']`, will raise a `TypeError` and crash. A correct implementation would first check if `stored_token_record` is `None` and return `False`. This is a missing edge case because the main validation logic is correct, but it fails to handle a specific, plausible boundary input.",
+  "code": "import time\n\ndef validate_item(item_key, owner_id, item_database):\n    entry = item_database.get(item_key)\n\n    if not entry:\n        return False\n\n    if entry.get(\"owner_id\") != owner_id:\n        return False\n\n    if time.time() > entry.get(\"expiration_ts\"):\n        return False\n\n    return True\n",
+  "rationale": "The function calls `entry.get(\"expiration_ts\")` without providing a default value. If a record fetched from `item_database` is missing the `\"expiration_ts\"` key, `.get()` will return `None`. The subsequent comparison `time.time() > None` will raise a `TypeError`, causing the function to crash. This constitutes a failure to handle a degenerate input (a malformed record), which is a form of missing edge case.",
   "generation_model": "google/gemini-2.5-pro",
-  "timestamp": "2026-09-25T20:41:35.380385+00:00",
-  "prompt_version": "2026-09-25-v2",
+  "timestamp": "2026-09-27T20:02:13.370546+00:00",
+  "prompt_version": "2026-09-27-v3",
   "provenance": {
     "source": "generated",
     "source_id": null,

@@ -118,6 +118,16 @@ def done_ids(path):
         return {json.loads(line)["item_id"] for line in fh if line.strip()}
 
 
+def done_prompts(path):
+    """(item_id, prompt) pairs already reviewed. A regenerated item keeps its item_id
+    but not its code, so resuming on item_id alone would skip it."""
+    if not path.exists():
+        return set()
+    with path.open() as fh:
+        rows = [json.loads(line) for line in fh if line.strip()]
+    return {(r["item_id"], r["messages"][0]["content"]) for r in rows}
+
+
 def parse(content):
     text = content.strip()
     m = re.match(r"^```(?:json)?\s*\n(.*)\n```$", text, re.DOTALL)
@@ -188,7 +198,9 @@ def main(argv=None):
     aims = {a["id"]: a for a in json.loads((ROOT / "config" / "stated_aims.json").read_text())["aims"]}
     items = load_items(args.items_dir)
     out = args.out_dir / f"{slug(args.reviewer)}.jsonl"
-    todo = [it for it in items if it["item_id"] not in done_ids(out)][: args.limit]
+    done = done_prompts(out)
+    todo = [it for it in items
+            if (it["item_id"], build_messages(it, aims)[0]["content"]) not in done][: args.limit]
     settings = {"max_tokens": MAX_OUTPUT_TOKENS, "seed": args.seed}
 
     if args.dry_run:
