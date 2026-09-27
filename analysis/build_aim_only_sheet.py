@@ -40,6 +40,9 @@ def parse_args(argv=None):
                     default=[ROOT / "data" / "items_gpt5", ROOT / "data" / "items_gemini25pro"])
     ap.add_argument("--out", type=Path, default=ROOT / "analysis" / "aim_only_review.html")
     ap.add_argument("--seed", default=SEED)
+    ap.add_argument("--only", type=Path, default=None,
+                    help="CSV with an item_id column (e.g. analysis/aim_audit_selection.csv): "
+                         "build the sheet for these items only")
     return ap.parse_args(argv)
 
 
@@ -77,6 +80,11 @@ def main(argv=None):
     args = parse_args(argv)
     aims = {a["id"]: a for a in json.loads((ROOT / "config" / "stated_aims.json").read_text())["aims"]}
     items = load_items(args.items_dir)
+    if args.only:
+        import csv
+        with args.only.open() as fh:
+            keep = {r["item_id"] for r in csv.DictReader(fh)}
+        items = [it for it in items if it["item_id"] in keep]
     items.sort(key=lambda it: token(it["item_id"], args.seed))
     body = "".join(card(it, n, aims, args.seed) for n, it in enumerate(items, 1))
     fields = json.dumps(FIELDS)

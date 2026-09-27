@@ -90,3 +90,20 @@ def test_comparison_maps_human_tokens_back_to_items(tmp_path):
     comp.main(["--items-dir", str(bank), "--review-dir", str(reviews), "--human", str(human),
                "--out", str(out)])
     assert "UNIQUE-INPUT-MARK" in out.read_text()
+
+
+def test_audit_selection_takes_every_weak_item_and_a_proportional_sample():
+    sys.path.insert(0, str(ROOT / "analysis"))
+    import select_aim_audit as sel
+    stated = [{"basis": "stated"}]
+    reviews = {f"a__f{f}__g__{i:03d}": stated for f in (1, 2) for i in range(10)}
+    reviews["a__f1__g__900"] = []
+    reviews["a__f2__g__901"] = [{"basis": "convention"}]
+    strata = sel.select(reviews, ["a__f1__g__000"], n_sample=4, seed=1)
+    assert strata["a__f1__g__900"] == "model_none"
+    assert strata["a__f2__g__901"] == "model_convention"
+    assert strata["a__f1__g__000"] == "contract_review_flag"
+    sampled = [i for i, s in strata.items() if s == "sampled_stated"]
+    assert len(sampled) == 4
+    assert sum("__f1__" in i for i in sampled) == 2   # 9 vs 10 remaining stated items
+    assert sel.select(reviews, [], 4, 1) == sel.select(reviews, [], 4, 1)

@@ -158,10 +158,23 @@ nothing about exceptions, is **no**; a crash on an empty list is
 this check must not have it, so it is done by reviewers who have not seen
 the contracts:
 
-1. **Human blind pass** (the collaborator, who has not seen the contracts):
-   every item on `analysis/aim_only_review.html`, which shows exactly the
-   aim sentence and code the judge sees under `none` and nothing else,
-   keyed by opaque tokens. The reviewer names, in their own words, the
+1. **Human blind pass** (the collaborator, who has not seen the contracts),
+   on a sheet showing exactly the aim sentence and code the judge sees
+   under `none` and nothing else, keyed by opaque tokens. The collaborator
+   chooses the extent (`docs/aim-review-for-collaborator.md`), and the
+   choice is recorded here:
+   - **A, full:** all 124 items, `analysis/aim_only_review.html`.
+   - **B, subset:** 67 items, `analysis/aim_only_review_selection.html`,
+     drawn by `analysis/select_aim_audit.py` (seed 20260927) into
+     `analysis/aim_audit_selection.csv`: every item where the model found
+     no issue (17) or only a convention-based one (30), items the contract
+     review flagged as likely "no" (all already included), and 20 of the
+     remaining 77 sampled in proportion to flavour. Rule: if 2 or more
+     sampled items within a flavour turn out not to be aim-visible, that
+     flavour gets a full human pass. The reviewer is not told how the subset
+     was chosen until after.
+   - **C, none:** flags rest on the model pass and adjudication by a team
+     member who has seen the contracts, and the write-up says so. The reviewer names, in their own words, the
    input where the code goes wrong, what it does, what it should do, and
    whether the aim itself or a convention establishes that.
 2. **Model blind pass**: every item, same view and same instruction,
