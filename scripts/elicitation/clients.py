@@ -41,6 +41,10 @@ DETECT_SCHEMA: Dict = {
 }
 
 MAX_OUTPUT_TOKENS = 16000
+# Hard cap for OpenAI-compatible gateways. Under a JSON-schema grammar whitespace is always a
+# legal next token, and a model that slips into emitting it never stops; the trickle of bytes
+# also keeps the read timeout from firing. Reasoning counts toward this (Qwen3 averages ~1.3k).
+OPENAI_COMPAT_MAX_TOKENS = 4096
 
 
 @dataclass
@@ -146,6 +150,7 @@ class OpenAIJudgeClient:
         response = self._client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": prompt}],
+            max_tokens=OPENAI_COMPAT_MAX_TOKENS,
             response_format={
                 "type": "json_schema",
                 "json_schema": {"name": "judgment", "schema": schema, "strict": True},

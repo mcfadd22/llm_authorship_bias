@@ -165,6 +165,7 @@ def test_openai_client_builds_request_and_parses_json(monkeypatch):
     kwargs = holder["inst"].chat.completions.last_kwargs
     assert kwargs["model"] == "gpt-5"
     assert kwargs["messages"] == [{"role": "user", "content": "the prompt"}]
+    assert kwargs["max_tokens"] == 4096
     rf = kwargs["response_format"]
     assert rf["type"] == "json_schema"
     assert rf["json_schema"]["schema"] == SCALED_SCHEMA
