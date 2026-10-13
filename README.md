@@ -127,6 +127,13 @@ confirmatory/exploratory pre-registration split.
    python analysis/build_item_review.py       # HTML sheet for vetting a bank
    ```
 
+## Wave 2, open-weight pilot (complete, 2026-10-13)
+
+Two open-weight judges over the full wave-2 design via OpenRouter: `qwen3-32b` and
+`gpt-oss-120b`, 10,416 rows each in `data/elicitation_wave2/<leg>/<judge>.jsonl`, tracked in
+git. Results, incidents, and the decision-rule outcome: `docs/status-2026-10-13.md`;
+analysis output `analysis/confirmatory_pilot_openweight.csv`. The API-judge wave is next.
+
 ## Wave 1 results (complete, 2026-09-13)
 
 Raw elicitation rows are tracked in `data/elicitation/{judge_id}.jsonl` to enable analysis
