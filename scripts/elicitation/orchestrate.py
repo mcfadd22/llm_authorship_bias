@@ -1,5 +1,5 @@
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +15,20 @@ from .rivals import resolve_rivals
 from .writer import append_row, load_existing_keys
 
 RETRYABLE = (ElicitationError, anthropic.APIError, openai.OpenAIError)
+
+# Wall-clock ceiling per attempt. HTTP read timeouts only fire when bytes stop arriving;
+# a provider trickling tokens can hold a worker for the whole output cap. Past this many
+# seconds the attempt is abandoned (its thread finishes in the background) and retried.
+CALL_DEADLINE_S = 240
+_deadline_pool = ThreadPoolExecutor(max_workers=512, thread_name_prefix="judge-call")
+
+
+def _ask_with_deadline(client: JudgeClient, prompt: str, schema: Dict):
+    future = _deadline_pool.submit(client.ask, prompt, schema)
+    try:
+        return future.result(timeout=CALL_DEADLINE_S)
+    except FutureTimeout:
+        raise ElicitationError(f"no complete response within {CALL_DEADLINE_S}s")
 
 # Sonnet 5 occasionally returns {"answer": ""} (or "...") on the free-text question after
 # spending its output budget on thinking; treat text with no letters as a retryable failure.
@@ -82,7 +96,7 @@ def elicit_one(
         if attempt:
             time.sleep(min(60, 5 * 2 ** (attempt - 1)))  # 5s, 10s, 20s ... between attempts
         try:
-            response = client.ask(prompt, schema)
+            response = _ask_with_deadline(client, prompt, schema)
             _validate(question, response.data)
             break
         except RETRYABLE as exc:
