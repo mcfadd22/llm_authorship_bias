@@ -102,6 +102,7 @@ def elicit_one(
             "prompt": prompt,
             "raw_response": response.raw_text,
             "response_model": response.model,
+            "response_provider": response.provider,
             "usage": response.usage,
             "thinking": response.thinking,
             "timestamp": datetime.now(timezone.utc).isoformat(),

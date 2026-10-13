@@ -147,6 +147,7 @@ def _patch_openai(monkeypatch, response):
     def factory(**kwargs):
         inst = _FakeOpenAI(response)
         inst.init_kwargs = kwargs
+        inst.init_kwargs = kwargs
         holder["inst"] = inst
         return inst
 
@@ -224,7 +225,20 @@ def test_make_client_routes_openrouter_through_the_openai_compatible_client(monk
     assert client.model == "google/gemini-2.5-pro"
     assert captured["base_url"] == "https://openrouter.ai/api/v1"
     assert captured["api_key"] == "test-key-not-real"
-    assert captured["timeout"] == 180 and captured["max_retries"] == 2
+    assert captured["timeout"] == 120 and captured["max_retries"] == 0
+
+
+def test_openrouter_judge_routing_block_is_sent_as_extra_body(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "k")
+    response = _OAIResponse(_OAIChoice(_OAIMessage('{"score": 3, "explanation": "ok"}')))
+    response.provider = "DeepInfra"
+    holder = _patch_openai(monkeypatch, response)
+    client = make_client({"provider": "openrouter", "model": "openai/gpt-oss-120b",
+                          "openrouter": {"provider": {"order": ["DeepInfra"], "allow_fallbacks": False}}})
+    result = client.ask("p", SCALED_SCHEMA)
+    kwargs = holder["inst"].chat.completions.last_kwargs
+    assert kwargs["extra_body"] == {"provider": {"order": ["DeepInfra"], "allow_fallbacks": False}}
+    assert result.provider == "DeepInfra"
 
 
 def test_make_client_routes_vllm_through_the_openai_compatible_client(monkeypatch):

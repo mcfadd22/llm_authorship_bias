@@ -50,6 +50,7 @@ class JudgeResponse:
     model: str
     usage: Dict
     thinking: Optional[str]
+    provider: Optional[str] = None  # serving provider, where the gateway reports one (OpenRouter)
 
 
 class JudgeClient(Protocol):
@@ -128,14 +129,16 @@ def _fresh_connection_http_client():
 class OpenAIJudgeClient:
     provider = "openai"
 
-    def __init__(self, model: str, base_url=None, api_key=None):
+    def __init__(self, model: str, base_url=None, api_key=None, extra_body: Optional[Dict] = None,
+                 timeout_s: float = REQUEST_TIMEOUT_S, max_retries: int = SDK_MAX_RETRIES):
         self.model = model
+        self._extra_body = extra_body or {}
         # Both None falls back to the SDK defaults: OPENAI_API_KEY and OpenAI's
         # own endpoint. Passing a base_url lets the same client reach any
         # OpenAI-compatible gateway, OpenRouter included.
         self._client = openai.OpenAI(
             base_url=base_url, api_key=api_key,
-            timeout=REQUEST_TIMEOUT_S, max_retries=SDK_MAX_RETRIES,
+            timeout=timeout_s, max_retries=max_retries,
             http_client=_fresh_connection_http_client(),
         )
 
@@ -147,6 +150,7 @@ class OpenAIJudgeClient:
                 "type": "json_schema",
                 "json_schema": {"name": "judgment", "schema": schema, "strict": True},
             },
+            **({"extra_body": self._extra_body} if self._extra_body else {}),
         )
         choice = response.choices[0]
         message = choice.message
@@ -162,6 +166,7 @@ class OpenAIJudgeClient:
             # Thinking, where the server exposes it: vLLM (--reasoning-parser) uses
             # `reasoning_content`, OpenRouter uses `reasoning`; OpenAI itself returns neither.
             thinking=getattr(message, "reasoning_content", None) or getattr(message, "reasoning", None) or None,
+            provider=getattr(response, "provider", None),
         )
 
 
@@ -178,8 +183,11 @@ def make_client(judge: Dict) -> JudgeClient:
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY is required for provider 'openrouter'")
+        # Optional per-judge routing, e.g. {"provider": {"order": [...], "allow_fallbacks": false}}.
+        # No SDK-level retries here: the orchestrator retries, so a hung call costs one timeout.
         return OpenAIJudgeClient(
-            model=judge["model"], base_url=OPENROUTER_BASE_URL, api_key=api_key
+            model=judge["model"], base_url=OPENROUTER_BASE_URL, api_key=api_key,
+            extra_body=judge.get("openrouter"), timeout_s=120, max_retries=0,
         )
     if provider == "vllm":
         # Any OpenAI-compatible server (vLLM, SGLang, ...) reachable at VLLM_BASE_URL,
