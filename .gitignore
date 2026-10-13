@@ -49,3 +49,8 @@ analysis/item_review.html
 !analysis/aim_audit_selection.csv
 # per-item caveats recorded when contract review closed
 !analysis/item_caveats.csv
+
+# Archives and editor swap files dropped into the repo root: never commit
+*.tar.gz
+*.zip
+*.swp

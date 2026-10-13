@@ -225,6 +225,44 @@ def test_make_client_routes_openrouter_through_the_openai_compatible_client(monk
     assert captured["api_key"] == "test-key-not-real"
 
 
+def test_make_client_routes_vllm_through_the_openai_compatible_client(monkeypatch):
+    """A self-hosted OpenAI-compatible server is addressed by URL, not by key."""
+    monkeypatch.setenv("VLLM_BASE_URL", "http://10.0.0.7:8000/v1")
+    captured = {}
+
+    def fake_openai(base_url=None, api_key=None):
+        captured["base_url"] = base_url
+        captured["api_key"] = api_key
+        return object()
+
+    monkeypatch.setattr("elicitation.clients.openai.OpenAI", fake_openai)
+    client = make_client({"provider": "vllm", "model": "Qwen/Qwen3-32B"})
+
+    assert client.model == "Qwen/Qwen3-32B"
+    assert captured["base_url"] == "http://10.0.0.7:8000/v1"
+    assert captured["api_key"] == "EMPTY"
+
+
+def test_make_client_vllm_fails_fast_without_a_base_url(monkeypatch):
+    monkeypatch.delenv("VLLM_BASE_URL", raising=False)
+    with pytest.raises(ValueError, match="VLLM_BASE_URL"):
+        make_client({"provider": "vllm", "model": "Qwen/Qwen3-32B"})
+
+
+def test_openai_client_records_reasoning_content_when_present(monkeypatch):
+    msg = _OAIMessage('{"score": 2, "explanation": "fine"}')
+    msg.reasoning_content = "let me think about the off-by-one"
+    _patch_openai(monkeypatch, _OAIResponse(_OAIChoice(msg)))
+    result = OpenAIJudgeClient(model="Qwen/Qwen3-32B").ask("p", SCALED_SCHEMA)
+    assert result.thinking == "let me think about the off-by-one"
+
+
+def test_openai_client_thinking_is_none_without_reasoning_content(monkeypatch):
+    _patch_openai(monkeypatch, _OAIResponse(_OAIChoice(_OAIMessage('{"score": 2, "explanation": "fine"}'))))
+    result = OpenAIJudgeClient(model="gpt-5").ask("p", SCALED_SCHEMA)
+    assert result.thinking is None
+
+
 def test_make_client_openrouter_fails_fast_without_a_key(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):

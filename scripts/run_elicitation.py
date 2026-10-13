@@ -17,8 +17,10 @@ from elicitation.writer import load_items
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 
+# Environment variable each provider needs before a real run; for a self-hosted
+# OpenAI-compatible server that is the endpoint URL rather than a key.
 KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY",
-           "openrouter": "OPENROUTER_API_KEY"}
+           "openrouter": "OPENROUTER_API_KEY", "vllm": "VLLM_BASE_URL"}
 
 # USD per 1M tokens (input, output). Sanity figures for --dry-run, not accounting.
 PRICE_TABLE = {
@@ -27,6 +29,9 @@ PRICE_TABLE = {
     "claude-haiku-4-5": (1.00, 5.00),
     "gpt-5": (1.25, 10.00),
     "google/gemini-2.5-pro": (1.25, 10.00),
+    # self-hosted judges: no per-token charge
+    "Qwen/Qwen3-32B": (0.0, 0.0),
+    "openai/gpt-oss-120b": (0.0, 0.0),
 }
 EST_INPUT_CHARS_PER_TOKEN = 4
 # Wave-1 actuals: mean output was 1013-1856 tokens/call depending on judge and

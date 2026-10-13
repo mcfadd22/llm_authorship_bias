@@ -108,9 +108,10 @@ def test_real_repo_config_loads():
     assert cfg["questions"][0]["applies_to"] == ["buggy", "clean"]
 
 
-def test_openrouter_is_a_known_provider():
+def test_openrouter_and_vllm_are_known_providers():
     from elicitation.config import KNOWN_PROVIDERS
     assert "openrouter" in KNOWN_PROVIDERS
+    assert "vllm" in KNOWN_PROVIDERS
 
 
 def test_shipped_judge_pool_is_one_judge_per_family():
@@ -118,4 +119,20 @@ def test_shipped_judge_pool_is_one_judge_per_family():
     from pathlib import Path
     judges = json.loads((Path(__file__).resolve().parent.parent / "config" / "judge_models.json")
                         .read_text())["judges"]
-    assert sorted(j["family"] for j in judges) == ["claude", "gemini", "gpt"]
+    api_judges = [j for j in judges if j["provider"] != "vllm"]
+    assert sorted(j["family"] for j in api_judges) == ["claude", "gemini", "gpt"]
+
+
+def test_shipped_self_hosted_judges_are_a_separate_pilot_pool():
+    import json
+    from pathlib import Path
+    judges = json.loads((Path(__file__).resolve().parent.parent / "config" / "judge_models.json")
+                        .read_text())["judges"]
+    local = [j for j in judges if j["provider"] == "vllm"]
+    assert sorted(j["id"] for j in local) == ["gpt-oss-120b", "qwen3-32b"]
+    assert len({j["id"] for j in judges}) == len(judges)
+    # A self-hosted judge sharing a family with an API judge must share its self label.
+    by_family = {}
+    for j in judges:
+        by_family.setdefault(j["family"], set()).add(j["display_name"])
+    assert all(len(names) == 1 for names in by_family.values())

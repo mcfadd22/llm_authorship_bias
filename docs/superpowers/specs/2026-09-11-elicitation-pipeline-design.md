@@ -7,7 +7,7 @@ with `author_label` and the question battery from [`design.md`](../../design.md)
 combination to each judge model over the vendor APIs, and write one row per elicitation in the
 §4 response schema. The output of this stage is the study dataset.
 
-Orcas (H200 cluster) is out of scope: it is for self-hosted judges later. This stage runs from a
+Self-hosted judges on a GPU cluster are out of scope for this stage, which runs from a
 laptop against the Anthropic and OpenAI APIs.
 
 ## 1. Judges and rivals
@@ -169,6 +169,6 @@ request construction via monkeypatched SDK classes (same style as `tests/test_cl
 ## Out of scope
 
 - Analysis code (`analysis/`), the NLP coding pass, and `authorship_belief_coded`.
-- Open-weight / self-hosted judges on Orcas. The `JudgeClient` protocol is the seam for adding a
+- Open-weight / self-hosted judges. The `JudgeClient` protocol is the seam for adding a
   vLLM backend later.
 - Extending the item bank beyond the current 41 items.

@@ -136,8 +136,13 @@ class OpenAIJudgeClient:
             raw_text=message.content,
             model=response.model,
             usage=_usage_dict(response.usage),
-            thinking=None,
+            # OpenAI-compatible servers that run a reasoning parser (e.g. vLLM with
+            # --reasoning-parser) return the model's thinking here; OpenAI itself does not.
+            thinking=getattr(message, "reasoning_content", None) or None,
         )
+
+
+VLLM_BASE_URL_ENV = "VLLM_BASE_URL"
 
 
 def make_client(judge: Dict) -> JudgeClient:
@@ -153,4 +158,11 @@ def make_client(judge: Dict) -> JudgeClient:
         return OpenAIJudgeClient(
             model=judge["model"], base_url=OPENROUTER_BASE_URL, api_key=api_key
         )
+    if provider == "vllm":
+        # Any OpenAI-compatible server (vLLM, SGLang, ...) reachable at VLLM_BASE_URL,
+        # e.g. http://host:8000/v1. Such servers ignore the key; the SDK requires one.
+        base_url = os.environ.get(VLLM_BASE_URL_ENV)
+        if not base_url:
+            raise ValueError(f"{VLLM_BASE_URL_ENV} is required for provider 'vllm'")
+        return OpenAIJudgeClient(model=judge["model"], base_url=base_url, api_key="EMPTY")
     raise ValueError(f"unknown provider {provider!r}")

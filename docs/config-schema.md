@@ -153,8 +153,14 @@ pre-filled `reference` text.
 ### `config/judge_models.json`
 
 The judge models to run. `display_name` is what gets substituted into
-`author_labels.json`'s `self` template. `provider` (`anthropic` | `openai`) selects the
-API client in `scripts/elicitation/clients.py`; `model` is the provider's model ID.
+`author_labels.json`'s `self` template. `provider` (`anthropic` | `openai` | `openrouter` |
+`vllm`) selects the client in `scripts/elicitation/clients.py`; `model` is the provider's
+model ID. `vllm` is any self-hosted OpenAI-compatible server: the endpoint comes from the
+`VLLM_BASE_URL` environment variable (e.g. `http://host:8000/v1`) and `model` must equal the
+name the server was started with. Self-hosted judges are a separate pilot pool: the
+one-judge-per-family rule (design.md §7) applies to the API judges, and a self-hosted judge
+may share a family with an API judge (e.g. `gpt-oss-120b` and `gpt-5` are both `gpt`, so
+they get the same `self` label and rival set; `tuning` tells them apart).
 
 ```json
 {"judges": [
