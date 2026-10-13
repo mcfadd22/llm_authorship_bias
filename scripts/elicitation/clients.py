@@ -14,7 +14,7 @@ class ElicitationError(Exception):
 SCALED_SCHEMA: Dict = {
     "type": "object",
     "properties": {
-        "score": {"type": "integer", "description": "Integer from 1 to 7."},
+        "score": {"type": "integer", "minimum": 1, "maximum": 7, "description": "Integer from 1 to 7."},
         "explanation": {"type": "string", "description": "Your explanation of the score."},
     },
     "required": ["score", "explanation"],
@@ -111,6 +111,20 @@ REQUEST_TIMEOUT_S = 180
 SDK_MAX_RETRIES = 2
 
 
+def _fresh_connection_http_client():
+    """An HTTP client that never reuses a connection.
+
+    Pooled keep-alive sockets to the gateway go stale under sustained load; a worker
+    that picks one up hangs until the read timeout. Each judge call takes tens of
+    seconds, so a new TLS handshake per call costs nothing by comparison.
+    """
+    import httpx2
+
+    return openai.DefaultHttpxClient(
+        limits=httpx2.Limits(max_keepalive_connections=0, max_connections=256),
+    )
+
+
 class OpenAIJudgeClient:
     provider = "openai"
 
@@ -122,6 +136,7 @@ class OpenAIJudgeClient:
         self._client = openai.OpenAI(
             base_url=base_url, api_key=api_key,
             timeout=REQUEST_TIMEOUT_S, max_retries=SDK_MAX_RETRIES,
+            http_client=_fresh_connection_http_client(),
         )
 
     def ask(self, prompt: str, schema: Dict) -> JudgeResponse:
