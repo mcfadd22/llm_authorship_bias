@@ -76,6 +76,16 @@ def _parse(raw_text: str) -> Dict:
         raise ElicitationError(f"response was not valid JSON: {exc}: {raw_text[:200]!r}") from exc
 
 
+def _anthropic_schema(schema: Dict) -> Dict:
+    """Anthropic's structured output rejects numeric bounds on integers; the orchestrator
+    validates the 1-7 range after parsing, so drop them for this provider only."""
+    out = json.loads(json.dumps(schema))
+    for prop in out.get("properties", {}).values():
+        prop.pop("minimum", None)
+        prop.pop("maximum", None)
+    return out
+
+
 class AnthropicJudgeClient:
     provider = "anthropic"
 
@@ -88,7 +98,7 @@ class AnthropicJudgeClient:
             model=self.model,
             max_tokens=MAX_OUTPUT_TOKENS,
             messages=[{"role": "user", "content": prompt}],
-            output_config={"format": {"type": "json_schema", "schema": schema}},
+            output_config={"format": {"type": "json_schema", "schema": _anthropic_schema(schema)}},
         )
         if response.stop_reason == "refusal":
             raise ElicitationError(f"model returned stop_reason=refusal ({self.model})")

@@ -74,7 +74,11 @@ def test_anthropic_client_builds_request_and_parses_json(monkeypatch):
     kwargs = holder["inst"].messages.last_kwargs
     assert kwargs["model"] == "claude-opus-5"
     assert kwargs["messages"] == [{"role": "user", "content": "the prompt"}]
-    assert kwargs["output_config"]["format"] == {"type": "json_schema", "schema": SCALED_SCHEMA}
+    sent = kwargs["output_config"]["format"]
+    assert sent["type"] == "json_schema"
+    assert "minimum" not in sent["schema"]["properties"]["score"]
+    assert sent["schema"]["required"] == SCALED_SCHEMA["required"]
+    assert "minimum" in SCALED_SCHEMA["properties"]["score"]  # untouched for other providers
     assert "system" not in kwargs
 
     assert result.data == {"score": 3, "explanation": "meh"}
