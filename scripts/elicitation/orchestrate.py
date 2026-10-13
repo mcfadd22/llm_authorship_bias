@@ -16,8 +16,8 @@ from .writer import append_row, load_existing_keys
 RETRYABLE = (ElicitationError, anthropic.APIError, openai.OpenAIError)
 
 # Sonnet 5 occasionally returns {"answer": ""} (or "...") on the free-text question after
-# spending its output budget on thinking; treat degenerate text as a retryable failure.
-MIN_TEXT_CHARS = 20
+# spending its output budget on thinking; treat text with no letters as a retryable failure.
+# A one-word answer ("human", "Claude") is a real answer and must pass.
 
 
 @dataclass
@@ -57,7 +57,7 @@ def _validate(question: Dict, data: Dict) -> None:
 def _require_text(value, field: str) -> None:
     if not isinstance(value, str):
         raise ElicitationError(f"{field} missing")
-    if len(value.strip()) < MIN_TEXT_CHARS:
+    if not any(ch.isalpha() for ch in value):
         raise ElicitationError(f"{field} degenerate ({value.strip()[:20]!r})")
 
 

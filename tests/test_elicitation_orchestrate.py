@@ -154,7 +154,7 @@ def test_elicit_one_rejects_out_of_range_score():
         elicit_one(BadScore(), _row(), JUDGE, CONFIG, ITEMS[0], max_retries=1)
 
 
-@pytest.mark.parametrize("answer", ["", "...", ")", "   ", "a human"])
+@pytest.mark.parametrize("answer", ["", "...", ")", "   ", "12 34"])
 def test_elicit_one_rejects_degenerate_free_answer(answer):
     class Degenerate(FakeClient):
         def ask(self, prompt, schema):
@@ -166,6 +166,17 @@ def test_elicit_one_rejects_degenerate_free_answer(answer):
     with pytest.raises(RuntimeError, match="degenerate"):
         elicit_one(client, _row("none", "q_authorship_belief"), JUDGE, CONFIG, ITEMS[0], max_retries=2)
     assert len(client.calls) == 2
+
+
+@pytest.mark.parametrize("answer", ["human", "Claude", "a human"])
+def test_elicit_one_accepts_one_word_free_answers(answer):
+    class OneWord(FakeClient):
+        def ask(self, prompt, schema):
+            data = {"answer": answer}
+            return JudgeResponse(data=data, raw_text="", model="m", usage={}, thinking=None)
+
+    record = elicit_one(OneWord(), _row("none", "q_authorship_belief"), JUDGE, CONFIG, ITEMS[0], max_retries=1)
+    assert record["authorship_belief_raw"] == answer
 
 
 def test_elicit_one_rejects_degenerate_explanation():
