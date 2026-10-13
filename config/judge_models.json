@@ -4,6 +4,6 @@
     {"id": "gpt-5", "family": "gpt", "tuning": "gpt-5", "display_name": "GPT", "provider": "openai", "model": "gpt-5"},
     {"id": "gemini-2.5-pro", "family": "gemini", "tuning": "2.5-pro", "display_name": "Gemini", "provider": "openrouter", "model": "google/gemini-2.5-pro"},
     {"id": "qwen3-32b", "family": "qwen", "tuning": "qwen3-32b", "display_name": "Qwen", "provider": "openrouter", "model": "qwen/qwen3-32b"},
-    {"id": "gpt-oss-120b", "family": "gpt", "tuning": "gpt-oss-120b", "display_name": "GPT", "provider": "openrouter", "model": "openai/gpt-oss-120b", "openrouter": {"provider": {"order": ["DeepInfra", "Mancer 2"], "allow_fallbacks": false, "require_parameters": true}}}
+    {"id": "gpt-oss-120b", "family": "gpt", "tuning": "gpt-oss-120b", "display_name": "GPT", "provider": "openrouter", "model": "openai/gpt-oss-120b", "openrouter": {"provider": {"ignore": ["CoreWeave", "Mara"], "allow_fallbacks": true, "require_parameters": true}}}
   ]
 }

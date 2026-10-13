@@ -1,3 +1,4 @@
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -77,7 +78,9 @@ def elicit_one(
     schema = {"scaled": SCALED_SCHEMA, "detect": DETECT_SCHEMA, "free": FREE_SCHEMA}[question["kind"]]
 
     last_error = None
-    for _ in range(max_retries):
+    for attempt in range(max_retries):
+        if attempt:
+            time.sleep(min(60, 5 * 2 ** (attempt - 1)))  # 5s, 10s, 20s ... between attempts
         try:
             response = client.ask(prompt, schema)
             _validate(question, response.data)

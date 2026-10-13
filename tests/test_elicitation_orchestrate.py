@@ -32,6 +32,12 @@ ITEMS = [
 ]
 
 
+@pytest.fixture(autouse=True)
+def _no_retry_sleep(monkeypatch):
+    import elicitation.orchestrate as orch
+    monkeypatch.setattr(orch.time, "sleep", lambda s: None)
+
+
 class FakeClient:
     def __init__(self, fail_first=0, always_fail=False):
         self.calls = []

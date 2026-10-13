@@ -225,7 +225,7 @@ def test_make_client_routes_openrouter_through_the_openai_compatible_client(monk
     assert client.model == "google/gemini-2.5-pro"
     assert captured["base_url"] == "https://openrouter.ai/api/v1"
     assert captured["api_key"] == "test-key-not-real"
-    assert captured["timeout"] == 120 and captured["max_retries"] == 0
+    assert captured["timeout"] == 120 and captured["max_retries"] == 2
 
 
 def test_openrouter_judge_routing_block_is_sent_as_extra_body(monkeypatch):
