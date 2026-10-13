@@ -29,9 +29,11 @@ PRICE_TABLE = {
     "claude-haiku-4-5": (1.00, 5.00),
     "gpt-5": (1.25, 10.00),
     "google/gemini-2.5-pro": (1.25, 10.00),
-    # self-hosted judges: no per-token charge
+    # open-weight judges via OpenRouter (2026-10-12 list prices)
+    "qwen/qwen3-32b": (0.08, 0.28),
+    "openai/gpt-oss-120b": (0.15, 0.60),
+    # the same models self-hosted: no per-token charge
     "Qwen/Qwen3-32B": (0.0, 0.0),
-    "openai/gpt-oss-120b": (0.0, 0.0),
 }
 EST_INPUT_CHARS_PER_TOKEN = 4
 # Wave-1 actuals: mean output was 1013-1856 tokens/call depending on judge and

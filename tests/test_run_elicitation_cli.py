@@ -61,25 +61,25 @@ def test_missing_key_fails_fast(tmp_path, monkeypatch):
         ])
 
 
-def test_vllm_judge_requires_base_url_not_a_key(tmp_path, monkeypatch):
-    monkeypatch.delenv("VLLM_BASE_URL", raising=False)
+def test_openrouter_judge_requires_openrouter_key(tmp_path, monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     items_dir = _make_items(tmp_path)
-    with pytest.raises(SystemExit, match="VLLM_BASE_URL"):
+    with pytest.raises(SystemExit, match="OPENROUTER_API_KEY"):
         run_elicitation.main([
             "--judge", "qwen3-32b", "--items-dir", str(items_dir),
             "--out-dir", str(tmp_path / "out"),
         ])
 
 
-def test_dry_run_prices_self_hosted_judges_at_zero(tmp_path, capsys):
+def test_dry_run_prices_open_weight_judges_cheaply(tmp_path, capsys):
     items_dir = _make_items(tmp_path)
     run_elicitation.main([
-        "--dry-run", "--judge", "qwen3-32b", "--items-dir", str(items_dir),
-        "--out-dir", str(tmp_path / "out"),
+        "--dry-run", "--judge", "qwen3-32b", "--judge", "gpt-oss-120b",
+        "--items-dir", str(items_dir), "--out-dir", str(tmp_path / "out"),
     ])
     out = capsys.readouterr().out
-    assert "qwen3-32b" in out
-    assert "~$0.00" in out
+    assert "qwen3-32b" in out and "gpt-oss-120b" in out
+    assert "~$0.00" not in out.splitlines()[-1]
 
 
 def test_unknown_judge_rejected(tmp_path):

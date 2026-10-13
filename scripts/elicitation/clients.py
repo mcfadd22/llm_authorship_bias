@@ -136,9 +136,9 @@ class OpenAIJudgeClient:
             raw_text=message.content,
             model=response.model,
             usage=_usage_dict(response.usage),
-            # OpenAI-compatible servers that run a reasoning parser (e.g. vLLM with
-            # --reasoning-parser) return the model's thinking here; OpenAI itself does not.
-            thinking=getattr(message, "reasoning_content", None) or None,
+            # Thinking, where the server exposes it: vLLM (--reasoning-parser) uses
+            # `reasoning_content`, OpenRouter uses `reasoning`; OpenAI itself returns neither.
+            thinking=getattr(message, "reasoning_content", None) or getattr(message, "reasoning", None) or None,
         )
 
 

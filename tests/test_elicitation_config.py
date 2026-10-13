@@ -119,17 +119,18 @@ def test_shipped_judge_pool_is_one_judge_per_family():
     from pathlib import Path
     judges = json.loads((Path(__file__).resolve().parent.parent / "config" / "judge_models.json")
                         .read_text())["judges"]
-    api_judges = [j for j in judges if j["provider"] != "vllm"]
-    assert sorted(j["family"] for j in api_judges) == ["claude", "gemini", "gpt"]
+    wave2 = [j for j in judges if j["id"] in ("claude-sonnet-5", "gpt-5", "gemini-2.5-pro")]
+    assert sorted(j["family"] for j in wave2) == ["claude", "gemini", "gpt"]
 
 
-def test_shipped_self_hosted_judges_are_a_separate_pilot_pool():
+def test_shipped_open_weight_judges_are_a_separate_pilot_pool():
     import json
     from pathlib import Path
     judges = json.loads((Path(__file__).resolve().parent.parent / "config" / "judge_models.json")
                         .read_text())["judges"]
-    local = [j for j in judges if j["provider"] == "vllm"]
-    assert sorted(j["id"] for j in local) == ["gpt-oss-120b", "qwen3-32b"]
+    pilot = [j for j in judges if j["id"] in ("gpt-oss-120b", "qwen3-32b")]
+    assert sorted(j["id"] for j in pilot) == ["gpt-oss-120b", "qwen3-32b"]
+    assert all(j["provider"] in ("openrouter", "vllm") for j in pilot)
     assert len({j["id"] for j in judges}) == len(judges)
     # A self-hosted judge sharing a family with an API judge must share its self label.
     by_family = {}

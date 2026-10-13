@@ -257,6 +257,14 @@ def test_openai_client_records_reasoning_content_when_present(monkeypatch):
     assert result.thinking == "let me think about the off-by-one"
 
 
+def test_openai_client_records_openrouter_reasoning_field(monkeypatch):
+    msg = _OAIMessage('{"score": 5, "explanation": "fine"}')
+    msg.reasoning = "openrouter-style reasoning"
+    _patch_openai(monkeypatch, _OAIResponse(_OAIChoice(msg)))
+    result = OpenAIJudgeClient(model="qwen/qwen3-32b").ask("p", SCALED_SCHEMA)
+    assert result.thinking == "openrouter-style reasoning"
+
+
 def test_openai_client_thinking_is_none_without_reasoning_content(monkeypatch):
     _patch_openai(monkeypatch, _OAIResponse(_OAIChoice(_OAIMessage('{"score": 2, "explanation": "fine"}'))))
     result = OpenAIJudgeClient(model="gpt-5").ask("p", SCALED_SCHEMA)
