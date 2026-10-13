@@ -229,6 +229,15 @@ def test_make_client_routes_openrouter_through_the_openai_compatible_client(monk
     assert captured["timeout"] == 120 and captured["max_retries"] == 2
 
 
+def test_per_judge_max_tokens_override(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "k")
+    holder = _patch_openai(monkeypatch, _OAIResponse(_OAIChoice(_OAIMessage('{"score": 3, "explanation": "ok"}'))))
+    make_client({"provider": "openrouter", "model": "google/gemini-2.5-pro", "max_tokens": 16384}).ask("p", SCALED_SCHEMA)
+    assert holder["inst"].chat.completions.last_kwargs["max_tokens"] == 16384
+    make_client({"provider": "openrouter", "model": "qwen/qwen3-32b"}).ask("p", SCALED_SCHEMA)
+    assert holder["inst"].chat.completions.last_kwargs["max_tokens"] == 4096
+
+
 def test_openrouter_judge_routing_block_is_sent_as_extra_body(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "k")
     response = _OAIResponse(_OAIChoice(_OAIMessage('{"score": 3, "explanation": "ok"}')))

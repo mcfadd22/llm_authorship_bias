@@ -134,9 +134,11 @@ class OpenAIJudgeClient:
     provider = "openai"
 
     def __init__(self, model: str, base_url=None, api_key=None, extra_body: Optional[Dict] = None,
-                 timeout_s: float = REQUEST_TIMEOUT_S, max_retries: int = SDK_MAX_RETRIES):
+                 timeout_s: float = REQUEST_TIMEOUT_S, max_retries: int = SDK_MAX_RETRIES,
+                 max_tokens: int = OPENAI_COMPAT_MAX_TOKENS):
         self.model = model
         self._extra_body = extra_body or {}
+        self._max_tokens = max_tokens
         # Both None falls back to the SDK defaults: OPENAI_API_KEY and OpenAI's
         # own endpoint. Passing a base_url lets the same client reach any
         # OpenAI-compatible gateway, OpenRouter included.
@@ -150,7 +152,7 @@ class OpenAIJudgeClient:
         response = self._client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=OPENAI_COMPAT_MAX_TOKENS,
+            max_tokens=self._max_tokens,
             response_format={
                 "type": "json_schema",
                 "json_schema": {"name": "judgment", "schema": schema, "strict": True},
@@ -183,7 +185,8 @@ def make_client(judge: Dict) -> JudgeClient:
     if provider == "anthropic":
         return AnthropicJudgeClient(model=judge["model"])
     if provider == "openai":
-        return OpenAIJudgeClient(model=judge["model"])
+        return OpenAIJudgeClient(model=judge["model"],
+                                 max_tokens=judge.get("max_tokens", OPENAI_COMPAT_MAX_TOKENS))
     if provider == "openrouter":
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
@@ -193,6 +196,7 @@ def make_client(judge: Dict) -> JudgeClient:
         return OpenAIJudgeClient(
             model=judge["model"], base_url=OPENROUTER_BASE_URL, api_key=api_key,
             extra_body=judge.get("openrouter"), timeout_s=120, max_retries=SDK_MAX_RETRIES,
+            max_tokens=judge.get("max_tokens", OPENAI_COMPAT_MAX_TOKENS),
         )
     if provider == "vllm":
         # Any OpenAI-compatible server (vLLM, SGLang, ...) reachable at VLLM_BASE_URL,
