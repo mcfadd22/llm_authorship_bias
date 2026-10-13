@@ -212,9 +212,10 @@ def test_make_client_routes_openrouter_through_the_openai_compatible_client(monk
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key-not-real")
     captured = {}
 
-    def fake_openai(base_url=None, api_key=None):
+    def fake_openai(base_url=None, api_key=None, **kw):
         captured["base_url"] = base_url
         captured["api_key"] = api_key
+        captured.update(kw)
         return object()
 
     monkeypatch.setattr("elicitation.clients.openai.OpenAI", fake_openai)
@@ -223,6 +224,7 @@ def test_make_client_routes_openrouter_through_the_openai_compatible_client(monk
     assert client.model == "google/gemini-2.5-pro"
     assert captured["base_url"] == "https://openrouter.ai/api/v1"
     assert captured["api_key"] == "test-key-not-real"
+    assert captured["timeout"] == 180 and captured["max_retries"] == 2
 
 
 def test_make_client_routes_vllm_through_the_openai_compatible_client(monkeypatch):
@@ -230,9 +232,10 @@ def test_make_client_routes_vllm_through_the_openai_compatible_client(monkeypatc
     monkeypatch.setenv("VLLM_BASE_URL", "http://10.0.0.7:8000/v1")
     captured = {}
 
-    def fake_openai(base_url=None, api_key=None):
+    def fake_openai(base_url=None, api_key=None, **kw):
         captured["base_url"] = base_url
         captured["api_key"] = api_key
+        captured.update(kw)
         return object()
 
     monkeypatch.setattr("elicitation.clients.openai.OpenAI", fake_openai)

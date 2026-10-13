@@ -104,6 +104,11 @@ class AnthropicJudgeClient:
 
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+# Per-request ceiling. The SDK default (10 min, 2 retries) let hung gateway
+# connections stall a whole worker pool for hours; a judge call that has not
+# returned in 3 min is dead and is better retried.
+REQUEST_TIMEOUT_S = 180
+SDK_MAX_RETRIES = 2
 
 
 class OpenAIJudgeClient:
@@ -114,7 +119,10 @@ class OpenAIJudgeClient:
         # Both None falls back to the SDK defaults: OPENAI_API_KEY and OpenAI's
         # own endpoint. Passing a base_url lets the same client reach any
         # OpenAI-compatible gateway, OpenRouter included.
-        self._client = openai.OpenAI(base_url=base_url, api_key=api_key)
+        self._client = openai.OpenAI(
+            base_url=base_url, api_key=api_key,
+            timeout=REQUEST_TIMEOUT_S, max_retries=SDK_MAX_RETRIES,
+        )
 
     def ask(self, prompt: str, schema: Dict) -> JudgeResponse:
         response = self._client.chat.completions.create(
