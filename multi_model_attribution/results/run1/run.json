@@ -3,5 +3,6 @@
   "prompt_version": "2026-10-13-attrib-v1",
   "config_sha256": "728f6a2807c4650c3b7851d355d349f333c01e75ca237ebc4131c8dc007e6054",
   "started": "2026-10-14T01:22:42.668606+00:00",
-  "note": "config_sha256 covers names/questions/notes; judges.json routing changed mid-run (slow providers), recorded in git history"
+  "note": "config_sha256 covers names/questions/notes; judges.json routing and max_tokens changed mid-run; llama-3.3-70b split question ran in prompted-JSON mode (schema_version per row); see STATUS.md",
+  "completed": "2026-10-14T05:40:00+00:00"
 }

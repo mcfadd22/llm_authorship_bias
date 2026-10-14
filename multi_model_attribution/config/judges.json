@@ -26,7 +26,8 @@
           "sort": "throughput",
           "require_parameters": true
         }
-      }
+      },
+      "max_tokens": 8192
     },
     {
       "id": "gpt-oss-20b",
@@ -69,7 +70,8 @@
           "sort": "throughput",
           "require_parameters": true
         }
-      }
+      },
+      "max_tokens": 16384
     },
     {
       "id": "llama-3.3-70b",

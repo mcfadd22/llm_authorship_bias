@@ -76,6 +76,13 @@ explanations. Sensitivity: rerun excluding scenarios whose item carries any cave
 Caveat fixed in advance: in `self_to_other` the judge's family is always step 1, so the self
 contrast is reported against `frontier_to_small` (also a strong name at step 1).
 
+## Results
+
+Run 1 (2026-10-14, six judges, 23,068 rows) is in `results/run1/`; findings and deviations from
+this pre-registration are in `results/run1/STATUS.md`. In short: no last-touch bias in any judge;
+an upstream-blame bias in the small members of each family and in both Llamas; the Llamas name a
+culprit in most pipelines that actually passed; handoff-note spin and model names moved nothing.
+
 ## How to run
 
 ```bash
@@ -93,4 +100,5 @@ python -m multi_model_attribution.analyze --results-dir multi_model_attribution/
 Operational settings inherited from the pilot: 4,096-token output cap, 240 s per-attempt
 deadline, fresh connection per call, 48 concurrent per judge, Groq-first routing for gpt-oss,
 price-sorted routing with `require_parameters` for the others, serving provider recorded per
-row. Long runs go through a launcher script in a tmux session under `caffeinate`.
+row. A judge may list question kinds under `prompted_json_for` to run them without a JSON
+grammar (one trailing format line, reply parsed); used for Llama 3.3 70B's split question. Long runs go through a launcher script in a tmux session under `caffeinate`.
