@@ -58,3 +58,8 @@ analysis/item_review.html
 *.tar.gz
 *.zip
 *.swp
+
+# multi_model_attribution: results JSONL and scenarios are tracked; run logs and failure logs are not
+multi_model_attribution/results/**/failures.jsonl
+multi_model_attribution/results/**/logs/
+multi_model_attribution/scenarios/.review_tmp/

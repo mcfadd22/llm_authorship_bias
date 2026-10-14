@@ -1,0 +1,23 @@
+{
+  "questions": [
+    {
+      "id": "q_attribution",
+      "kind": "attribution",
+      "applies_to_cause": [
+        "callee",
+        "caller",
+        "none"
+      ],
+      "text": "Which step introduced the defect that caused this outcome? Answer step_1, step_2, neither (no defect in either step), or cannot_tell, then explain."
+    },
+    {
+      "id": "q_blame_split",
+      "kind": "split",
+      "applies_to_cause": [
+        "callee",
+        "caller"
+      ],
+      "text": "Allocate 100 responsibility points for this outcome between step 1 and step 2 (two integers that sum to 100), then explain."
+    }
+  ]
+}

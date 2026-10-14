@@ -1,0 +1,20 @@
+{
+  "frontier": "Claude",
+  "small": "Gemma",
+  "other": "Gemini",
+  "levels": {
+    "frontier_to_small": [
+      "frontier",
+      "small"
+    ],
+    "small_to_frontier": [
+      "small",
+      "frontier"
+    ],
+    "self_to_other": [
+      "self",
+      "other"
+    ]
+  },
+  "note": "'self' resolves to the judge's display_name. Judge families must not equal any ladder name."
+}

@@ -1,0 +1,118 @@
+{
+  "judges": [
+    {
+      "id": "llama-3.1-8b",
+      "family": "llama",
+      "params_b": 8,
+      "display_name": "Llama",
+      "provider": "openrouter",
+      "model": "meta-llama/llama-3.1-8b-instruct",
+      "openrouter": {
+        "provider": {
+          "sort": "price",
+          "require_parameters": true
+        }
+      }
+    },
+    {
+      "id": "qwen3-14b",
+      "family": "qwen",
+      "params_b": 14,
+      "display_name": "Qwen",
+      "provider": "openrouter",
+      "model": "qwen/qwen3-14b",
+      "openrouter": {
+        "provider": {
+          "sort": "price",
+          "require_parameters": true
+        }
+      }
+    },
+    {
+      "id": "gpt-oss-20b",
+      "family": "gpt",
+      "params_b": 20,
+      "display_name": "GPT",
+      "provider": "openrouter",
+      "model": "openai/gpt-oss-20b",
+      "openrouter": {
+        "provider": {
+          "order": [
+            "Groq",
+            "BaseTen",
+            "Together",
+            "Nebius",
+            "Parasail",
+            "Crusoe"
+          ],
+          "ignore": [
+            "CoreWeave",
+            "Mara",
+            "DekaLLM",
+            "AkashML",
+            "DeepInfra"
+          ],
+          "allow_fallbacks": true,
+          "require_parameters": true
+        }
+      }
+    },
+    {
+      "id": "qwen3-32b",
+      "family": "qwen",
+      "params_b": 32,
+      "display_name": "Qwen",
+      "provider": "openrouter",
+      "model": "qwen/qwen3-32b",
+      "openrouter": {
+        "provider": {
+          "sort": "price",
+          "require_parameters": true
+        }
+      }
+    },
+    {
+      "id": "llama-3.3-70b",
+      "family": "llama",
+      "params_b": 70,
+      "display_name": "Llama",
+      "provider": "openrouter",
+      "model": "meta-llama/llama-3.3-70b-instruct",
+      "openrouter": {
+        "provider": {
+          "sort": "price",
+          "require_parameters": true
+        }
+      }
+    },
+    {
+      "id": "gpt-oss-120b",
+      "family": "gpt",
+      "params_b": 120,
+      "display_name": "GPT",
+      "provider": "openrouter",
+      "model": "openai/gpt-oss-120b",
+      "openrouter": {
+        "provider": {
+          "order": [
+            "Groq",
+            "BaseTen",
+            "Together",
+            "Nebius",
+            "Parasail",
+            "Crusoe"
+          ],
+          "ignore": [
+            "CoreWeave",
+            "Mara",
+            "DekaLLM",
+            "AkashML",
+            "DeepInfra"
+          ],
+          "allow_fallbacks": true,
+          "require_parameters": true
+        }
+      }
+    }
+  ]
+}
