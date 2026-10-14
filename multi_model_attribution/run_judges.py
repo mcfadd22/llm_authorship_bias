@@ -138,9 +138,12 @@ def _sha(paths: List[Path]) -> str:
     return h.hexdigest()
 
 
+PROMPT_CONFIG_FILES = ("names.json", "questions.json", "notes.json")  # judges.json is routing, not prompt content
+
+
 def check_manifest(out_dir: Path, scenario_files: List[Path], config_dir: Path, write: bool) -> None:
     here = {"scenarios_sha256": _sha(scenario_files), "prompt_version": PROMPT_VERSION,
-            "config_sha256": _sha(sorted(Path(config_dir).glob("*.json")))}
+            "config_sha256": _sha([Path(config_dir) / f for f in PROMPT_CONFIG_FILES])}
     path = out_dir / MANIFEST
     if path.exists():
         recorded = json.loads(path.read_text())

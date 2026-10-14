@@ -1,0 +1,7 @@
+{
+  "scenarios_sha256": "ebf0c0c8e50c78660b6896645c8392e65b836c94b8daf035c324dd6728eeeb61",
+  "prompt_version": "2026-10-13-attrib-v1",
+  "config_sha256": "728f6a2807c4650c3b7851d355d349f333c01e75ca237ebc4131c8dc007e6054",
+  "started": "2026-10-14T01:22:42.668606+00:00",
+  "note": "config_sha256 covers names/questions/notes; judges.json routing changed mid-run (slow providers), recorded in git history"
+}

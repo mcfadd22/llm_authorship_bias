@@ -23,7 +23,7 @@
       "model": "qwen/qwen3-14b",
       "openrouter": {
         "provider": {
-          "sort": "price",
+          "sort": "throughput",
           "require_parameters": true
         }
       }
@@ -66,7 +66,7 @@
       "model": "qwen/qwen3-32b",
       "openrouter": {
         "provider": {
-          "sort": "price",
+          "sort": "throughput",
           "require_parameters": true
         }
       }
@@ -80,7 +80,22 @@
       "model": "meta-llama/llama-3.3-70b-instruct",
       "openrouter": {
         "provider": {
-          "sort": "price",
+          "order": [
+            "Groq",
+            "BaseTen",
+            "Together",
+            "Nebius",
+            "Parasail",
+            "Crusoe"
+          ],
+          "ignore": [
+            "CoreWeave",
+            "Mara",
+            "DekaLLM",
+            "AkashML",
+            "DeepInfra"
+          ],
+          "allow_fallbacks": true,
           "require_parameters": true
         }
       }

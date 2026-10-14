@@ -97,6 +97,21 @@ def test_dry_run_and_manifest(scenario, cfg, judge, tmp_path, monkeypatch, capsy
         rj.main(["--dry-run", "--scenarios-dir", str(sdir), "--out-dir", str(out)])
 
 
+def test_manifest_ignores_routing_changes(scenario, cfg, tmp_path):
+    import json as _json
+    cdir = tmp_path / "config"; cdir.mkdir()
+    for name in ("judges", "names", "questions", "notes"):
+        (cdir / f"{name}.json").write_text(_json.dumps(cfg[name]))
+    files = [tmp_path / "s.json"]; files[0].write_text(_json.dumps(scenario))
+    out = tmp_path / "run"
+    rj.check_manifest(out, files, cdir, write=True)
+    (cdir / "judges.json").write_text(_json.dumps({"judges": []}))
+    rj.check_manifest(out, files, cdir, write=False)          # routing change accepted
+    (cdir / "notes.json").write_text(_json.dumps({"step_1": {}}))
+    with pytest.raises(SystemExit, match="config_sha256"):
+        rj.check_manifest(out, files, cdir, write=False)      # prompt content change refused
+
+
 def test_require_reviewed(scenario, tmp_path):
     sdir = tmp_path / "s"; sdir.mkdir()
     (sdir / "a.json").write_text(json.dumps(scenario))
