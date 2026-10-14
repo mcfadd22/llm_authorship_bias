@@ -59,6 +59,21 @@ def test_elicit_one_record_shape(scenario, cfg, judge):
     assert rec2["step_1_points"] == 70 and rec2["attribution"] is None
 
 
+def test_prompted_json_mode_for_named_question_kinds(scenario, cfg, judge):
+    class Capture(FakeClient):
+        def ask(self, prompt, schema):
+            self.last = (prompt, schema); return super().ask(prompt, schema if schema is not None else rj.SPLIT_SCHEMA)
+    j = {**judge, "prompted_json_for": ["split"]}
+    rows = rj.enumerate_cells([scenario], j, cfg["questions"]["questions"], 1)
+    split = next(r for r in rows if r["question_kind"] == "split")
+    c = Capture(); rec = rj.elicit_one(c, split, scenario, j, cfg, 3)
+    assert c.last[1] is None and c.last[0].endswith(rj.PROMPTED_FORMAT_LINE["split"])
+    assert rec["schema_version"].endswith("-prompted") and rec["step_1_points"] == 70
+    attr = next(r for r in rows if r["question_kind"] == "attribution")
+    c2 = Capture(); rec2 = rj.elicit_one(c2, attr, scenario, j, cfg, 3)
+    assert c2.last[1] is rj.ATTRIBUTION_SCHEMA and not rec2["schema_version"].endswith("-prompted")
+
+
 def test_elicit_one_retries_then_fails(scenario, cfg, judge):
     rows = rj.enumerate_cells([scenario], judge, cfg["questions"]["questions"], 1)
     rec = rj.elicit_one(FakeClient(fail_first=2), rows[0], scenario, judge, cfg, 3)

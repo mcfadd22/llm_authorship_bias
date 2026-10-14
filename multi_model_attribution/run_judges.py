@@ -47,6 +47,14 @@ SPLIT_SCHEMA = {"type": "object",
                 "required": ["explanation", "step_1_points", "step_2_points"], "additionalProperties": False}
 SCHEMAS = {"attribution": ATTRIBUTION_SCHEMA, "split": SPLIT_SCHEMA}
 SCHEMA_VERSION = "attrib-v1/split-v2"  # recorded per row; split-v1 rows (integers first) were discarded
+# Some models loop on whitespace under a JSON grammar at the position after a string field
+# (Llama 3.3 70B on every provider tried). For those, a judge config may list question kinds
+# in "prompted_json_for": the prompt then ends with a format line, no grammar is applied, and
+# the reply is parsed as JSON. Rows record schema_version "...-prompted" so the caveat is visible.
+PROMPTED_FORMAT_LINE = {
+    "split": "Respond with a JSON object with exactly these keys: explanation (string), step_1_points (integer), step_2_points (integer).",
+    "attribution": "Respond with a JSON object with exactly these keys: step (one of step_1, step_2, neither, cannot_tell), explanation (string).",
+}
 
 
 @dataclass
@@ -77,7 +85,12 @@ def validate(kind: str, data: Dict) -> None:
 
 def elicit_one(client: JudgeClient, row: Dict, scenario: Dict, judge: Dict, cfg: Dict, max_retries: int) -> Dict:
     prompt = build_prompt(scenario, row, judge, cfg)
-    schema = SCHEMAS[row["question_kind"]]
+    kind = row["question_kind"]
+    prompted = kind in judge.get("prompted_json_for", [])
+    schema = None if prompted else SCHEMAS[kind]
+    if prompted:
+        prompt = prompt + "\n\n" + PROMPTED_FORMAT_LINE[kind]
+    schema_version = SCHEMA_VERSION + ("-prompted" if prompted else "")
     last = None
     for attempt in range(max_retries):
         if attempt:
@@ -98,7 +111,7 @@ def elicit_one(client: JudgeClient, row: Dict, scenario: Dict, judge: Dict, cfg:
             "response_model": response.model, "response_provider": response.provider,
             "usage": response.usage, "thinking": response.thinking,
             "timestamp": datetime.now(timezone.utc).isoformat(), "prompt_version": PROMPT_VERSION,
-            "schema_version": SCHEMA_VERSION}
+            "schema_version": schema_version}
 
 
 def plan_rows(judge: Dict, scenarios: List[Dict], cfg: Dict, options: RunOptions):

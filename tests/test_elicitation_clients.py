@@ -196,6 +196,13 @@ def test_openai_client_raises_on_empty_content(monkeypatch):
         client.ask("p", SCALED_SCHEMA)
 
 
+def test_openai_client_without_schema_sends_no_response_format_and_strips_fences(monkeypatch):
+    holder = _patch_openai(monkeypatch, _OAIResponse(_OAIChoice(_OAIMessage('```json\n{"score": 4, "explanation": "ok"}\n```'))))
+    result = OpenAIJudgeClient(model="m").ask("p", None)
+    assert "response_format" not in holder["inst"].chat.completions.last_kwargs
+    assert result.data == {"score": 4, "explanation": "ok"}
+
+
 def test_detect_schema_shape():
     assert DETECT_SCHEMA["properties"]["has_bug"]["type"] == "boolean"
     assert DETECT_SCHEMA["required"] == ["has_bug", "explanation"]

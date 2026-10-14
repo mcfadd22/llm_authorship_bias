@@ -87,7 +87,10 @@
           "require_parameters": true
         }
       },
-      "max_tokens": 1536
+      "max_tokens": 1536,
+      "prompted_json_for": [
+        "split"
+      ]
     },
     {
       "id": "gpt-oss-120b",

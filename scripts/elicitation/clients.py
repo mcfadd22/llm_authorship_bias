@@ -1,4 +1,5 @@
 import json
+import re
 import os
 from dataclasses import dataclass
 from typing import Dict, Optional, Protocol
@@ -69,9 +70,16 @@ def _usage_dict(usage) -> Dict:
     return dict(usage)
 
 
+_FENCE_RE = re.compile(r"^```(?:json)?\s*\n(.*?)\n```\s*$", re.DOTALL)
+
+
 def _parse(raw_text: str) -> Dict:
+    text = raw_text.strip()
+    m = _FENCE_RE.match(text)
+    if m:
+        text = m.group(1)
     try:
-        return json.loads(raw_text)
+        return json.loads(text)
     except json.JSONDecodeError as exc:
         raise ElicitationError(f"response was not valid JSON: {exc}: {raw_text[:200]!r}") from exc
 
@@ -159,14 +167,15 @@ class OpenAIJudgeClient:
         )
 
     def ask(self, prompt: str, schema: Dict) -> JudgeResponse:
+        # schema=None: no constrained decoding; the prompt must ask for JSON and the reply is parsed.
+        fmt = ({"response_format": {"type": "json_schema",
+                                    "json_schema": {"name": "judgment", "schema": schema, "strict": True}}}
+               if schema is not None else {})
         response = self._client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=self._max_tokens,
-            response_format={
-                "type": "json_schema",
-                "json_schema": {"name": "judgment", "schema": schema, "strict": True},
-            },
+            **fmt,
             **({"extra_body": self._extra_body} if self._extra_body else {}),
         )
         choice = response.choices[0]
