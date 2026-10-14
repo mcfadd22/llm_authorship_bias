@@ -39,12 +39,13 @@ def scenario_code(scenario: Dict, cause: str, variant: str) -> Dict:
         run = scenario["runs"][cause]
     kind = "violating" if cause == "caller" else "correct"
     meta = scenario["caller"][kind]
-    return {"callee_code": callee, "caller_code": caller, "run": run,
+    return {"callee_code": callee.rstrip("\n"), "caller_code": caller.rstrip("\n"), "run": run,
             "entry_call": meta["entry_call"], "expected_repr": meta["expected_repr"], "purpose": meta["purpose"],
             "caller_fn": meta["function_name"], "callee_fn": scenario["callee"]["function_name"]}
 
 
 def render_trace(run: Dict, entry_call: str, per_step: bool) -> str:
+    """The harness frame is shown as the bare entry call: the result marker is an implementation detail."""
     if run["outcome"] == "ok":
         return f"Integration check passed:\n  call:   {entry_call}\n  result: {run['result_repr']}"
     if run["outcome"] == "wrong_result":
@@ -60,8 +61,9 @@ def render_trace(run: Dict, entry_call: str, per_step: bool) -> str:
         else:
             fname, ln = ("integration_check.py", 1) if fr["component"] == "harness" else ("pipeline.py", fr["lineno_assembled"])
         lines.append(f'  File "{fname}", line {ln}, in {fr["function"]}')
-        if fr["line"]:
-            lines.append(f"    {fr['line']}")
+        src = entry_call if fr["component"] == "harness" else fr["line"]
+        if src:
+            lines.append(f"    {src}")
     if run.get("stdlib_frames_omitted"):
         lines.append(f"  [{run['stdlib_frames_omitted']} frame(s) inside the standard library omitted]")
     msg = f"{run['exc_type']}: {run['exc_message']}" if run.get("exc_message") else str(run["exc_type"])

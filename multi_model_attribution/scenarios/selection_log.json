@@ -1,0 +1,9 @@
+{
+  "built": [
+    "add_note__known_trap__gpt5__000",
+    "apply_discount_codes__silent_failure__gemini25pro__001",
+    "average_temperature__missing_edge_case__gpt5__000"
+  ],
+  "failed": [],
+  "skipped": []
+}

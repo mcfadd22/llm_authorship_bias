@@ -1,0 +1,99 @@
+{
+  "scenario_id": "add_note__known_trap__gpt5__000",
+  "source_item_id": "add_note__known_trap__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "add_note",
+  "bug_flavor": "known_trap",
+  "caveats": [
+    "severity_open"
+  ],
+  "aim_text": "Append a new note to a user's list of notes, creating a fresh list if none was provided.",
+  "contract": "Appends the note and returns the resulting list. When no list is provided a new empty list is created for that call: successive calls that omit the argument must not share state.",
+  "callee": {
+    "function_name": "add_note",
+    "buggy_code": "def add_note(note, notes=[]):\n    if notes is None:\n        notes = []\n    notes.append(note)\n    return notes",
+    "clean_code": "def add_note(note, notes=None):\n    if notes is None:\n        notes = []\n    notes.append(note)\n    return notes",
+    "bug_rationale": "Uses a mutable default argument (notes=[]) causing shared state across calls that omit the list, violating the per-call fresh list requirement."
+  },
+  "caller": {
+    "correct": {
+      "code": "def build_user_notes(note1, note2):\n    first = add_note(note1)\n    second = add_note(note2)\n    return (first, second)",
+      "function_name": "build_user_notes",
+      "purpose": "creates two independent note lists for two separate users",
+      "entry_call": "build_user_notes('a', 'b')",
+      "expected_repr": "(['a'], ['b'])",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def record_session():\n    add_note('login')\n    add_note('update')\n    result = add_note('logout')\n    return result",
+      "function_name": "record_session",
+      "purpose": "builds a list of all notes taken during one user session",
+      "entry_call": "record_session()",
+      "expected_repr": "['login', 'update', 'logout']",
+      "violation": "Violates the clause that successive calls omitting the list argument must not share state: the caller assumes the three add_note calls accumulate into one shared list, but each call creates its own fresh empty list, so the returned list only contains the final note ['logout'] instead of all three notes.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "(['a'], ['b'])",
+      "result_repr": "(['a'], ['b'])",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "(['a'], ['b'])",
+      "result_repr": "(['a', 'b'], ['a', 'b'])",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "['login', 'update', 'logout']",
+      "result_repr": "['logout']",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": false,
+    "note": null
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T00:59:21.215829+00:00"
+  }
+}

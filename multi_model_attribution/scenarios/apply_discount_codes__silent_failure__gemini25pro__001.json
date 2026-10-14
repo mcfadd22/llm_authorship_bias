@@ -1,0 +1,153 @@
+{
+  "scenario_id": "apply_discount_codes__silent_failure__gemini25pro__001",
+  "source_item_id": "apply_discount_codes__silent_failure__gemini25pro__001",
+  "bank": "items_gemini25pro",
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "caveats": [
+    "contract_changed_after_review"
+  ],
+  "aim_text": "Apply a list of discount codes to an order total and report any codes that were not valid.",
+  "contract": "Returns a dict with 'total' (the order total after applying every valid code) and 'rejected' (codes not found in the discount table). An unrecognised code appears in 'rejected' and leaves the total unchanged. Every entry in the discount table is a valid numeric discount; only codes absent from the table are invalid.",
+  "callee": {
+    "function_name": "compute_result",
+    "buggy_code": "def compute_result(base_amount, applied_codes, all_discounts):\n    final_amount = base_amount\n    invalid_codes = []\n\n    for code in applied_codes:\n        try:\n            final_amount -= all_discounts[code]\n        except KeyError:\n            pass\n\n    return {'total': final_amount, 'rejected': invalid_codes}",
+    "clean_code": "def compute_result(base_amount, applied_codes, all_discounts):\n    final_amount = base_amount\n    invalid_codes = []\n\n    for code in applied_codes:\n        try:\n            final_amount -= all_discounts[code]\n        except KeyError:\n            invalid_codes.append(code)\n\n    return {'total': final_amount, 'rejected': invalid_codes}",
+    "bug_rationale": "The function uses a `try...except KeyError: pass` block. When a discount code is not found in the `all_discounts` dictionary, the `KeyError` is caught and silently ignored. This prevents the invalid code from being appended to the `invalid_codes` list, causing the function to silently fail to report rejected codes as required by its contract. The 'rejected' list in the return value will thus always be empty."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_order(base_amount, applied_codes, all_discounts):\n    result = compute_result(base_amount, applied_codes, all_discounts)\n    report = {\n        'final_total': result['total'],\n        'rejected_codes': sorted(result['rejected'])\n    }\n    return report",
+      "function_name": "summarize_order",
+      "purpose": "turns an order's discount application into a summary report of final total and rejected codes",
+      "entry_call": "summarize_order(100, ['SAVE10','INVALID1','SAVE20','INVALID2'], {'SAVE10':10,'SAVE20':20})",
+      "expected_repr": "{'final_total': 70, 'rejected_codes': ['INVALID1', 'INVALID2']}",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def charge_order(base_amount, codes, discounts):\n    result = compute_result(base_amount, codes, discounts)\n    if result['rejected']:\n        final_total = base_amount\n    else:\n        final_total = result['total']\n    return {'total': final_total, 'rejected': result['rejected']}",
+      "function_name": "charge_order",
+      "purpose": "apply a list of discount codes to an order total and report invalid codes",
+      "entry_call": "charge_order(200, ['WELCOME20', 'FAKECODE'], {'WELCOME20': 20, 'LOYAL5': 5})",
+      "expected_repr": "{'total': 180, 'rejected': ['FAKECODE']}",
+      "violation": "Misreads the clause 'An unrecognised code appears in rejected and leaves the total unchanged' as applying to the whole order rather than to that single code's discount: the caller assumes any rejected code means no discounts at all were applied and resets the total to the base amount, instead of keeping the total returned by compute_result (which already reflects the valid discounts applied alongside the rejection).",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "{'final_total': 70, 'rejected_codes': ['INVALID1', 'INVALID2']}",
+      "result_repr": "{'final_total': 70, 'rejected_codes': ['INVALID1', 'INVALID2']}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'final_total': 70, 'rejected_codes': ['INVALID1', 'INVALID2']}",
+      "result_repr": "{'final_total': 70, 'rejected_codes': []}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'total': 180, 'rejected': ['FAKECODE']}",
+      "result_repr": "{'total': 200, 'rejected': ['FAKECODE']}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "callee_buggy_code": "def compute_result(base_amount, applied_codes, all_discounts):\n    final_amount_val = base_amount\n    invalid_codes_val = []\n\n    for code_val in applied_codes:\n        try:\n            final_amount_val -= all_discounts[code_val]\n        except KeyError:\n            pass\n\n    return {'total': final_amount_val, 'rejected': invalid_codes_val}",
+    "callee_clean_code": "def compute_result(base_amount, applied_codes, all_discounts):\n    final_amount_val = base_amount\n    invalid_codes_val = []\n\n    for code_val in applied_codes:\n        try:\n            final_amount_val -= all_discounts[code_val]\n        except KeyError:\n            invalid_codes_val.append(code_val)\n\n    return {'total': final_amount_val, 'rejected': invalid_codes_val}",
+    "caller_correct_code": "def summarize_order(base_amount, applied_codes, all_discounts):\n    out = compute_result(base_amount, applied_codes, all_discounts)\n    report_val = {\n        'final_total': out['total'],\n        'rejected_codes': sorted(out['rejected'])\n    }\n    return report_val",
+    "caller_violating_code": "def charge_order(base_amount, codes, discounts):\n    out = compute_result(base_amount, codes, discounts)\n    if out['rejected']:\n        final_total = base_amount\n    else:\n        final_total = out['total']\n    return {'total': final_total, 'rejected': out['rejected']}",
+    "rename_map": {
+      "code": "code_val",
+      "final_amount": "final_amount_val",
+      "invalid_codes": "invalid_codes_val",
+      "report": "report_val",
+      "result": "out"
+    },
+    "runs": {
+      "none": {
+        "outcome": "ok",
+        "expected_repr": "{'final_total': 70, 'rejected_codes': ['INVALID1', 'INVALID2']}",
+        "result_repr": "{'final_total': 70, 'rejected_codes': ['INVALID1', 'INVALID2']}",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "clean",
+        "caller_kind": "correct"
+      },
+      "callee": {
+        "outcome": "wrong_result",
+        "expected_repr": "{'final_total': 70, 'rejected_codes': ['INVALID1', 'INVALID2']}",
+        "result_repr": "{'final_total': 70, 'rejected_codes': []}",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "buggy",
+        "caller_kind": "correct"
+      },
+      "caller": {
+        "outcome": "wrong_result",
+        "expected_repr": "{'total': 180, 'rejected': ['FAKECODE']}",
+        "result_repr": "{'total': 200, 'rejected': ['FAKECODE']}",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "clean",
+        "caller_kind": "violating"
+      }
+    },
+    "failure_kind": {
+      "callee": "wrong_result",
+      "caller": "wrong_result"
+    }
+  },
+  "review": {
+    "violating_caller_reviewed": false,
+    "note": null
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T00:59:58.856208+00:00"
+  }
+}

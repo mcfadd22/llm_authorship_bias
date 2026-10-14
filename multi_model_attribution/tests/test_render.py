@@ -71,6 +71,14 @@ def test_code_blocks_identical_across_names_spin_fidelity(scenario, cfg, judge):
     assert len(blocks) == 1
 
 
+def test_harness_frame_shows_entry_call_not_marker(scenario, cfg, judge):
+    p = build_prompt(scenario, _cell(cause="caller", fidelity="full"), judge, cfg)
+    assert "__RESULT__" not in p and "repr(" not in p
+    assert 'File "integration_check.py", line 1, in <module>\n    report_average([2, 4, 9])' in p
+    assert "```python\n" in p and "\n\n```" not in p   # no trailing blank line inside code blocks
+    assert "calls compute_average and doubles the mean" in p
+
+
 def test_render_trace_ok_and_timeout():
     assert render_trace({"outcome": "ok", "result_repr": "5"}, "f(1)", False) == "Integration check passed:\n  call:   f(1)\n  result: 5"
     assert "time limit" in render_trace({"outcome": "timeout"}, "f(1)", False)

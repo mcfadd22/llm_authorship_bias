@@ -1,0 +1,119 @@
+{
+  "scenario_id": "average_temperature__missing_edge_case__gpt5__000",
+  "source_item_id": "average_temperature__missing_edge_case__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "caveats": [],
+  "aim_text": "Read a list of temperature readings and return their average.",
+  "contract": "Readings are numbers or numeric strings; a string that cannot be converted to a number raises ValueError. None and other non-string, non-numeric values are not valid input. Returns the arithmetic mean of the readings; returns None for an empty list; does not silently omit readings.",
+  "callee": {
+    "function_name": "average_readings",
+    "buggy_code": "def average_readings(readings):\n    total = 0.0\n    for r in readings:\n        try:\n            v = float(r)\n        except (TypeError, ValueError):\n            raise ValueError(\"invalid reading\")\n        total += v\n    return total / len(readings)\n",
+    "clean_code": "def average_readings(readings):\n    if len(readings) == 0:\n        return None\n    total = 0.0\n    for r in readings:\n        try:\n            v = float(r)\n        except (TypeError, ValueError):\n            raise ValueError(\"invalid reading\")\n        total += v\n    return total / len(readings)\n",
+    "bug_rationale": "Missing empty-input check: on an empty list, the function divides by zero instead of returning None as required."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_readings(readings):\n    avg = average_readings(readings)\n    if avg is None:\n        return \"no data\"\n    return \"average: \" + str(avg)\n",
+      "function_name": "summarize_readings",
+      "purpose": "turns a list of temperature readings into a short summary report",
+      "entry_call": "summarize_readings([])",
+      "expected_repr": "'no data'",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def combined_average(readings_a, readings_b):\n    avg_a = average_readings(readings_a)\n    avg_b = average_readings(readings_b)\n    if avg_a is None:\n        avg_a = 0.0\n    if avg_b is None:\n        avg_b = 0.0\n    return (avg_a + avg_b) / 2",
+      "function_name": "combined_average",
+      "purpose": "combine average temperatures from two sensor stations into one overall average",
+      "entry_call": "combined_average([10, 20, 30], [])",
+      "expected_repr": "20.0",
+      "violation": "The contract states average_readings returns None for an empty list and does not define how to combine that with another station's average; the caller treats this None as 0.0 instead of excluding the empty station, misinterpreting the empty-list boundary case and skewing the combined average downward.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "'no data'",
+      "result_repr": "'no data'",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "exception",
+      "expected_repr": "'no data'",
+      "result_repr": null,
+      "exc_type": "ZeroDivisionError",
+      "exc_message": "float division by zero",
+      "frames": [
+        {
+          "component": "harness",
+          "function": "<module>",
+          "lineno_component": 2,
+          "lineno_assembled": 18,
+          "line": "print('__RESULT__ ' + repr(summarize_readings([])))"
+        },
+        {
+          "component": "caller",
+          "function": "summarize_readings",
+          "lineno_component": 2,
+          "lineno_assembled": 12,
+          "line": "avg = average_readings(readings)"
+        },
+        {
+          "component": "callee",
+          "function": "average_readings",
+          "lineno_component": 9,
+          "lineno_assembled": 9,
+          "line": "return total / len(readings)"
+        }
+      ],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "20.0",
+      "result_repr": "10.0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "exception_in_callee",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": false,
+    "note": null
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:00:14.758823+00:00"
+  }
+}
