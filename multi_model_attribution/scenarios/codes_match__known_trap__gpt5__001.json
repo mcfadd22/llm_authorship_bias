@@ -1,0 +1,99 @@
+{
+  "scenario_id": "codes_match__known_trap__gpt5__001",
+  "source_item_id": "codes_match__known_trap__gpt5__001",
+  "bank": "items_gpt5",
+  "aim_id": "codes_match",
+  "bug_flavor": "known_trap",
+  "caveats": [],
+  "aim_text": "Check whether a parsed numeric code matches the expected code.",
+  "contract": "Returns True when the parsed code equals the expected code and False otherwise, for any integer either may take. Equal values compare equal regardless of magnitude: identity comparison is not equality and must not stand in for it.",
+  "callee": {
+    "function_name": "check_code",
+    "buggy_code": "def check_code(x, expected):\n    try:\n        v = int(x)\n    except (ValueError, TypeError):\n        return False\n    return v is expected",
+    "clean_code": "def check_code(x, expected):\n    try:\n        v = int(x)\n    except (ValueError, TypeError):\n        return False\n    return v == expected",
+    "bug_rationale": "The final comparison uses 'is' (identity) instead of '==' (equality). This Python gotcha causes equal integers that are not the same object to compare False, especially for larger values not interned."
+  },
+  "caller": {
+    "correct": {
+      "code": "def verify_entry(record, expected_code):\n    raw_value = record.get('code')\n    status = check_code(raw_value, expected_code)\n    return status",
+      "function_name": "verify_entry",
+      "purpose": "confirms a record's numeric code matches the expected code",
+      "entry_call": "verify_entry({'code': '1000'}, 1000)",
+      "expected_repr": "True",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def filter_matching_codes(codes, expected):\n    matches = []\n    for code in codes:\n        if check_code(expected, code):\n            matches.append(code)\n    return matches",
+      "function_name": "filter_matching_codes",
+      "purpose": "selects parsed codes from a list that equal an expected code",
+      "entry_call": "filter_matching_codes(['007','15','22'], 15)",
+      "expected_repr": "['15']",
+      "violation": "Swapped the positional arguments so that check_code(expected, code) is called instead of check_code(code, expected); this makes int() conversion apply to the already-numeric expected value while the actual parsed code (a string) is compared raw, relying on behavior the CONTRACT excludes since only the first parameter is guaranteed to undergo int() conversion.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "True",
+      "result_repr": "True",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "True",
+      "result_repr": "False",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "['15']",
+      "result_repr": "[]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:16:16.297605+00:00"
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "scenario_id": "parse_csv_header__logic_error__gpt5__000",
+  "source_item_id": "parse_csv_header__logic_error__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "logic_error",
+  "caveats": [],
+  "aim_text": "Parse a CSV header line into a list of non-blank column names.",
+  "contract": "Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line. A line of None is not valid input and raises TypeError rather than being treated as blank.",
+  "callee": {
+    "function_name": "parse_header",
+    "buggy_code": "def parse_header(line):\n    parts = line.split(',')\n    items = [x.strip() for x in parts]\n    if not any(items):\n        return []\n    result = [v for v in items if v == '']\n    return result",
+    "clean_code": "def parse_header(line):\n    parts = line.split(',')\n    items = [x.strip() for x in parts]\n    if not any(items):\n        return []\n    result = [v for v in items if v != '']\n    return result",
+    "bug_rationale": "The bug is an inverted filter condition. Instead of keeping non-empty trimmed fields, the list comprehension uses v == '' and thus keeps only empty fields. The rest of the logic (splitting, stripping, handling all-blank lines) follows the contract."
+  },
+  "caller": {
+    "correct": {
+      "code": "def build_column_map(line):\n    names = parse_header(line)\n    mapping = {}\n    for i, name in enumerate(names):\n        mapping[name] = i\n    return mapping",
+      "function_name": "build_column_map",
+      "purpose": "turns a CSV header line into a name-to-column-index mapping",
+      "entry_call": "build_column_map(' id , name,, email ')",
+      "expected_repr": "{'id': 0, 'name': 1, 'email': 2}",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def build_column_list(raw_header):\n    columns = parse_header(raw_header)\n    return columns",
+      "function_name": "build_column_list",
+      "purpose": "turns an optional CSV header line into a list of column names",
+      "entry_call": "build_column_list(None)",
+      "expected_repr": "[]",
+      "violation": "Violates the clause that a line of None is not valid input and raises TypeError rather than being treated as blank; the caller passes None to parse_header assuming it will be treated as a blank line and return an empty list.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "{'id': 0, 'name': 1, 'email': 2}",
+      "result_repr": "{'id': 0, 'name': 1, 'email': 2}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'id': 0, 'name': 1, 'email': 2}",
+      "result_repr": "{'': 0}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "exception",
+      "expected_repr": "[]",
+      "result_repr": null,
+      "exc_type": "AttributeError",
+      "exc_message": "'NoneType' object has no attribute 'split'",
+      "frames": [
+        {
+          "component": "harness",
+          "function": "<module>",
+          "lineno_component": 2,
+          "lineno_assembled": 14,
+          "line": "print('__RESULT__ ' + repr(build_column_list(None)))"
+        },
+        {
+          "component": "caller",
+          "function": "build_column_list",
+          "lineno_component": 2,
+          "lineno_assembled": 10,
+          "line": "columns = parse_header(raw_header)"
+        },
+        {
+          "component": "callee",
+          "function": "parse_header",
+          "lineno_component": 2,
+          "lineno_assembled": 2,
+          "line": "parts = line.split(',')"
+        }
+      ],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "exception_in_callee"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": true,
+    "note": "callee raises AttributeError where the contract says TypeError, so step 1 also departs from the contract; fault is not cleanly step 2",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13)"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:07:26.060313+00:00"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "scenario_id": "median_response_time__wrong_algorithm__gpt5__001",
+  "source_item_id": "median_response_time__wrong_algorithm__gpt5__001",
+  "bank": "items_gpt5",
+  "aim_id": "median_response_time",
+  "bug_flavor": "wrong_algorithm",
+  "caveats": [],
+  "aim_text": "Return the median of a list of response times.",
+  "contract": "Returns the middle value of the sorted times, or the mean of the two middle values when the count is even. Returns None for an empty list. The median is not approximated by the mean.",
+  "callee": {
+    "function_name": "median_time",
+    "buggy_code": "def median_time(values):\n    if not values:\n        return None\n    s = 0\n    for v in values:\n        s += v\n    return s / len(values)\n",
+    "clean_code": "def median_time(values):\n    if not values:\n        return None\n    a = sorted(values)\n    n = len(a)\n    m = n // 2\n    if n % 2 == 1:\n        return a[m]\n    return (a[m - 1] + a[m]) / 2\n",
+    "bug_rationale": "Instead of selecting the middle of the sorted list (or averaging the two middles), the function computes the arithmetic mean by summing all values and dividing by the count. This is a clean but wrong algorithm relative to the stated aim."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_response_times(times):\n    typical = median_time(times)\n    return typical\n",
+      "function_name": "summarize_response_times",
+      "purpose": "summarizes a list of response times by their typical value",
+      "entry_call": "summarize_response_times([100, 2, 3, 1, 2])",
+      "expected_repr": "2",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def monitoring_score(times):\n    threshold = 1000\n    fast_times = [t for t in times if t > threshold]\n    overall_median = median_time(times)\n    fast_median = median_time(fast_times) or 0\n    return (fast_median + overall_median) / 2",
+      "function_name": "monitoring_score",
+      "purpose": "combines a group's fast-response median with its overall median into one priority score",
+      "entry_call": "monitoring_score([10, 20, 30, 40])",
+      "expected_repr": "25.0",
+      "violation": "Violates the contract clause 'Returns None for an empty list': when fast_times is empty, median_time correctly returns None to signal there is no median, but the caller writes `median_time(fast_times) or 0`, silently treating that None as the numeric value 0 instead of recognizing the missing-data case. This makes the function average 0 with the overall median (giving 12.5) instead of correctly falling back to just the overall median (25.0) when no fast responses exist.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "2",
+      "result_repr": "2",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "2",
+      "result_repr": "21.6",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "25.0",
+      "result_repr": "12.5",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:18:34.996487+00:00"
+  }
+}

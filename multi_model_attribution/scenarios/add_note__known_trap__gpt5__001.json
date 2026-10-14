@@ -1,0 +1,101 @@
+{
+  "scenario_id": "add_note__known_trap__gpt5__001",
+  "source_item_id": "add_note__known_trap__gpt5__001",
+  "bank": "items_gpt5",
+  "aim_id": "add_note",
+  "bug_flavor": "known_trap",
+  "caveats": [
+    "severity_open"
+  ],
+  "aim_text": "Append a new note to a user's list of notes, creating a fresh list if none was provided.",
+  "contract": "Appends the note and returns the resulting list. When no list is provided a new empty list is created for that call: successive calls that omit the argument must not share state.",
+  "callee": {
+    "function_name": "add_note",
+    "buggy_code": "def add_note(note, notes=[]):\n    notes.append(note)\n    return notes\n",
+    "clean_code": "def add_note(note, notes=None):\n    if notes is None:\n        notes = []\n    notes.append(note)\n    return notes\n",
+    "bug_rationale": "Uses a mutable default argument (notes=[]). This causes state to be shared across calls that omit the notes argument, violating the requirement that each such call should get a fresh list."
+  },
+  "caller": {
+    "correct": {
+      "code": "def start_session(note1, note2):\n    first = add_note(note1)\n    second = add_note(note2)\n    return [first, second]",
+      "function_name": "start_session",
+      "purpose": "creates two independent note lists for separate tasks",
+      "entry_call": "start_session('check stock', 'order supplies')",
+      "expected_repr": "[['check stock'], ['order supplies']]",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def build_session_log():\n    add_note('start')\n    add_note('middle')\n    final = add_note('end')\n    return final\n",
+      "function_name": "build_session_log",
+      "purpose": "combine three session notes into one list",
+      "entry_call": "build_session_log()",
+      "expected_repr": "['start', 'middle', 'end']",
+      "violation": "The caller omits the notes argument on each call, expecting the notes to accumulate into one shared list across calls, but the CONTRACT guarantees that omitting the argument creates a fresh, unshared list for each call, so only the final note survives.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 2
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "[['check stock'], ['order supplies']]",
+      "result_repr": "[['check stock'], ['order supplies']]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "[['check stock'], ['order supplies']]",
+      "result_repr": "[['check stock', 'order supplies'], ['check stock', 'order supplies']]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "['start', 'middle', 'end']",
+      "result_repr": "['end']",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:13:40.850338+00:00"
+  }
+}

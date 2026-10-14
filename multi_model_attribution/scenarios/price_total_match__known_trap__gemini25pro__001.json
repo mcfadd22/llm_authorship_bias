@@ -1,0 +1,99 @@
+{
+  "scenario_id": "price_total_match__known_trap__gemini25pro__001",
+  "source_item_id": "price_total_match__known_trap__gemini25pro__001",
+  "bank": "items_gemini25pro",
+  "aim_id": "price_total_match",
+  "bug_flavor": "known_trap",
+  "caveats": [],
+  "aim_text": "Check whether the sum of a list of item prices matches an expected total.",
+  "contract": "Prices and the expected total are finite, nonnegative dollar amounts specified to the nearest cent. Returns True when the sum of the prices, rounded to cents, equals the expected total rounded to cents; otherwise returns False. Floating-point representation error alone must not turn a matching total into a mismatch.",
+  "callee": {
+    "function_name": "check_transaction",
+    "buggy_code": "def check_transaction(items, total):\n    computed_value = 0.0\n    for x in items:\n        computed_value += x\n\n    if computed_value == total:\n        return True\n    else:\n        return False",
+    "clean_code": "def check_transaction(items, total):\n    computed_value = 0.0\n    for x in items:\n        computed_value += x\n\n    if round(computed_value, 2) == round(total, 2):\n        return True\n    else:\n        return False",
+    "bug_rationale": "The function directly compares two floating-point numbers for equality using `==`. Due to representation inaccuracies in binary floating-point arithmetic, the calculated sum of `items` may not be bit-for-bit identical to the `total` even when they are mathematically equal (e.g., `0.1 + 0.2` is not exactly `0.3`). This causes the function to return `False` for valid inputs, which violates the contract's requirement to handle rounding."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_receipt(prices, expected_total):\n    matches = check_transaction(prices, expected_total)\n    return matches",
+      "function_name": "summarize_receipt",
+      "purpose": "confirms a receipt's line items add up to the posted total",
+      "entry_call": "summarize_receipt([0.1, 0.2], 0.3)",
+      "expected_repr": "True",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def verify_receipt(prices_in_cents, total):\n    adjusted_total = total\n    line_total = adjusted_total\n    return check_transaction(prices_in_cents, line_total)",
+      "function_name": "verify_receipt",
+      "purpose": "confirms a shopping cart's itemized prices add up to the receipt's printed total",
+      "entry_call": "verify_receipt([1999, 500, 301], 28.00)",
+      "expected_repr": "True",
+      "violation": "The CONTRACT requires that prices be finite, nonnegative dollar amounts to the nearest cent; the caller instead supplies prices expressed in cents (1999, 500, 301) while the total argument is in dollars (28.00), violating the 'dollar amounts' unit requirement and causing the sum comparison to fail even though the underlying transaction actually matches.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "True",
+      "result_repr": "True",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "True",
+      "result_repr": "False",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "True",
+      "result_repr": "False",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:21:02.218165+00:00"
+  }
+}

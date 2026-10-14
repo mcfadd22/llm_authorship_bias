@@ -1,0 +1,101 @@
+{
+  "scenario_id": "apply_discount_codes__silent_failure__gpt5__000",
+  "source_item_id": "apply_discount_codes__silent_failure__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "apply_discount_codes",
+  "bug_flavor": "silent_failure",
+  "caveats": [
+    "contract_changed_after_review"
+  ],
+  "aim_text": "Apply a list of discount codes to an order total and report any codes that were not valid.",
+  "contract": "Returns a dict with 'total' (the order total after applying every valid code) and 'rejected' (codes not found in the discount table). An unrecognised code appears in 'rejected' and leaves the total unchanged. Every entry in the discount table is a valid numeric discount; only codes absent from the table are invalid.",
+  "callee": {
+    "function_name": "apply_discounts",
+    "buggy_code": "def apply_discounts(total, codes, table):\n    t = float(total)\n    rejected = []\n    for code in codes:\n        try:\n            v = table[code]\n        except KeyError:\n            pass\n            continue\n        if 0 < v < 1:\n            t -= t * v\n        else:\n            t -= v\n    return {'total': t, 'rejected': rejected}\n",
+    "clean_code": "def apply_discounts(total, codes, table):\n    t = float(total)\n    rejected = []\n    for code in codes:\n        try:\n            v = table[code]\n        except KeyError:\n            rejected.append(code)\n            continue\n        if 0 < v < 1:\n            t -= t * v\n        else:\n            t -= v\n    return {'total': t, 'rejected': rejected}\n",
+    "bug_rationale": "Unknown codes trigger a KeyError that is caught and discarded with pass, and the code is not added to 'rejected'. This silently ignores invalid codes instead of reporting them."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_order(total, codes, table):\n    result = apply_discounts(total, codes, table)\n    return {'final_total': result['total'], 'invalid_codes': result['rejected']}\n",
+      "function_name": "summarize_order",
+      "purpose": "summarizes an order's final total and any invalid discount codes",
+      "entry_call": "summarize_order(100, ['A10', 'BAD'], {'A10': 10})",
+      "expected_repr": "{'final_total': 90.0, 'invalid_codes': ['BAD']}",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def summarize_order(total, codes, table):\n    result = apply_discounts(total, codes, table)\n    invalid_codes = [c for c in codes if c not in result['rejected']]\n    return {'final_total': result['total'], 'invalid_codes': invalid_codes}",
+      "function_name": "summarize_order",
+      "purpose": "applies a list of discount codes to an order total and reports which codes were invalid",
+      "entry_call": "summarize_order(100, ['A', 'B', 'C'], {'A': 0.2, 'B': 5})",
+      "expected_repr": "{'final_total': 75.0, 'invalid_codes': ['C']}",
+      "violation": "Misinterprets the 'rejected' field: the contract states that only codes absent from the discount table appear in 'rejected' (i.e., 'rejected' already lists the invalid codes). The caller instead computes invalid codes as those NOT in 'rejected', inverting the meaning and reporting the valid codes ('A', 'B') as invalid while omitting the actually unrecognised code 'C'.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "{'final_total': 90.0, 'invalid_codes': ['BAD']}",
+      "result_repr": "{'final_total': 90.0, 'invalid_codes': ['BAD']}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'final_total': 90.0, 'invalid_codes': ['BAD']}",
+      "result_repr": "{'final_total': 90.0, 'invalid_codes': []}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'final_total': 75.0, 'invalid_codes': ['C']}",
+      "result_repr": "{'final_total': 75.0, 'invalid_codes': ['A', 'B']}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:14:40.696016+00:00"
+  }
+}

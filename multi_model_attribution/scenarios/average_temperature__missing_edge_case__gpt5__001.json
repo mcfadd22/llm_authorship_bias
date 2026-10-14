@@ -1,0 +1,150 @@
+{
+  "scenario_id": "average_temperature__missing_edge_case__gpt5__001",
+  "source_item_id": "average_temperature__missing_edge_case__gpt5__001",
+  "bank": "items_gpt5",
+  "aim_id": "average_temperature",
+  "bug_flavor": "missing_edge_case",
+  "caveats": [],
+  "aim_text": "Read a list of temperature readings and return their average.",
+  "contract": "Readings are numbers or numeric strings; a string that cannot be converted to a number raises ValueError. None and other non-string, non-numeric values are not valid input. Returns the arithmetic mean of the readings; returns None for an empty list; does not silently omit readings.",
+  "callee": {
+    "function_name": "average_readings",
+    "buggy_code": "def average_readings(readings):\n    total = 0.0\n    for item in readings:\n        try:\n            value = float(item)\n        except (TypeError, ValueError):\n            raise ValueError(\"Invalid reading\")\n        total += value\n    return total / len(readings)\n",
+    "clean_code": "def average_readings(readings):\n    if len(readings) == 0:\n        return None\n    total = 0.0\n    for item in readings:\n        try:\n            value = float(item)\n        except (TypeError, ValueError):\n            raise ValueError(\"Invalid reading\")\n        total += value\n    return total / len(readings)\n",
+    "bug_rationale": "Missing edge case: the function does not handle an empty list and divides by len(readings) unconditionally, causing ZeroDivisionError instead of returning None as required. All other behavior (coercion to float and raising ValueError on failure) matches the contract."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_readings(readings):\n    result = average_readings(readings)\n    return result\n",
+      "function_name": "summarize_readings",
+      "purpose": "summarizes a batch of temperature readings into a single average value",
+      "entry_call": "summarize_readings([])",
+      "expected_repr": "None",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def summarize_sensor_log(readings):\n    processed = []\n    for value in readings:\n        processed.append(value)\n    result = average_readings(processed)\n    return result\n",
+      "function_name": "summarize_sensor_log",
+      "purpose": "turns a sensor log into its average reading",
+      "entry_call": "summarize_sensor_log([68, 70, None, 72])",
+      "expected_repr": "70.0",
+      "violation": "Passes a list containing a None entry straight to average_readings, assuming it will be silently skipped as a missing reading; the CONTRACT states that None and other non-string, non-numeric values are not valid input and that readings are never silently omitted, so this misuse causes average_readings to raise ValueError instead of returning the average of the valid readings.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "None",
+      "result_repr": "None",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "exception",
+      "expected_repr": "None",
+      "result_repr": null,
+      "exc_type": "ZeroDivisionError",
+      "exc_message": "float division by zero",
+      "frames": [
+        {
+          "component": "harness",
+          "function": "<module>",
+          "lineno_component": 2,
+          "lineno_assembled": 16,
+          "line": "print('__RESULT__ ' + repr(summarize_readings([])))"
+        },
+        {
+          "component": "caller",
+          "function": "summarize_readings",
+          "lineno_component": 2,
+          "lineno_assembled": 12,
+          "line": "result = average_readings(readings)"
+        },
+        {
+          "component": "callee",
+          "function": "average_readings",
+          "lineno_component": 9,
+          "lineno_assembled": 9,
+          "line": "return total / len(readings)"
+        }
+      ],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "exception",
+      "expected_repr": "70.0",
+      "result_repr": null,
+      "exc_type": "ValueError",
+      "exc_message": "Invalid reading",
+      "frames": [
+        {
+          "component": "callee",
+          "function": "average_readings",
+          "lineno_component": 7,
+          "lineno_assembled": 7,
+          "line": "value = float(item)"
+        },
+        {
+          "component": "harness",
+          "function": "<module>",
+          "lineno_component": 2,
+          "lineno_assembled": 21,
+          "line": "print('__RESULT__ ' + repr(summarize_sensor_log([68, 70, None, 72])))"
+        },
+        {
+          "component": "caller",
+          "function": "summarize_sensor_log",
+          "lineno_component": 5,
+          "lineno_assembled": 17,
+          "line": "result = average_readings(processed)"
+        },
+        {
+          "component": "callee",
+          "function": "average_readings",
+          "lineno_component": 9,
+          "lineno_assembled": 9,
+          "line": "raise ValueError(\"Invalid reading\")"
+        }
+      ],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "exception_in_callee",
+    "caller": "exception_in_callee"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:15:14.554367+00:00"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "scenario_id": "celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001",
+  "source_item_id": "celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001",
+  "bank": "items_gemini25pro",
+  "aim_id": "celsius_to_fahrenheit",
+  "bug_flavor": "wrong_algorithm",
+  "caveats": [],
+  "aim_text": "Convert a temperature from Celsius to Fahrenheit.",
+  "contract": "Returns celsius * 9 / 5 + 32. The result depends only on the input: any caching must not change the value returned for a given input.",
+  "callee": {
+    "function_name": "calculate_target_temp",
+    "buggy_code": "def calculate_target_temp(source_val):\n    result = (source_val - 32) * 5 / 9\n    return result",
+    "clean_code": "def calculate_target_temp(source_val):\n    result = source_val * 9 / 5 + 32\n    return result",
+    "bug_rationale": "The function is stated to convert Celsius to Fahrenheit, but the code implements the reverse conversion from Fahrenheit to Celsius. The correct formula is `celsius * 9 / 5 + 32`, but the function implements `(celsius - 32) * 5 / 9`. This is a 'wrong algorithm' bug because the implemented logic is a coherent but incorrect procedure for the stated goal, rather than a minor error within the correct procedure."
+  },
+  "caller": {
+    "correct": {
+      "code": "def forecast_readings(readings):\n    results = []\n    for value in readings:\n        results.append(calculate_target_temp(value))\n    return results",
+      "function_name": "forecast_readings",
+      "purpose": "converts a list of Celsius readings into Fahrenheit forecast values",
+      "entry_call": "forecast_readings([0, 10, 20])",
+      "expected_repr": "[32.0, 50.0, 68.0]",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def summarize_readings(readings):\n    total = 0\n    for value in readings:\n        converted = calculate_target_temp(value)\n        total += converted\n    return total / len(readings)\n",
+      "function_name": "summarize_readings",
+      "purpose": "averages a list of temperature readings into a single value",
+      "entry_call": "summarize_readings([32, 212])",
+      "expected_repr": "50.0",
+      "violation": "The CONTRACT defines calculate_target_temp as a one-way Celsius-to-Fahrenheit mapping (celsius * 9 / 5 + 32); the caller misuses it by feeding Fahrenheit readings and treating the output as the corresponding Celsius value, effectively assuming the function also performs the inverse Fahrenheit-to-Celsius conversion, which the CONTRACT does not provide.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "[32.0, 50.0, 68.0]",
+      "result_repr": "[32.0, 50.0, 68.0]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "[32.0, 50.0, 68.0]",
+      "result_repr": "[-17.77777777777778, -12.222222222222221, -6.666666666666667]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "50.0",
+      "result_repr": "251.60000000000002",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:15:39.427887+00:00"
+  }
+}

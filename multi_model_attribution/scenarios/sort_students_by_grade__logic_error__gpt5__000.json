@@ -1,0 +1,157 @@
+{
+  "scenario_id": "sort_students_by_grade__logic_error__gpt5__000",
+  "source_item_id": "sort_students_by_grade__logic_error__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "sort_students_by_grade",
+  "bug_flavor": "logic_error",
+  "caveats": [],
+  "aim_text": "Sort a list of student records by grade in descending order, and report the number of tied grades in a stats dict.",
+  "contract": "Returns the records ordered by grade descending, with a stats dict whose tied_grades counts the number of distinct grade values shared by two or more students. Empty input returns an empty list and a count of 0.",
+  "callee": {
+    "function_name": "sort_students",
+    "buggy_code": "def sort_students(records):\n    if not records:\n        return [], {'tied_grades': 0}\n    counts = {}\n    for item in records:\n        g = item['grade']\n        counts[g] = counts.get(g, 0) + 1\n    tied = sum(1 for v in counts.values() if v >= 2)\n    ordered = sorted(records, key=lambda x: x['grade'])\n    return ordered, {'tied_grades': tied}\n",
+    "clean_code": "def sort_students(records):\n    if not records:\n        return [], {'tied_grades': 0}\n    counts = {}\n    for item in records:\n        g = item['grade']\n        counts[g] = counts.get(g, 0) + 1\n    tied = sum(1 for v in counts.values() if v >= 2)\n    ordered = sorted(records, key=lambda x: x['grade'], reverse=True)\n    return ordered, {'tied_grades': tied}\n",
+    "bug_rationale": "The sorting step uses ascending order (missing reverse=True) instead of descending, violating the contract. All other logic, including counting distinct tied grades, is correct."
+  },
+  "caller": {
+    "correct": {
+      "code": "def build_grade_report(records):\n    ordered, stats = sort_students(records)\n    names = [r['name'] for r in ordered]\n    return names, stats",
+      "function_name": "build_grade_report",
+      "purpose": "turns student grade records into a ranked name list with tie stats",
+      "entry_call": "build_grade_report([{'name':'A','grade':90},{'name':'B','grade':85},{'name':'C','grade':90},{'name':'D','grade':70}])",
+      "expected_repr": "(['A', 'C', 'B', 'D'], {'tied_grades': 1})",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def build_report(records):\n    ordered, stats = sort_students(records)\n    total = len(ordered)\n    tied_students = stats['tied_grades']\n    ratio = tied_students / total if total else 0\n    top_grade = ordered[0]['grade'] if ordered else None\n    return {'top_grade': top_grade, 'tied_ratio': ratio, 'total': total}",
+      "function_name": "build_report",
+      "purpose": "summarize a class roster with the top grade and the share of students involved in grade ties",
+      "entry_call": "build_report([{'grade':90},{'grade':90},{'grade':85},{'grade':85},{'grade':85},{'grade':70}])",
+      "expected_repr": "{'top_grade': 90, 'tied_ratio': 0.8333333333333334, 'total': 6}",
+      "violation": "The CONTRACT defines tied_grades as the count of distinct grade values shared by two or more students, not the number of students involved in ties; the caller misuses stats['tied_grades'] directly as a per-student tie count when computing tied_ratio, giving 2/6 instead of the correct 5/6 share of students who actually share a tied grade.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "(['A', 'C', 'B', 'D'], {'tied_grades': 1})",
+      "result_repr": "(['A', 'C', 'B', 'D'], {'tied_grades': 1})",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "(['A', 'C', 'B', 'D'], {'tied_grades': 1})",
+      "result_repr": "(['D', 'B', 'A', 'C'], {'tied_grades': 1})",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'top_grade': 90, 'tied_ratio': 0.8333333333333334, 'total': 6}",
+      "result_repr": "{'top_grade': 90, 'tied_ratio': 0.3333333333333333, 'total': 6}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "callee_buggy_code": "def sort_students(records):\n    if not records:\n        return [], {'tied_grades': 0}\n    counts_val = {}\n    for entry in records:\n        g_val = entry['grade']\n        counts_val[g_val] = counts_val.get(g_val, 0) + 1\n    tied_val = sum(1 for v_val in counts_val.values() if v_val >= 2)\n    ordered_val = sorted(records, key=lambda x: x['grade'])\n    return ordered_val, {'tied_grades': tied_val}\n",
+    "callee_clean_code": "def sort_students(records):\n    if not records:\n        return [], {'tied_grades': 0}\n    counts_val = {}\n    for entry in records:\n        g_val = entry['grade']\n        counts_val[g_val] = counts_val.get(g_val, 0) + 1\n    tied_val = sum(1 for v_val in counts_val.values() if v_val >= 2)\n    ordered_val = sorted(records, key=lambda x: x['grade'], reverse=True)\n    return ordered_val, {'tied_grades': tied_val}\n",
+    "caller_correct_code": "def build_grade_report(records):\n    ordered_val, stats_val = sort_students(records)\n    names_val = [r_val['name'] for r_val in ordered_val]\n    return names_val, stats_val",
+    "caller_violating_code": "def build_report(records):\n    ordered_val, stats_val = sort_students(records)\n    total = len(ordered_val)\n    tied_students = stats_val['tied_grades']\n    ratio = tied_students / total if total else 0\n    top_grade = ordered_val[0]['grade'] if ordered_val else None\n    return {'top_grade': top_grade, 'tied_ratio': ratio, 'total': total}",
+    "rename_map": {
+      "counts": "counts_val",
+      "g": "g_val",
+      "item": "entry",
+      "names": "names_val",
+      "ordered": "ordered_val",
+      "r": "r_val",
+      "stats": "stats_val",
+      "tied": "tied_val",
+      "v": "v_val"
+    },
+    "runs": {
+      "none": {
+        "outcome": "ok",
+        "expected_repr": "(['A', 'C', 'B', 'D'], {'tied_grades': 1})",
+        "result_repr": "(['A', 'C', 'B', 'D'], {'tied_grades': 1})",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "clean",
+        "caller_kind": "correct"
+      },
+      "callee": {
+        "outcome": "wrong_result",
+        "expected_repr": "(['A', 'C', 'B', 'D'], {'tied_grades': 1})",
+        "result_repr": "(['D', 'B', 'A', 'C'], {'tied_grades': 1})",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "buggy",
+        "caller_kind": "correct"
+      },
+      "caller": {
+        "outcome": "wrong_result",
+        "expected_repr": "{'top_grade': 90, 'tied_ratio': 0.8333333333333334, 'total': 6}",
+        "result_repr": "{'top_grade': 90, 'tied_ratio': 0.3333333333333333, 'total': 6}",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "clean",
+        "caller_kind": "violating"
+      }
+    },
+    "failure_kind": {
+      "callee": "wrong_result",
+      "caller": "wrong_result"
+    }
+  },
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:12:03.702771+00:00"
+  }
+}

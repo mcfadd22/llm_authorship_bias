@@ -108,8 +108,10 @@
   },
   "cosmetic": null,
   "review": {
-    "violating_caller_reviewed": false,
-    "note": null
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
   },
   "build": {
     "harness_version": "2026-10-13-v1",

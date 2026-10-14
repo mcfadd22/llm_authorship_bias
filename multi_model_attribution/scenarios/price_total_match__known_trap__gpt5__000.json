@@ -1,0 +1,156 @@
+{
+  "scenario_id": "price_total_match__known_trap__gpt5__000",
+  "source_item_id": "price_total_match__known_trap__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "price_total_match",
+  "bug_flavor": "known_trap",
+  "caveats": [],
+  "aim_text": "Check whether the sum of a list of item prices matches an expected total.",
+  "contract": "Prices and the expected total are finite, nonnegative dollar amounts specified to the nearest cent. Returns True when the sum of the prices, rounded to cents, equals the expected total rounded to cents; otherwise returns False. Floating-point representation error alone must not turn a matching total into a mismatch.",
+  "callee": {
+    "function_name": "check_total",
+    "buggy_code": "import decimal\n\ndef check_total(prices, expected):\n    t = decimal.Decimal('0')\n    for v in prices:\n        t += decimal.Decimal(str(v))\n    a = t.quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    b = decimal.Decimal(str(expected)).quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    x = int((a * 100).to_integral_exact())\n    y = int((b * 100).to_integral_exact())\n    return x is y\n",
+    "clean_code": "import decimal\n\ndef check_total(prices, expected):\n    t = decimal.Decimal('0')\n    for v in prices:\n        t += decimal.Decimal(str(v))\n    a = t.quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    b = decimal.Decimal(str(expected)).quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    x = int((a * 100).to_integral_exact())\n    y = int((b * 100).to_integral_exact())\n    return x == y\n",
+    "bug_rationale": "Uses identity comparison 'is' instead of equality '==' for integers representing cents at the return line, a known Python gotcha. This can incorrectly return False for equal numeric values that are not the same object."
+  },
+  "caller": {
+    "correct": {
+      "code": "def reconcile_invoice(prices, expected):\n    items = list(prices)\n    result = check_total(items, expected)\n    return result\n",
+      "function_name": "reconcile_invoice",
+      "purpose": "confirms an invoice's expected total matches the sum of its line item prices",
+      "entry_call": "reconcile_invoice([100.00, 200.00, 50.55], 350.55)",
+      "expected_repr": "True",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def verify_order_total(cart_items, expected_total):\n    cents_prices = [int(round(p * 100)) for p in cart_items]\n    return check_total(cents_prices, expected_total)",
+      "function_name": "verify_order_total",
+      "purpose": "checks whether a shopping cart's total matches an expected receipt amount",
+      "entry_call": "verify_order_total([19.99, 5.00], 24.99)",
+      "expected_repr": "True",
+      "violation": "The CONTRACT requires all prices and the expected total to be finite, nonnegative dollar amounts to the nearest cent. The caller converts cart item prices into integer cents (e.g., 1999 for $19.99) while leaving the expected total in dollars (24.99), mixing units within a single call. This causes check_total to compare a cents-scaled sum against a dollar-scaled expected value, producing a spurious mismatch (False) even though the actual dollar totals are equal.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "True",
+      "result_repr": "True",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "True",
+      "result_repr": "False",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "True",
+      "result_repr": "False",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "callee_buggy_code": "import decimal\n\ndef check_total(prices, expected):\n    t_val = decimal.Decimal('0')\n    for v_val in prices:\n        t_val += decimal.Decimal(str(v_val))\n    a_val = t_val.quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    b_val = decimal.Decimal(str(expected)).quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    v_ = int((a_val * 100).to_integral_exact())\n    w = int((b_val * 100).to_integral_exact())\n    return v_ is w\n",
+    "callee_clean_code": "import decimal\n\ndef check_total(prices, expected):\n    t_val = decimal.Decimal('0')\n    for v_val in prices:\n        t_val += decimal.Decimal(str(v_val))\n    a_val = t_val.quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    b_val = decimal.Decimal(str(expected)).quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP)\n    v_ = int((a_val * 100).to_integral_exact())\n    w = int((b_val * 100).to_integral_exact())\n    return v_ == w\n",
+    "caller_correct_code": "def reconcile_invoice(prices, expected):\n    entries = list(prices)\n    out = check_total(entries, expected)\n    return out\n",
+    "caller_violating_code": "def verify_order_total(cart_items, expected_total):\n    cents_prices = [int(round(p * 100)) for p in cart_items]\n    return check_total(cents_prices, expected_total)",
+    "rename_map": {
+      "a": "a_val",
+      "b": "b_val",
+      "items": "entries",
+      "result": "out",
+      "t": "t_val",
+      "v": "v_val",
+      "x": "v_",
+      "y": "w"
+    },
+    "runs": {
+      "none": {
+        "outcome": "ok",
+        "expected_repr": "True",
+        "result_repr": "True",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "clean",
+        "caller_kind": "correct"
+      },
+      "callee": {
+        "outcome": "wrong_result",
+        "expected_repr": "True",
+        "result_repr": "False",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "buggy",
+        "caller_kind": "correct"
+      },
+      "caller": {
+        "outcome": "wrong_result",
+        "expected_repr": "True",
+        "result_repr": "False",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "clean",
+        "caller_kind": "violating"
+      }
+    },
+    "failure_kind": {
+      "callee": "wrong_result",
+      "caller": "wrong_result"
+    }
+  },
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:09:13.750748+00:00"
+  }
+}

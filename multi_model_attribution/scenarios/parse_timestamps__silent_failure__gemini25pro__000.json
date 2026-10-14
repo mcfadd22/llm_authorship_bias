@@ -1,0 +1,99 @@
+{
+  "scenario_id": "parse_timestamps__silent_failure__gemini25pro__000",
+  "source_item_id": "parse_timestamps__silent_failure__gemini25pro__000",
+  "bank": "items_gemini25pro",
+  "aim_id": "parse_timestamps",
+  "bug_flavor": "silent_failure",
+  "caveats": [],
+  "aim_text": "Parse a list of timestamp strings into parsed values, reporting any that could not be parsed.",
+  "contract": "Accepts timestamp strings in YYYY-MM-DD HH:MM:SS format. Returns a dict with 'parsed' (successfully parsed datetime values in input order) and 'failed' (unparseable input strings in input order). Each occurrence of an input string is represented exactly once, in one of those lists, even when input strings repeat.",
+  "callee": {
+    "function_name": "process_timestamps",
+    "buggy_code": "from datetime import datetime\n\ndef process_timestamps(items):\n    parsed_values = []\n    failed_values = []\n    for value in items:\n        try:\n            dt_obj = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')\n            parsed_values.append(dt_obj)\n        except ValueError:\n            pass\n    return {'parsed': parsed_values, 'failed': failed_values}",
+    "clean_code": "from datetime import datetime\n\ndef process_timestamps(items):\n    parsed_values = []\n    failed_values = []\n    for value in items:\n        try:\n            dt_obj = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')\n            parsed_values.append(dt_obj)\n        except ValueError:\n            failed_values.append(value)\n    return {'parsed': parsed_values, 'failed': failed_values}",
+    "bug_rationale": "The function is designed to parse timestamp strings and report any that fail. The `try...except ValueError` block correctly catches exceptions raised for malformed strings. However, the `except` block contains only a `pass` statement. This swallows the error, causing the function to silently ignore the failed string instead of adding it to the `failed_values` list as required by the contract. As a result, the 'failed' list in the returned dictionary will always be empty."
+  },
+  "caller": {
+    "correct": {
+      "code": "from datetime import datetime\n\ndef build_timestamp_report(timestamps):\n    result = process_timestamps(timestamps)\n    return {'parsed_count': len(result['parsed']), 'failed': result['failed']}\n",
+      "function_name": "build_timestamp_report",
+      "purpose": "summarizes how many timestamps parsed and lists the ones that failed",
+      "entry_call": "build_timestamp_report(['2023-01-01 10:00:00', 'bad-timestamp', '2023-01-02 11:00:00'])",
+      "expected_repr": "{'parsed_count': 2, 'failed': ['bad-timestamp']}",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def summarize_timestamps(items):\n    result = process_timestamps(items)\n    parsed = result['parsed']\n    report = {}\n    for value, dt in zip(items, parsed):\n        report[value] = dt\n    return report",
+      "function_name": "summarize_timestamps",
+      "purpose": "maps each valid timestamp string to its parsed datetime value",
+      "entry_call": "summarize_timestamps(['2023-01-01 10:00:00', 'bad-timestamp', '2023-01-02 11:00:00', '2023-01-03 12:00:00'])",
+      "expected_repr": "{'2023-01-01 10:00:00': datetime.datetime(2023, 1, 1, 10, 0), '2023-01-02 11:00:00': datetime.datetime(2023, 1, 2, 11, 0), '2023-01-03 12:00:00': datetime.datetime(2023, 1, 3, 12, 0)}",
+      "violation": "The CONTRACT guarantees 'parsed' holds only successfully parsed values in their relative order, with no positional link to the original 'items' list once any entry fails. The caller pairs items with parsed via zip() assuming index-for-index correspondence, so once a timestamp fails, every subsequent pairing shifts and associates valid-looking keys with datetime values parsed from a different, later entry.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 2
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "{'parsed_count': 2, 'failed': ['bad-timestamp']}",
+      "result_repr": "{'parsed_count': 2, 'failed': ['bad-timestamp']}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'parsed_count': 2, 'failed': ['bad-timestamp']}",
+      "result_repr": "{'parsed_count': 2, 'failed': []}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'2023-01-01 10:00:00': datetime.datetime(2023, 1, 1, 10, 0), '2023-01-02 11:00:00': datetime.datetime(2023, 1, 2, 11, 0), '2023-01-03 12:00:00': datetime.datetime(2023, 1, 3, 12, 0)}",
+      "result_repr": "{'2023-01-01 10:00:00': datetime.datetime(2023, 1, 1, 10, 0), 'bad-timestamp': datetime.datetime(2023, 1, 2, 11, 0), '2023-01-02 11:00:00': datetime.datetime(2023, 1, 3, 12, 0)}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:08:21.033392+00:00"
+  }
+}

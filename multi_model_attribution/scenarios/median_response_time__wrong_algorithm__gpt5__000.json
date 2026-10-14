@@ -1,0 +1,101 @@
+{
+  "scenario_id": "median_response_time__wrong_algorithm__gpt5__000",
+  "source_item_id": "median_response_time__wrong_algorithm__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "median_response_time",
+  "bug_flavor": "wrong_algorithm",
+  "caveats": [],
+  "aim_text": "Return the median of a list of response times.",
+  "contract": "Returns the middle value of the sorted times, or the mean of the two middle values when the count is even. Returns None for an empty list. The median is not approximated by the mean.",
+  "callee": {
+    "function_name": "median_time",
+    "buggy_code": "def median_time(values):\n    if not values:\n        return None\n    total = 0\n    count = 0\n    for x in values:\n        total += x\n        count += 1\n    return total / count",
+    "clean_code": "def median_time(values):\n    if not values:\n        return None\n    s = sorted(values)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 1:\n        return s[mid]\n    return (s[mid - 1] + s[mid]) / 2",
+    "bug_rationale": "The function consistently computes the arithmetic mean (sum divided by count) instead of the median; it never sorts or selects middle elements. This is a wrong_algorithm defect."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_response_times(times):\n    typical = median_time(times)\n    return typical",
+      "function_name": "summarize_response_times",
+      "purpose": "summarizes a list of response times by their typical value",
+      "entry_call": "summarize_response_times([10, 20, 30, 40, 1000])",
+      "expected_repr": "30",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def team_average_median(teams):\n    medians = []\n    for times in teams:\n        m = median_time(times) or 0\n        medians.append(m)\n    return sum(medians) / len(medians)",
+      "function_name": "team_average_median",
+      "purpose": "computes the average of per-team median response times",
+      "entry_call": "team_average_median([[10,20,30], [], [5,15]])",
+      "expected_repr": "15.0",
+      "violation": "Violates the clause 'Returns None for an empty list': the caller coerces median_time's None result (for the team with no readings) into 0 via 'or 0' and includes it in the average, instead of excluding that team, misinterpreting the documented empty-list boundary case.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "30",
+      "result_repr": "30",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "30",
+      "result_repr": "220.0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "15.0",
+      "result_repr": "10.0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "skipped": "too few renameable locals (callee 3, caller 1)"
+  },
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:04:37.942401+00:00"
+  }
+}

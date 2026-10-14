@@ -1,0 +1,101 @@
+{
+  "scenario_id": "shipping_cost__logic_error__gemini25pro__000",
+  "source_item_id": "shipping_cost__logic_error__gemini25pro__000",
+  "bank": "items_gemini25pro",
+  "aim_id": "shipping_cost",
+  "bug_flavor": "logic_error",
+  "caveats": [],
+  "aim_text": "Calculate the shipping cost for a package based on its weight tier.",
+  "contract": "Returns 0 for weight <= 0, 5.00 for weight <= 5, 8.50 for weight <= 10, 12.00 for weight <= 20, and 18.00 above 20.",
+  "callee": {
+    "function_name": "process_item",
+    "buggy_code": "def process_item(value):\n    if value <= 0:\n        return 0.0\n    elif value <= 5:\n        return 5.00\n    elif value > 10:\n        return 8.50\n    elif value <= 20:\n        return 12.00\n    else:\n        return 18.00",
+    "clean_code": "def process_item(value):\n    if value <= 0:\n        return 0.0\n    elif value <= 5:\n        return 5.00\n    elif value <= 10:\n        return 8.50\n    elif value <= 20:\n        return 12.00\n    else:\n        return 18.00",
+    "bug_rationale": "The third condition `elif value > 10:` uses a swapped relational operator. The correct condition to check for the 8.50 tier is `elif value <= 10:`. This error causes incorrect costs to be returned for all input values greater than 5."
+  },
+  "caller": {
+    "correct": {
+      "code": "def calculate_shipping_total(weights):\n    total = 0.0\n    for w in weights:\n        total += process_item(w)\n    return total",
+      "function_name": "calculate_shipping_total",
+      "purpose": "sums the shipping cost for a list of package weights",
+      "entry_call": "calculate_shipping_total([7])",
+      "expected_repr": "8.5",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def total_shipping_cost(weight1, weight2):\n    cost1 = process_item(weight1)\n    cost2 = process_item(cost1 + weight2)\n    return cost1 + cost2",
+      "function_name": "total_shipping_cost",
+      "purpose": "compute the combined shipping cost for two packages based on their individual weights",
+      "entry_call": "total_shipping_cost(3, 4)",
+      "expected_repr": "10.0",
+      "violation": "The caller feeds the shipping cost already computed for the first package into process_item as part of the weight argument for the second package (cost1 + weight2), effectively reusing the returned cost value as if it were additional weight. This misinterprets process_item's return value, which the CONTRACT defines strictly as a monetary cost for a given weight tier, not a quantity that can be combined with weight inputs for subsequent lookups.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "8.5",
+      "result_repr": "8.5",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "8.5",
+      "result_repr": "12.0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "10.0",
+      "result_repr": "13.5",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "skipped": "too few renameable locals (callee 0, caller 2)"
+  },
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:11:18.637694+00:00"
+  }
+}

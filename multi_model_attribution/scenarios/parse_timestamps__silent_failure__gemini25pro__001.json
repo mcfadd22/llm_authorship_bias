@@ -1,0 +1,156 @@
+{
+  "scenario_id": "parse_timestamps__silent_failure__gemini25pro__001",
+  "source_item_id": "parse_timestamps__silent_failure__gemini25pro__001",
+  "bank": "items_gemini25pro",
+  "aim_id": "parse_timestamps",
+  "bug_flavor": "silent_failure",
+  "caveats": [],
+  "aim_text": "Parse a list of timestamp strings into parsed values, reporting any that could not be parsed.",
+  "contract": "Accepts timestamp strings in YYYY-MM-DD HH:MM:SS format. Returns a dict with 'parsed' (successfully parsed datetime values in input order) and 'failed' (unparseable input strings in input order). Each occurrence of an input string is represented exactly once, in one of those lists, even when input strings repeat.",
+  "callee": {
+    "function_name": "process_timestamps",
+    "buggy_code": "import datetime\n\ndef process_timestamps(records):\n    parsed_list = []\n    failed_list = []\n    date_format = \"%Y-%m-%d %H:%M:%S\"\n\n    for item in records:\n        try:\n            dt_obj = datetime.datetime.strptime(item, date_format)\n            parsed_list.append(dt_obj)\n        except ValueError:\n            pass\n\n    return {\"parsed\": parsed_list, \"failed\": failed_list}",
+    "clean_code": "import datetime\n\ndef process_timestamps(records):\n    parsed_list = []\n    failed_list = []\n    date_format = \"%Y-%m-%d %H:%M:%S\"\n\n    for item in records:\n        try:\n            dt_obj = datetime.datetime.strptime(item, date_format)\n            parsed_list.append(dt_obj)\n        except ValueError:\n            failed_list.append(item)\n\n    return {\"parsed\": parsed_list, \"failed\": failed_list}",
+    "bug_rationale": "The function is designed to parse timestamps and report failures. The bug is in the `except ValueError:` block. When `strptime` fails for an invalidly formatted string, the exception is caught, but the block contains only `pass`. This silences the error. As a result, the invalid input string is not added to the `failed_list` as required by the contract, and it effectively vanishes from the output, leading to incorrect results for any input list containing unparseable strings."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_timestamp_batch(records):\n    result = process_timestamps(records)\n    parsed = result['parsed']\n    failed = result['failed']\n    return {\n        'total': len(records),\n        'parsed_count': len(parsed),\n        'failed_count': len(failed),\n        'failed_items': failed\n    }",
+      "function_name": "summarize_timestamp_batch",
+      "purpose": "summarizes a batch of timestamp strings into counts and failed entries",
+      "entry_call": "summarize_timestamp_batch([\"2023-01-01 10:00:00\", \"bad-timestamp\", \"2023-01-02 11:30:00\", \"bad-timestamp\"])",
+      "expected_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 2, 'failed_items': ['bad-timestamp', 'bad-timestamp']}",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "import datetime\n\ndef build_timestamp_map(records):\n    result = process_timestamps(records)\n    mapping = {}\n    for original, parsed_value in zip(records, result[\"parsed\"]):\n        mapping[original] = parsed_value\n    for failed_item in result[\"failed\"]:\n        mapping[failed_item] = None\n    return mapping",
+      "function_name": "build_timestamp_map",
+      "purpose": "turns a list of timestamp strings into a mapping from each original string to its parsed datetime or None if unparseable",
+      "entry_call": "build_timestamp_map([\"2023-01-01 10:00:00\", \"bad-timestamp\", \"2023-01-02 11:00:00\"])",
+      "expected_repr": "{'2023-01-01 10:00:00': datetime.datetime(2023, 1, 1, 10, 0), 'bad-timestamp': None, '2023-01-02 11:00:00': datetime.datetime(2023, 1, 2, 11, 0)}",
+      "violation": "The contract only guarantees that 'parsed' preserves the relative order of the successfully parsed inputs and 'failed' the relative order of unparseable ones; it does not promise that 'parsed' lines up positionally with the original records list. The caller zips records directly against result['parsed'] by index, so as soon as one entry fails, every subsequent pairing is misaligned and the final record never receives an entry in the mapping at all.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 3
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 2, 'failed_items': ['bad-timestamp', 'bad-timestamp']}",
+      "result_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 2, 'failed_items': ['bad-timestamp', 'bad-timestamp']}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 2, 'failed_items': ['bad-timestamp', 'bad-timestamp']}",
+      "result_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 0, 'failed_items': []}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "{'2023-01-01 10:00:00': datetime.datetime(2023, 1, 1, 10, 0), 'bad-timestamp': None, '2023-01-02 11:00:00': datetime.datetime(2023, 1, 2, 11, 0)}",
+      "result_repr": "{'2023-01-01 10:00:00': datetime.datetime(2023, 1, 1, 10, 0), 'bad-timestamp': None}",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "callee_buggy_code": "import datetime\n\ndef process_timestamps(records):\n    parsed_list_val = []\n    failed_list_val = []\n    date_format_val = \"%Y-%m-%d %H:%M:%S\"\n\n    for entry in records:\n        try:\n            dt_obj_val = datetime.datetime.strptime(entry, date_format_val)\n            parsed_list_val.append(dt_obj_val)\n        except ValueError:\n            pass\n\n    return {\"parsed\": parsed_list_val, \"failed\": failed_list_val}",
+    "callee_clean_code": "import datetime\n\ndef process_timestamps(records):\n    parsed_list_val = []\n    failed_list_val = []\n    date_format_val = \"%Y-%m-%d %H:%M:%S\"\n\n    for entry in records:\n        try:\n            dt_obj_val = datetime.datetime.strptime(entry, date_format_val)\n            parsed_list_val.append(dt_obj_val)\n        except ValueError:\n            failed_list_val.append(entry)\n\n    return {\"parsed\": parsed_list_val, \"failed\": failed_list_val}",
+    "caller_correct_code": "def summarize_timestamp_batch(records):\n    out = process_timestamps(records)\n    parsed_val = out['parsed']\n    failed_val = out['failed']\n    return {\n        'total': len(records),\n        'parsed_count': len(parsed_val),\n        'failed_count': len(failed_val),\n        'failed_items': failed_val\n    }",
+    "caller_violating_code": "import datetime\n\ndef build_timestamp_map(records):\n    out = process_timestamps(records)\n    mapping = {}\n    for original, parsed_value in zip(records, out[\"parsed\"]):\n        mapping[original] = parsed_value\n    for failed_item in out[\"failed\"]:\n        mapping[failed_item] = None\n    return mapping",
+    "rename_map": {
+      "date_format": "date_format_val",
+      "dt_obj": "dt_obj_val",
+      "failed": "failed_val",
+      "failed_list": "failed_list_val",
+      "item": "entry",
+      "parsed": "parsed_val",
+      "parsed_list": "parsed_list_val",
+      "result": "out"
+    },
+    "runs": {
+      "none": {
+        "outcome": "ok",
+        "expected_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 2, 'failed_items': ['bad-timestamp', 'bad-timestamp']}",
+        "result_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 2, 'failed_items': ['bad-timestamp', 'bad-timestamp']}",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "clean",
+        "caller_kind": "correct"
+      },
+      "callee": {
+        "outcome": "wrong_result",
+        "expected_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 2, 'failed_items': ['bad-timestamp', 'bad-timestamp']}",
+        "result_repr": "{'total': 4, 'parsed_count': 2, 'failed_count': 0, 'failed_items': []}",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "buggy",
+        "caller_kind": "correct"
+      },
+      "caller": {
+        "outcome": "wrong_result",
+        "expected_repr": "{'2023-01-01 10:00:00': datetime.datetime(2023, 1, 1, 10, 0), 'bad-timestamp': None, '2023-01-02 11:00:00': datetime.datetime(2023, 1, 2, 11, 0)}",
+        "result_repr": "{'2023-01-01 10:00:00': datetime.datetime(2023, 1, 1, 10, 0), 'bad-timestamp': None}",
+        "exc_type": null,
+        "exc_message": null,
+        "frames": [],
+        "stdlib_frames_omitted": 0,
+        "stdout": "",
+        "callee_version": "clean",
+        "caller_kind": "violating"
+      }
+    },
+    "failure_kind": {
+      "callee": "wrong_result",
+      "caller": "wrong_result"
+    }
+  },
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:20:19.654829+00:00"
+  }
+}

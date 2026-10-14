@@ -2,8 +2,43 @@
   "built": [
     "add_note__known_trap__gpt5__000",
     "apply_discount_codes__silent_failure__gemini25pro__001",
-    "average_temperature__missing_edge_case__gpt5__000"
+    "average_temperature__missing_edge_case__gpt5__000",
+    "celsius_to_fahrenheit__wrong_algorithm__gemini25pro__000",
+    "codes_match__known_trap__gpt5__000",
+    "compute_average__wrong_algorithm__gemini25pro__000",
+    "discount_eligibility__logic_error__gpt5__000",
+    "is_freezing__logic_error__gemini25pro__000",
+    "median_response_time__wrong_algorithm__gpt5__000",
+    "parse_csv_header__logic_error__gpt5__000",
+    "parse_timestamps__silent_failure__gemini25pro__000",
+    "price_total_match__known_trap__gpt5__000",
+    "process_order_batch__missing_edge_case__gpt5__001",
+    "reset_token_validation__missing_edge_case__gpt5__001",
+    "shipping_cost__logic_error__gemini25pro__000",
+    "sort_students_by_grade__logic_error__gpt5__000",
+    "validate_username_length__missing_edge_case__gemini25pro__000",
+    "add_note__known_trap__gpt5__001",
+    "apply_discount_codes__silent_failure__gpt5__000",
+    "average_temperature__missing_edge_case__gpt5__001",
+    "celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001",
+    "codes_match__known_trap__gpt5__001",
+    "compute_average__wrong_algorithm__gemini25pro__001",
+    "discount_eligibility__logic_error__gpt5__001",
+    "is_freezing__logic_error__gemini25pro__001",
+    "median_response_time__wrong_algorithm__gpt5__001",
+    "parse_csv_header__logic_error__gpt5__001",
+    "parse_timestamps__silent_failure__gemini25pro__001",
+    "price_total_match__known_trap__gemini25pro__001"
   ],
-  "failed": [],
-  "skipped": []
+  "failed": [
+    {
+      "source_item_id": "parse_config__silent_failure__gpt5__001",
+      "error": "correct caller failed after 4 attempts: ElicitationError: clean callee + caller did not pass: outcome=exception exc=ValueError: Malformed JSON got=None expected=\"ValueError('Malformed JSON')\""
+    }
+  ],
+  "skipped": [
+    "add_note__known_trap__gpt5__000",
+    "apply_discount_codes__silent_failure__gemini25pro__001",
+    "average_temperature__missing_edge_case__gpt5__000"
+  ]
 }

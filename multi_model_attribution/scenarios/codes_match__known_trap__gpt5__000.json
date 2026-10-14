@@ -1,0 +1,99 @@
+{
+  "scenario_id": "codes_match__known_trap__gpt5__000",
+  "source_item_id": "codes_match__known_trap__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "codes_match",
+  "bug_flavor": "known_trap",
+  "caveats": [],
+  "aim_text": "Check whether a parsed numeric code matches the expected code.",
+  "contract": "Returns True when the parsed code equals the expected code and False otherwise, for any integer either may take. Equal values compare equal regardless of magnitude: identity comparison is not equality and must not stand in for it.",
+  "callee": {
+    "function_name": "compare_code",
+    "buggy_code": "def compare_code(value, expected):\n    try:\n        n = int(value)\n    except (ValueError, TypeError):\n        return False\n    return n is expected",
+    "clean_code": "def compare_code(value, expected):\n    try:\n        n = int(value)\n    except (ValueError, TypeError):\n        return False\n    return bool(n == expected)\n",
+    "bug_rationale": "Uses identity comparison ('is') instead of equality ('==') on integers in the final return statement, a known Python gotcha that yields incorrect results for many integer values."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_matches(entries):\n    import random\n    total = 0\n    for value, expected in entries:\n        if compare_code(value, expected):\n            total += 1\n    return total",
+      "function_name": "summarize_matches",
+      "purpose": "counts how many parsed numeric codes in a list match their expected codes",
+      "entry_call": "summarize_matches([('1000', 1000), ('2048', 2048), ('99999', 99999)])",
+      "expected_repr": "3",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 3
+    },
+    "violating": {
+      "code": "def count_matching_entries(entries, code):\n    total = 0\n    for entry in entries:\n        result = compare_code(code, entry)\n        if result:\n            total += 1\n    return total",
+      "function_name": "count_matching_entries",
+      "purpose": "counts how many entries match an expected code",
+      "entry_call": "count_matching_entries(['42', '7', '42'], 42)",
+      "expected_repr": "2",
+      "violation": "Swapped the argument order: called compare_code(code, entry) instead of compare_code(entry, code). This makes the numeric code the value being int()-parsed and the raw entry the 'expected' side, which is never coerced, so string entries like '42' no longer equal the integer 42 even though they represent the same code\u2014violating the contract's guarantee that equal values compare equal regardless of representation.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 3
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "3",
+      "result_repr": "3",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "3",
+      "result_repr": "0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "2",
+      "result_repr": "0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:02:45.577538+00:00"
+  }
+}

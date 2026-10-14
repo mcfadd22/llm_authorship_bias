@@ -1,0 +1,123 @@
+{
+  "scenario_id": "parse_csv_header__logic_error__gpt5__001",
+  "source_item_id": "parse_csv_header__logic_error__gpt5__001",
+  "bank": "items_gpt5",
+  "aim_id": "parse_csv_header",
+  "bug_flavor": "logic_error",
+  "caveats": [],
+  "aim_text": "Parse a CSV header line into a list of non-blank column names.",
+  "contract": "Splits the line on commas, strips surrounding whitespace from each field, and omits fields that are empty after stripping. Returns an empty list for a blank or all-blank line. A line of None is not valid input and raises TypeError rather than being treated as blank.",
+  "callee": {
+    "function_name": "parse_header",
+    "buggy_code": "def parse_header(line):\n    parts = line.split(',')\n    trimmed = [p.strip() for p in parts]\n    result = [p for p in trimmed if p == '']\n    return result",
+    "clean_code": "def parse_header(line):\n    parts = line.split(',')\n    trimmed = [p.strip() for p in parts]\n    result = [p for p in trimmed if p != '']\n    return result",
+    "bug_rationale": "The filter condition is inverted: it keeps fields equal to '' instead of omitting them. Specifically, the list comprehension uses `if p == ''` instead of `if p != ''`, causing non-empty column names to be dropped and empty ones to be retained."
+  },
+  "caller": {
+    "correct": {
+      "code": "def build_column_list(line):\n    columns = parse_header(line)\n    return columns\n",
+      "function_name": "build_column_list",
+      "purpose": "turns a raw CSV header line into a clean list of column names",
+      "entry_call": "build_column_list(' id , name,, age ,')",
+      "expected_repr": "['id', 'name', 'age']",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def load_column_names(raw_lines):\n    header_line = raw_lines[0]\n    names = parse_header(header_line)\n    return names",
+      "function_name": "load_column_names",
+      "purpose": "extract column names from the first line of a batch of raw text lines",
+      "entry_call": "load_column_names([None, \"id, name , age\"])",
+      "expected_repr": "['id', 'name', 'age']",
+      "violation": "The CONTRACT states a line of None is invalid input and must raise TypeError rather than be treated as blank. The caller indexes raw_lines[0], which holds a None placeholder for a skipped separator row, and feeds it straight into parse_header assuming it will simply yield an empty list like a blank line would, instead of using the actual header text at raw_lines[1]; this misuse causes parse_header to raise TypeError instead of returning the real column names.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "['id', 'name', 'age']",
+      "result_repr": "['id', 'name', 'age']",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "['id', 'name', 'age']",
+      "result_repr": "['', '']",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "exception",
+      "expected_repr": "['id', 'name', 'age']",
+      "result_repr": null,
+      "exc_type": "AttributeError",
+      "exc_message": "'NoneType' object has no attribute 'split'",
+      "frames": [
+        {
+          "component": "harness",
+          "function": "<module>",
+          "lineno_component": 2,
+          "lineno_assembled": 13,
+          "line": "print('__RESULT__ ' + repr(load_column_names([None, \"id, name , age\"])))"
+        },
+        {
+          "component": "caller",
+          "function": "load_column_names",
+          "lineno_component": 3,
+          "lineno_assembled": 9,
+          "line": "names = parse_header(header_line)"
+        },
+        {
+          "component": "callee",
+          "function": "parse_header",
+          "lineno_component": 2,
+          "lineno_assembled": 2,
+          "line": "parts = line.split(',')"
+        }
+      ],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "exception_in_callee"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "skipped": "too few renameable locals (callee 4, caller 1)"
+  },
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": true,
+    "note": "callee raises AttributeError where the contract says TypeError, so step 1 also departs from the contract; fault is not cleanly step 2",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13)"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:19:03.183355+00:00"
+  }
+}

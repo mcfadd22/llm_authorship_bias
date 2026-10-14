@@ -1,0 +1,101 @@
+{
+  "scenario_id": "discount_eligibility__logic_error__gpt5__001",
+  "source_item_id": "discount_eligibility__logic_error__gpt5__001",
+  "bank": "items_gpt5",
+  "aim_id": "discount_eligibility",
+  "bug_flavor": "logic_error",
+  "caveats": [],
+  "aim_text": "Determine whether a user is eligible for a discount based on their account balance exceeding a threshold.",
+  "contract": "Returns True only when balance is strictly greater than threshold. A balance equal to the threshold is not eligible.",
+  "callee": {
+    "function_name": "is_discount_eligible",
+    "buggy_code": "def is_discount_eligible(balance, threshold):\n    b = balance\n    t = threshold\n    if b < t:\n        return True\n    return False\n",
+    "clean_code": "def is_discount_eligible(balance, threshold):\n    b = balance\n    t = threshold\n    if b > t:\n        return True\n    return False\n",
+    "bug_rationale": "The comparison operator is wrong: it uses b < t instead of b > t, causing True to be returned when the balance is less than the threshold."
+  },
+  "caller": {
+    "correct": {
+      "code": "def compute_discount(balance, threshold, discount_percent):\n    eligible = is_discount_eligible(balance, threshold)\n    if eligible:\n        return balance * discount_percent // 100\n    return 0",
+      "function_name": "compute_discount",
+      "purpose": "computes the discount amount a customer receives based on their balance",
+      "entry_call": "compute_discount(500, 200, 10)",
+      "expected_repr": "50",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def evaluate_eligibility(records):\n    results = []\n    for balance, threshold in records:\n        eligible = is_discount_eligible(threshold, balance)\n        results.append(eligible)\n    return results",
+      "function_name": "evaluate_eligibility",
+      "purpose": "turns a list of (balance, threshold) account pairs into a list of discount eligibility flags",
+      "entry_call": "evaluate_eligibility([(600,500),(300,300),(1000,999)])",
+      "expected_repr": "[True, False, True]",
+      "violation": "The contract expects is_discount_eligible(balance, threshold) with balance first and threshold second; this caller swaps the argument order to is_discount_eligible(threshold, balance), reversing the comparison direction for each record.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 2
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "50",
+      "result_repr": "50",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "50",
+      "result_repr": "0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "[True, False, True]",
+      "result_repr": "[False, False, False]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "skipped": "too few renameable locals (callee 2, caller 1)"
+  },
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:17:21.319226+00:00"
+  }
+}

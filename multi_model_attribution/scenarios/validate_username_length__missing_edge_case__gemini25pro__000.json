@@ -1,0 +1,99 @@
+{
+  "scenario_id": "validate_username_length__missing_edge_case__gemini25pro__000",
+  "source_item_id": "validate_username_length__missing_edge_case__gemini25pro__000",
+  "bank": "items_gemini25pro",
+  "aim_id": "validate_username_length",
+  "bug_flavor": "missing_edge_case",
+  "caveats": [],
+  "aim_text": "Check that a username is at least 3 characters long before allowing account creation, and track single-character attempts for abuse monitoring.",
+  "contract": "Returns True only when the username is at least 3 characters. Appends to abuse_log only usernames of exactly one character: two-character names are rejected without being logged. A username that is not a string is not valid input and raises TypeError rather than being silently rejected.",
+  "callee": {
+    "function_name": "process_new_user",
+    "buggy_code": "def process_new_user(user_entry, system_log):\n    if not isinstance(user_entry, str):\n        raise TypeError\n\n    if len(user_entry) <= 1:\n        system_log.append(user_entry)\n\n    return len(user_entry) >= 3\n",
+    "clean_code": "def process_new_user(user_entry, system_log):\n    if not isinstance(user_entry, str):\n        raise TypeError\n\n    if len(user_entry) == 1:\n        system_log.append(user_entry)\n\n    return len(user_entry) >= 3\n",
+    "bug_rationale": "The bug is the condition `len(user_entry) <= 1`. The contract requires logging only usernames of exactly one character, which would be `len(user_entry) == 1`. The implemented condition incorrectly also logs empty strings (`len == 0`) because `0 <= 1`. This is a missing edge case bug where the logic fails on the degenerate empty string input, while the primary return value (the boolean check for length >= 3) remains correct across all inputs."
+  },
+  "caller": {
+    "correct": {
+      "code": "def register_account(username, log):\n    allowed = process_new_user(username, log)\n    return (allowed, log)\n",
+      "function_name": "register_account",
+      "purpose": "registers a new account and returns whether it was created along with the abuse log",
+      "entry_call": "register_account('', [])",
+      "expected_repr": "(False, [])",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def evaluate_batch(usernames, abuse_log):\n    accepted_count = 0\n    for name in usernames:\n        if process_new_user(name, abuse_log):\n            accepted_count += 1\n    rejected_count = len(abuse_log)\n    return (accepted_count, rejected_count)",
+      "function_name": "evaluate_batch",
+      "purpose": "summarize a batch of candidate usernames into accepted and rejected counts for account creation screening",
+      "entry_call": "evaluate_batch(['ab', 'abcd', 'x', 'xy', 'hello', 'q'], [])",
+      "expected_repr": "(2, 4)",
+      "violation": "Violates the clause that abuse_log only receives usernames of exactly one character (two-character names are rejected without being logged); the caller wrongly treats len(abuse_log) as the count of all rejected (length<3) usernames, undercounting the two-character rejections.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "(False, [])",
+      "result_repr": "(False, [])",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "(False, [])",
+      "result_repr": "(False, [''])",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "(2, 4)",
+      "result_repr": "(2, 2)",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:12:55.912122+00:00"
+  }
+}

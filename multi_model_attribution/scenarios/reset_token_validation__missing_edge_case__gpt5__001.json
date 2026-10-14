@@ -1,0 +1,99 @@
+{
+  "scenario_id": "reset_token_validation__missing_edge_case__gpt5__001",
+  "source_item_id": "reset_token_validation__missing_edge_case__gpt5__001",
+  "bank": "items_gpt5",
+  "aim_id": "reset_token_validation",
+  "bug_flavor": "missing_edge_case",
+  "caveats": [],
+  "aim_text": "Validate a password-reset token before allowing a password change.",
+  "contract": "Returns True only for a valid, unexpired token belonging to the specified user. Returns False for an empty or malformed submitted token, a mismatch, an expired token, or a user mismatch.",
+  "callee": {
+    "function_name": "check_token",
+    "buggy_code": "import time, hmac, hashlib\n\ndef check_token(submitted_token, user_id, key):\n    if not submitted_token or not isinstance(submitted_token, str):\n        return False\n    parts = submitted_token.split(\".\")\n    if len(parts) != 3:\n        return False\n    tok_user, exp_s, sig = parts\n    if tok_user != user_id:\n        return False\n    try:\n        exp = int(exp_s)\n    except:\n        return False\n    expected = hmac.new(key.encode(\"utf-8\"), f\"{tok_user}.{exp_s}\".encode(\"utf-8\"), hashlib.sha256).hexdigest()\n    if not hmac.compare_digest(sig, expected):\n        return False\n    now = int(time.time())\n    return now <= exp\n",
+    "clean_code": "import time, hmac, hashlib\n\ndef check_token(submitted_token, user_id, key):\n    if not submitted_token or not isinstance(submitted_token, str):\n        return False\n    parts = submitted_token.split(\".\")\n    if len(parts) != 3:\n        return False\n    tok_user, exp_s, sig = parts\n    if tok_user != user_id:\n        return False\n    try:\n        exp = int(exp_s)\n    except:\n        return False\n    expected = hmac.new(key.encode(\"utf-8\"), f\"{tok_user}.{exp_s}\".encode(\"utf-8\"), hashlib.sha256).hexdigest()\n    if not hmac.compare_digest(sig, expected):\n        return False\n    now = int(time.time())\n    return now < exp\n",
+    "bug_rationale": "Boundary check bug: the expiration comparison uses now <= exp, so a token whose exp exactly equals the current time is incorrectly treated as valid. It should require now < exp."
+  },
+  "caller": {
+    "correct": {
+      "code": "import time, hmac, hashlib\n\ndef process_password_reset(user_id, key):\n    now = int(time.time())\n    exp_s = str(now)\n    sig = hmac.new(key.encode(\"utf-8\"), f\"{user_id}.{exp_s}\".encode(\"utf-8\"), hashlib.sha256).hexdigest()\n    token = f\"{user_id}.{exp_s}.{sig}\"\n    return check_token(token, user_id, key)",
+      "function_name": "process_password_reset",
+      "purpose": "decides whether a user's password reset request may proceed",
+      "entry_call": "process_password_reset('user42', 'supersecretkey')",
+      "expected_repr": "False",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "import hmac, hashlib, time\n\ndef process_password_reset(user_id, key):\n    exp = int(time.time()) + 3600\n    sig = hmac.new(key.encode(\"utf-8\"), f\"{user_id}.{exp}\".encode(\"utf-8\"), hashlib.sha256).hexdigest()\n    submitted_token = f\"{user_id}.{exp}.{sig}\"\n    if check_token(user_id, submitted_token, key):\n        return \"password changed\"\n    return \"reset denied\"\n",
+      "function_name": "process_password_reset",
+      "purpose": "turns a user's reset request into either an approval or denial message",
+      "entry_call": "process_password_reset(\"u123\", \"secret-key\")",
+      "expected_repr": "'password changed'",
+      "violation": "The contract specifies check_token(submitted_token, user_id, key); the caller instead invokes check_token(user_id, submitted_token, key), swapping the first two positional arguments so the real token is passed where a user id is expected.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "False",
+      "result_repr": "False",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "False",
+      "result_repr": "True",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "'password changed'",
+      "result_repr": "'reset denied'",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:10:28.350912+00:00"
+  }
+}

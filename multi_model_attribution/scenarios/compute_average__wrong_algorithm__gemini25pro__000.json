@@ -1,0 +1,99 @@
+{
+  "scenario_id": "compute_average__wrong_algorithm__gemini25pro__000",
+  "source_item_id": "compute_average__wrong_algorithm__gemini25pro__000",
+  "bank": "items_gemini25pro",
+  "aim_id": "compute_average",
+  "bug_flavor": "wrong_algorithm",
+  "caveats": [],
+  "aim_text": "Compute the average of a list of numbers.",
+  "contract": "Returns the arithmetic mean of the numbers. Returns None for an empty list.",
+  "callee": {
+    "function_name": "calculate_statistic",
+    "buggy_code": "def calculate_statistic(data_points):\n    if not data_points:\n        return None\n    \n    total = sum(data_points)\n\n    return total",
+    "clean_code": "def calculate_statistic(data_points):\n    if not data_points:\n        return None\n    \n    total = sum(data_points)\n\n    return total / len(data_points)",
+    "bug_rationale": "The function is intended to compute the average of a list of numbers. It correctly handles the empty list case by returning None. However, for a non-empty list, it calculates the sum of the elements but omits the final step of dividing by the number of elements. This results in the function returning the sum instead of the average, which is a 'wrong algorithm' defect."
+  },
+  "caller": {
+    "correct": {
+      "code": "def summarize_readings(readings):\n    average = calculate_statistic(readings)\n    if average is None:\n        return None\n    return round(average, 2)",
+      "function_name": "summarize_readings",
+      "purpose": "summarizes a list of sensor readings into a rounded average",
+      "entry_call": "summarize_readings([2, 4, 6])",
+      "expected_repr": "4.0",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def summarize_group_scores(groups):\n    averages = []\n    for g in groups:\n        avg = calculate_statistic(g)\n        averages.append(avg if avg is not None else 0)\n    return calculate_statistic(averages)",
+      "function_name": "summarize_group_scores",
+      "purpose": "combines per-group score averages into one overall average",
+      "entry_call": "summarize_group_scores([[10,20,30],[],[40,50]])",
+      "expected_repr": "32.5",
+      "violation": "The contract states that calculate_statistic returns None only to signal an empty input list, not a numeric value. The caller treats that None as the number 0 and folds it into a later average, misusing the None sentinel as if it were a valid statistic.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "4.0",
+      "result_repr": "4.0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "4.0",
+      "result_repr": "12",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "32.5",
+      "result_repr": "21.666666666666668",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:03:07.768887+00:00"
+  }
+}

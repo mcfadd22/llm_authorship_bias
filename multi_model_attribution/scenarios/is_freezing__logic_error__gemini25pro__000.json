@@ -1,0 +1,99 @@
+{
+  "scenario_id": "is_freezing__logic_error__gemini25pro__000",
+  "source_item_id": "is_freezing__logic_error__gemini25pro__000",
+  "bank": "items_gemini25pro",
+  "aim_id": "is_freezing",
+  "bug_flavor": "logic_error",
+  "caveats": [],
+  "aim_text": "Determine whether a temperature reading in Celsius represents freezing conditions (at or below 0 degrees).",
+  "contract": "Returns True when the temperature is less than or equal to 0, False otherwise.",
+  "callee": {
+    "function_name": "process_value",
+    "buggy_code": "def process_value(reading):\n    is_cold = False\n    if reading >= 0:\n        is_cold = True\n    return is_cold",
+    "clean_code": "def process_value(reading):\n    is_cold = False\n    if reading <= 0:\n        is_cold = True\n    return is_cold",
+    "bug_rationale": "The bug is a logic error in the conditional `if reading >= 0:`. The relational operator `>=` is used instead of the correct `<=`. This causes the function to incorrectly return `True` for all positive temperatures (e.g., 10) and `False` for all negative temperatures (e.g., -5), the opposite of the intended logic for those ranges. It only produces the correct result for the single boundary value of 0."
+  },
+  "caller": {
+    "correct": {
+      "code": "def filter_freezing(readings):\n    freezing = []\n    for r in readings:\n        if process_value(r):\n            freezing.append(r)\n    return freezing",
+      "function_name": "filter_freezing",
+      "purpose": "returns the subset of temperature readings that are at or below freezing",
+      "entry_call": "filter_freezing([-5, 10])",
+      "expected_repr": "[-5]",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def count_freezing_readings(readings):\n    total = 0\n    for reading in readings:\n        if process_value(reading):\n            total += 1\n    return total",
+      "function_name": "count_freezing_readings",
+      "purpose": "counts how many Fahrenheit temperature readings indicate freezing conditions",
+      "entry_call": "count_freezing_readings([32, 50, 0, -10, 20])",
+      "expected_repr": "4",
+      "violation": "The CONTRACT specifies process_value expects a Celsius reading, but the caller passes raw Fahrenheit values directly into process_value without converting them to Celsius first, misinterpreting the expected input units.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "[-5]",
+      "result_repr": "[-5]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "[-5]",
+      "result_repr": "[10]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "4",
+      "result_repr": "2",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:04:01.711682+00:00"
+  }
+}

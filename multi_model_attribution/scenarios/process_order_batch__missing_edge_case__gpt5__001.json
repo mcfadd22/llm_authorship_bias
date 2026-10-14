@@ -1,0 +1,123 @@
+{
+  "scenario_id": "process_order_batch__missing_edge_case__gpt5__001",
+  "source_item_id": "process_order_batch__missing_edge_case__gpt5__001",
+  "bank": "items_gpt5",
+  "aim_id": "process_order_batch",
+  "bug_flavor": "missing_edge_case",
+  "caveats": [],
+  "aim_text": "Process a batch of pending orders and return the list of order IDs that were successfully charged.",
+  "contract": "Returns the IDs of orders that pass their payment method's validation with a positive amount, in input order. Returns an empty list for None or an empty batch.",
+  "callee": {
+    "function_name": "process_batch",
+    "buggy_code": "def process_batch(batch):\n    result = []\n    for order in batch:\n        if order[\"amount\"] > 0 and order[\"payment\"].validate(order):\n            result.append(order[\"id\"])\n    return result",
+    "clean_code": "def process_batch(batch):\n    if batch is None:\n        return []\n    result = []\n    for order in batch:\n        if order[\"amount\"] > 0 and order[\"payment\"].validate(order):\n            result.append(order[\"id\"])\n    return result",
+    "bug_rationale": "Missing edge case: the function does not handle batch being None. Iterating over None raises a TypeError, violating the contract which requires returning an empty list for None. All other logic (positive amount and payment method validation, preserving input order) is correct."
+  },
+  "caller": {
+    "correct": {
+      "code": "def charge_pending_orders(batch):\n    charged_ids = process_batch(batch)\n    return charged_ids",
+      "function_name": "charge_pending_orders",
+      "purpose": "returns the list of order IDs charged from a pending order batch",
+      "entry_call": "charge_pending_orders(None)",
+      "expected_repr": "[]",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "import types\n\ndef pick_top_charge():\n    payment = types.SimpleNamespace(validate=lambda order: True)\n    batch = [\n        {\"id\": 10, \"amount\": 200, \"payment\": payment},\n        {\"id\": 20, \"amount\": 50, \"payment\": payment},\n        {\"id\": 30, \"amount\": 100, \"payment\": payment},\n    ]\n    charged_ids = process_batch(batch)\n    if not charged_ids:\n        return None\n    return charged_ids[-1]",
+      "function_name": "pick_top_charge",
+      "purpose": "selects the ID of the order with the highest charged amount from a batch of pending orders",
+      "entry_call": "pick_top_charge()",
+      "expected_repr": "10",
+      "violation": "The contract guarantees that returned IDs are in input order, not sorted by amount; the caller incorrectly assumes the last ID in the returned list corresponds to the highest charged amount, when in this batch the highest amount (200) belongs to the first order (id 10), not the last (id 30).",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "[]",
+      "result_repr": "[]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "exception",
+      "expected_repr": "[]",
+      "result_repr": null,
+      "exc_type": "TypeError",
+      "exc_message": "'NoneType' object is not iterable",
+      "frames": [
+        {
+          "component": "harness",
+          "function": "<module>",
+          "lineno_component": 2,
+          "lineno_assembled": 13,
+          "line": "print('__RESULT__ ' + repr(charge_pending_orders(None)))"
+        },
+        {
+          "component": "caller",
+          "function": "charge_pending_orders",
+          "lineno_component": 2,
+          "lineno_assembled": 9,
+          "line": "charged_ids = process_batch(batch)"
+        },
+        {
+          "component": "callee",
+          "function": "process_batch",
+          "lineno_component": 3,
+          "lineno_assembled": 3,
+          "line": "for order in batch:"
+        }
+      ],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "10",
+      "result_repr": "30",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "exception_in_callee",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": {
+    "skipped": "too few renameable locals (callee 2, caller 1)"
+  },
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:09:53.013695+00:00"
+  }
+}

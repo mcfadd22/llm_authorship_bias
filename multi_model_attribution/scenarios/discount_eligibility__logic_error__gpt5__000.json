@@ -1,0 +1,99 @@
+{
+  "scenario_id": "discount_eligibility__logic_error__gpt5__000",
+  "source_item_id": "discount_eligibility__logic_error__gpt5__000",
+  "bank": "items_gpt5",
+  "aim_id": "discount_eligibility",
+  "bug_flavor": "logic_error",
+  "caveats": [],
+  "aim_text": "Determine whether a user is eligible for a discount based on their account balance exceeding a threshold.",
+  "contract": "Returns True only when balance is strictly greater than threshold. A balance equal to the threshold is not eligible.",
+  "callee": {
+    "function_name": "discount_eligible",
+    "buggy_code": "def discount_eligible(balance, threshold):\n    result = balance <= threshold\n    return result",
+    "clean_code": "def discount_eligible(balance, threshold):\n    result = balance > threshold\n    return result",
+    "bug_rationale": "The comparison uses <= instead of >, so it returns True when balance is less than or equal to the threshold. The bug is the wrong relational operator in the eligibility check."
+  },
+  "caller": {
+    "correct": {
+      "code": "def evaluate_customer_discount(balance, threshold):\n    eligible = discount_eligible(balance, threshold)\n    return eligible",
+      "function_name": "evaluate_customer_discount",
+      "purpose": "determines if a customer qualifies for a loyalty discount based on account balance",
+      "entry_call": "evaluate_customer_discount(500, 500)",
+      "expected_repr": "False",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def apply_discount(balance, threshold, price):\n    eligible = discount_eligible(threshold, balance)\n    if eligible:\n        return price * 0.9\n    else:\n        return price",
+      "function_name": "apply_discount",
+      "purpose": "adjusts a purchase price when a customer qualifies for a loyalty discount",
+      "entry_call": "apply_discount(50, 100, 200)",
+      "expected_repr": "200",
+      "violation": "The contract requires calling discount_eligible(balance, threshold) in that order, but the caller passes (threshold, balance), swapping the argument order and inverting the comparison direction.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 2
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "False",
+      "result_repr": "False",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "False",
+      "result_repr": "True",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "200",
+      "result_repr": "180.0",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:03:42.473917+00:00"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "scenario_id": "is_freezing__logic_error__gemini25pro__001",
+  "source_item_id": "is_freezing__logic_error__gemini25pro__001",
+  "bank": "items_gemini25pro",
+  "aim_id": "is_freezing",
+  "bug_flavor": "logic_error",
+  "caveats": [],
+  "aim_text": "Determine whether a temperature reading in Celsius represents freezing conditions (at or below 0 degrees).",
+  "contract": "Returns True when the temperature is less than or equal to 0, False otherwise.",
+  "callee": {
+    "function_name": "check_condition",
+    "buggy_code": "def check_condition(value):\n    if value > 0:\n        return True\n    else:\n        return False",
+    "clean_code": "def check_condition(value):\n    if value <= 0:\n        return True\n    else:\n        return False",
+    "bug_rationale": "The function uses the `>` operator in its conditional check instead of the correct `<=` operator. As a result, it returns `True` for positive temperatures (non-freezing) and `False` for zero or negative temperatures (freezing), which is the inverse of the behavior required by the contract."
+  },
+  "caller": {
+    "correct": {
+      "code": "def freezing_report(readings):\n    results = []\n    for value in readings:\n        results.append(check_condition(value))\n    return results\n",
+      "function_name": "freezing_report",
+      "purpose": "summarizes a list of temperature readings into freezing/non-freezing flags",
+      "entry_call": "freezing_report([0])",
+      "expected_repr": "[True]",
+      "violation": "",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 1
+    },
+    "violating": {
+      "code": "def count_freezing_days(readings):\n    freezing = 0\n    for reading in readings:\n        if check_condition(reading):\n            freezing += 1\n    return freezing",
+      "function_name": "count_freezing_days",
+      "purpose": "counts how many of a list of temperature readings indicate freezing conditions",
+      "entry_call": "count_freezing_days([32, 20, 50, -5])",
+      "expected_repr": "3",
+      "violation": "The CONTRACT specifies that check_condition expects a Celsius value, but the caller feeds it Fahrenheit readings directly without converting them, causing freezing days to be misidentified.",
+      "generation_model": "anthropic/claude-sonnet-5",
+      "prompt_version": "2026-10-13-caller-v1",
+      "attempts": 2
+    }
+  },
+  "runs": {
+    "none": {
+      "outcome": "ok",
+      "expected_repr": "[True]",
+      "result_repr": "[True]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "correct"
+    },
+    "callee": {
+      "outcome": "wrong_result",
+      "expected_repr": "[True]",
+      "result_repr": "[False]",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "buggy",
+      "caller_kind": "correct"
+    },
+    "caller": {
+      "outcome": "wrong_result",
+      "expected_repr": "3",
+      "result_repr": "1",
+      "exc_type": null,
+      "exc_message": null,
+      "frames": [],
+      "stdlib_frames_omitted": 0,
+      "stdout": "",
+      "callee_version": "clean",
+      "caller_kind": "violating"
+    }
+  },
+  "failure_kind": {
+    "callee": "wrong_result",
+    "caller": "wrong_result"
+  },
+  "truth": {
+    "callee": "step_1",
+    "caller": "step_2",
+    "none": "neither"
+  },
+  "cosmetic": null,
+  "review": {
+    "violating_caller_reviewed": true,
+    "excluded": false,
+    "note": "violation plausible and grounded in the judge-facing spec; sandbox outcome matches truth",
+    "reviewed_by": "claude-fable-5.1 (session, 2026-10-13); no separate human pass"
+  },
+  "build": {
+    "harness_version": "2026-10-13-v1",
+    "python": "3.12.12",
+    "timestamp": "2026-10-14T01:17:51.259991+00:00"
+  }
+}
