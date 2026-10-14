@@ -51,6 +51,8 @@ def test_elicit_one_record_shape(scenario, cfg, judge):
     rec = rj.elicit_one(FakeClient(), attr, scenario, judge, cfg, 3)
     assert rec["attribution"] == "step_1" and rec["step_1_points"] is None and rec["truth"] == "step_1"
     assert rec["response_provider"] == "P" and rec["thinking"] == "hmm" and rec["prompt_version"] == rj.PROMPT_VERSION
+    assert rec["schema_version"] == rj.SCHEMA_VERSION
+    assert list(rj.SPLIT_SCHEMA["properties"]) == ["explanation", "step_1_points", "step_2_points"]
     assert "Step 1 (Claude)" in rec["prompt"]
     split = next(r for r in rows if r["question_kind"] == "split")
     rec2 = rj.elicit_one(FakeClient(), split, scenario, judge, cfg, 3)

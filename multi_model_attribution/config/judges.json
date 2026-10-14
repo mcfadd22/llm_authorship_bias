@@ -81,24 +81,13 @@
       "openrouter": {
         "provider": {
           "order": [
-            "Groq",
-            "BaseTen",
-            "Together",
-            "Nebius",
-            "Parasail",
-            "Crusoe"
-          ],
-          "ignore": [
-            "CoreWeave",
-            "Mara",
-            "DekaLLM",
-            "AkashML",
-            "DeepInfra"
+            "CoreWeave"
           ],
           "allow_fallbacks": true,
           "require_parameters": true
         }
-      }
+      },
+      "max_tokens": 1536
     },
     {
       "id": "gpt-oss-120b",

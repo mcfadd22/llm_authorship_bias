@@ -38,11 +38,15 @@ ATTRIBUTION_SCHEMA = {"type": "object",
                       "properties": {"step": {"type": "string", "enum": STEPS},
                                      "explanation": {"type": "string"}},
                       "required": ["step", "explanation"], "additionalProperties": False}
+# Explanation first, then bounded integers: with the integers first, Llama 3.3 70B fell into a
+# whitespace loop under the JSON grammar on every provider; prose first cured most of it.
 SPLIT_SCHEMA = {"type": "object",
-                "properties": {"step_1_points": {"type": "integer"}, "step_2_points": {"type": "integer"},
-                               "explanation": {"type": "string"}},
-                "required": ["step_1_points", "step_2_points", "explanation"], "additionalProperties": False}
+                "properties": {"explanation": {"type": "string"},
+                               "step_1_points": {"type": "integer", "minimum": 0, "maximum": 100},
+                               "step_2_points": {"type": "integer", "minimum": 0, "maximum": 100}},
+                "required": ["explanation", "step_1_points", "step_2_points"], "additionalProperties": False}
 SCHEMAS = {"attribution": ATTRIBUTION_SCHEMA, "split": SPLIT_SCHEMA}
+SCHEMA_VERSION = "attrib-v1/split-v2"  # recorded per row; split-v1 rows (integers first) were discarded
 
 
 @dataclass
@@ -93,7 +97,8 @@ def elicit_one(client: JudgeClient, row: Dict, scenario: Dict, judge: Dict, cfg:
             "reasoning_text": d["explanation"], "prompt": prompt, "raw_response": response.raw_text,
             "response_model": response.model, "response_provider": response.provider,
             "usage": response.usage, "thinking": response.thinking,
-            "timestamp": datetime.now(timezone.utc).isoformat(), "prompt_version": PROMPT_VERSION}
+            "timestamp": datetime.now(timezone.utc).isoformat(), "prompt_version": PROMPT_VERSION,
+            "schema_version": SCHEMA_VERSION}
 
 
 def plan_rows(judge: Dict, scenarios: List[Dict], cfg: Dict, options: RunOptions):
