@@ -49,7 +49,11 @@ def wcb_test(y, X, clusters, col, n_boot=4999, seed=0):
     XtX_inv = np.linalg.pinv(X.T @ X)
     beta, V, _ = cluster_ols(y, X, starts, XtX_inv)
     se = np.sqrt(V[col, col])
-    t_obs = beta[col] / se if se > 0 else 0.0
+    if not se > 0:
+        # No variation to test (e.g. a constant outcome): report no evidence rather than
+        # letting the loop below, where no draw can count as extreme, return 1/(B+1).
+        return beta[col], se, 0.0, 1.0
+    t_obs = beta[col] / se
 
     # Restricted fit: drop the tested column, so the null holds by construction.
     keep = np.ones(X.shape[1], bool)

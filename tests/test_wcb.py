@@ -80,3 +80,13 @@ def test_holm_is_monotone_and_never_below_raw():
     adj = holm(raw)
     assert all(a >= r for a, r in zip(adj, raw))
     assert max(adj) <= 1.0
+
+
+def test_wcb_constant_outcome_is_not_significant():
+    """A judge that never gives a wrong answer has a constant outcome: zero SE, no test.
+    It used to return the minimum p-value, 1/(B+1), because no bootstrap draw counted as extreme."""
+    _, X, clusters = _clustered(seed=4)
+    y = np.zeros(len(clusters))
+    beta, se, t, p = wcb_test(y, X, clusters, 1, n_boot=199, seed=0)
+    assert beta == 0 and se == 0 and t == 0
+    assert p == 1.0
