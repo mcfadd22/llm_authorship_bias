@@ -31,6 +31,19 @@ def test_config_rejects_judge_colliding_with_ladder(tmp_path, cfg):
         load_config(tmp_path)
 
 
+def test_config_allows_declared_self_in_ladder(tmp_path, cfg):
+    import json
+    for name in ("judges", "names", "questions", "notes"):
+        (tmp_path / f"{name}.json").write_text(json.dumps(cfg[name]))
+    claude = {"id": "c", "family": "claude", "display_name": "Claude", "provider": "openrouter", "model": "m",
+              "self_in_ladder": True}
+    (tmp_path / "judges.json").write_text(json.dumps({"judges": [claude]}))
+    loaded = load_config(tmp_path)
+    judge = loaded["judges"]["judges"][0]
+    assert resolve_names("frontier_to_small", loaded["names"], judge) == ("Claude", "Gemma")
+    assert resolve_names("self_to_other", loaded["names"], judge) == ("Claude", "Gemini")
+
+
 def test_fidelity_sections(scenario, cfg, judge):
     full = build_prompt(scenario, _cell(fidelity="full"), judge, cfg)
     summ = build_prompt(scenario, _cell(fidelity="summary"), judge, cfg)

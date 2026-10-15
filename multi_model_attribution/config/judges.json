@@ -122,6 +122,25 @@
           "require_parameters": true
         }
       }
+    },
+    {
+      "id": "claude-sonnet-5",
+      "family": "claude",
+      "params_b": null,
+      "display_name": "Claude",
+      "self_in_ladder": true,
+      "provider": "openrouter",
+      "model": "anthropic/claude-sonnet-5",
+      "openrouter": {
+        "provider": {
+          "order": [
+            "Anthropic"
+          ],
+          "allow_fallbacks": true,
+          "require_parameters": true
+        }
+      },
+      "rpm": 18
     }
   ]
 }

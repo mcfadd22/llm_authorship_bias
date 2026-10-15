@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 import os
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -31,7 +32,8 @@ MANIFEST = "run.json"
 PRICES = {**PRICE_TABLE,
           "meta-llama/llama-3.1-8b-instruct": (0.02, 0.04), "qwen/qwen3-14b": (0.06, 0.22),
           "openai/gpt-oss-20b": (0.03, 0.09), "qwen/qwen3-32b": (0.08, 0.28),
-          "meta-llama/llama-3.3-70b-instruct": (0.10, 0.32), "openai/gpt-oss-120b": (0.15, 0.60)}
+          "meta-llama/llama-3.3-70b-instruct": (0.10, 0.32), "openai/gpt-oss-120b": (0.15, 0.60),
+          "anthropic/claude-sonnet-5": (2.00, 10.00)}
 
 STEPS = ["step_1", "step_2", "neither", "cannot_tell"]
 ATTRIBUTION_SCHEMA = {"type": "object",
@@ -55,6 +57,25 @@ PROMPTED_FORMAT_LINE = {
     "split": "Respond with a JSON object with exactly these keys: explanation (string), step_1_points (integer), step_2_points (integer).",
     "attribution": "Respond with a JSON object with exactly these keys: step (one of step_1, step_2, neither, cannot_tell), explanation (string).",
 }
+
+
+class RateLimiter:
+    """Spaces call starts at least 60/rpm seconds apart across threads. Set per judge with "rpm" in
+    judges.json where the provider caps requests per minute (OpenRouter's new-account cap on Sonnet 5)."""
+
+    def __init__(self, rpm: float, clock=time.monotonic, sleep=time.sleep):
+        self.interval = 60.0 / rpm
+        self._clock, self._sleep = clock, sleep
+        self._next = None
+        self._lock = threading.Lock()
+
+    def wait(self) -> None:
+        with self._lock:
+            now = self._clock()
+            slot = now if self._next is None else max(now, self._next)
+            self._next = slot + self.interval
+        if slot > now:
+            self._sleep(slot - now)
 
 
 @dataclass
@@ -83,7 +104,8 @@ def validate(kind: str, data: Dict) -> None:
     _require_text(data.get("explanation"), "explanation")
 
 
-def elicit_one(client: JudgeClient, row: Dict, scenario: Dict, judge: Dict, cfg: Dict, max_retries: int) -> Dict:
+def elicit_one(client: JudgeClient, row: Dict, scenario: Dict, judge: Dict, cfg: Dict, max_retries: int,
+               limiter: Optional[RateLimiter] = None) -> Dict:
     prompt = build_prompt(scenario, row, judge, cfg)
     kind = row["question_kind"]
     prompted = kind in judge.get("prompted_json_for", [])
@@ -95,6 +117,8 @@ def elicit_one(client: JudgeClient, row: Dict, scenario: Dict, judge: Dict, cfg:
     for attempt in range(max_retries):
         if attempt:
             time.sleep(min(60, 5 * 2 ** (attempt - 1)))
+        if limiter is not None:
+            limiter.wait()
         try:
             response = _ask_with_deadline(client, prompt, schema)
             validate(row["question_kind"], response.data)
@@ -132,8 +156,10 @@ def run_judge(client: Optional[JudgeClient], judge: Dict, scenarios: List[Dict],
     if options.dry_run:
         return {"planned": len(pending), "skipped": skipped}
     generated = failed = 0
+    limiter = RateLimiter(judge["rpm"]) if judge.get("rpm") else None
     with ThreadPoolExecutor(max_workers=options.concurrency) as pool:
-        futures = {pool.submit(elicit_one, client, r, by_id[r["scenario_id"]], judge, cfg, options.max_retries): r for r in pending}
+        futures = {pool.submit(elicit_one, client, r, by_id[r["scenario_id"]], judge, cfg, options.max_retries, limiter): r
+                   for r in pending}
         for fut in as_completed(futures):
             row = futures[fut]
             try:

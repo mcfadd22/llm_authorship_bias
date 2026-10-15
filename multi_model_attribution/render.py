@@ -13,7 +13,9 @@ def load_config(config_dir: Path = CONFIG_DIR) -> Dict:
     cfg = {name: json.loads((config_dir / f"{name}.json").read_text()) for name in ("judges", "names", "questions", "notes")}
     ladder = {cfg["names"][k] for k in ("frontier", "small", "other")}
     for j in cfg["judges"]["judges"]:
-        if j["display_name"] in ladder:
+        # A judge whose family is itself a ladder name (Claude) must say so: for it, "frontier" is
+        # also "self", so its F4 status contrasts do not mean what they mean for the other judges.
+        if j["display_name"] in ladder and not j.get("self_in_ladder"):
             raise ValueError(f"judge {j['id']} display name {j['display_name']!r} collides with a ladder name")
     return cfg
 

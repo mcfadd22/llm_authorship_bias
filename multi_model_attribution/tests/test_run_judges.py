@@ -82,6 +82,30 @@ def test_elicit_one_retries_then_fails(scenario, cfg, judge):
         rj.elicit_one(FakeClient(fail_first=5), rows[0], scenario, judge, cfg, 2)
 
 
+def test_rate_limiter_spaces_calls():
+    now = [0.0]; slept = []
+    def sleep(s):
+        slept.append(s); now[0] += s
+    limiter = rj.RateLimiter(rpm=30, clock=lambda: now[0], sleep=sleep)
+    for _ in range(3):
+        limiter.wait()
+    assert slept == [2.0, 2.0]          # first call goes at once, then one every 60/30 s
+    now[0] += 10
+    limiter.wait()
+    assert slept == [2.0, 2.0]          # an idle gap longer than the interval needs no wait
+
+
+def test_elicit_one_waits_for_the_limiter_on_every_attempt(scenario, cfg, judge):
+    class Counting:
+        n = 0
+        def wait(self):
+            self.n += 1
+    rows = rj.enumerate_cells([scenario], judge, cfg["questions"]["questions"], 1)
+    limiter = Counting()
+    rj.elicit_one(FakeClient(fail_first=2), rows[0], scenario, judge, cfg, 3, limiter=limiter)
+    assert limiter.n == 3
+
+
 def test_run_judge_writes_resumes_and_logs_failures(scenario, cfg, judge, tmp_path):
     opts = _opts(tmp_path)
     summary = rj.run_judge(FakeClient(), judge, [scenario], cfg, opts)
