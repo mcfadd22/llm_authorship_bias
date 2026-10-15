@@ -140,7 +140,8 @@
           "require_parameters": true
         }
       },
-      "rpm": 18
+      "rpm": 18,
+      "sdk_max_retries": 0
     }
   ]
 }

@@ -211,10 +211,14 @@ def make_client(judge: Dict) -> JudgeClient:
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY is required for provider 'openrouter'")
         # Optional per-judge routing, e.g. {"provider": {"ignore": [...], "require_parameters": true}}.
-        # SDK retries stay on: they back off on 429 from an overloaded upstream provider.
+        # SDK retries stay on by default: they back off on 429 from an overloaded upstream provider.
+        # A judge under an account-level request cap sets "sdk_max_retries": 0 so that every
+        # request passes the caller's rate limiter (SDK retries would bypass it, and honour
+        # retry-after waits long enough to outlive the per-call deadline).
         return OpenAIJudgeClient(
             model=judge["model"], base_url=OPENROUTER_BASE_URL, api_key=api_key,
-            extra_body=judge.get("openrouter"), timeout_s=120, max_retries=SDK_MAX_RETRIES,
+            extra_body=judge.get("openrouter"), timeout_s=120,
+            max_retries=judge.get("sdk_max_retries", SDK_MAX_RETRIES),
             max_tokens=judge.get("max_tokens", OPENAI_COMPAT_MAX_TOKENS),
         )
     if provider == "vllm":

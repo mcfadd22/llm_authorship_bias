@@ -106,6 +106,13 @@ def test_elicit_one_waits_for_the_limiter_on_every_attempt(scenario, cfg, judge)
     assert limiter.n == 3
 
 
+def test_elicit_one_logs_each_retried_error(scenario, cfg, judge, capsys):
+    rows = rj.enumerate_cells([scenario], judge, cfg["questions"]["questions"], 1)
+    rj.elicit_one(FakeClient(fail_first=2), rows[0], scenario, judge, cfg, 3)
+    lines = [l for l in capsys.readouterr().out.splitlines() if "retry" in l]
+    assert len(lines) == 2 and "attempt 1/3" in lines[0] and "ElicitationError: boom" in lines[0]
+
+
 def test_run_judge_writes_resumes_and_logs_failures(scenario, cfg, judge, tmp_path):
     opts = _opts(tmp_path)
     summary = rj.run_judge(FakeClient(), judge, [scenario], cfg, opts)

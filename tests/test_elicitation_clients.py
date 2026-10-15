@@ -240,6 +240,20 @@ def test_make_client_routes_openrouter_through_the_openai_compatible_client(monk
     assert captured["timeout"] == 120 and captured["max_retries"] == 2
 
 
+def test_openrouter_judge_can_turn_off_sdk_retries(monkeypatch):
+    """A rate-capped judge retries only through the caller's limiter, never inside the SDK."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "k")
+    captured = {}
+
+    def fake_openai(base_url=None, api_key=None, **kw):
+        captured.update(kw)
+        return object()
+
+    monkeypatch.setattr("elicitation.clients.openai.OpenAI", fake_openai)
+    make_client({"provider": "openrouter", "model": "anthropic/claude-sonnet-5", "sdk_max_retries": 0})
+    assert captured["max_retries"] == 0
+
+
 def test_per_judge_max_tokens_override(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "k")
     holder = _patch_openai(monkeypatch, _OAIResponse(_OAIChoice(_OAIMessage('{"score": 3, "explanation": "ok"}'))))

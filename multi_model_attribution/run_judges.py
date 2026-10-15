@@ -125,6 +125,8 @@ def elicit_one(client: JudgeClient, row: Dict, scenario: Dict, judge: Dict, cfg:
             break
         except RETRYABLE as exc:
             last = f"{type(exc).__name__}: {exc}"
+            print(f"[{judge['id']}] retry after attempt {attempt + 1}/{max_retries} {row['scenario_id']} "
+                  f"{row['cause']}/{row['fidelity']} {row['question_type']}: {last[:160]}", flush=True)
     else:
         raise RuntimeError(f"failed after {max_retries} attempts: {last}")
     d = response.data
