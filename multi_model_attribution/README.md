@@ -46,7 +46,11 @@ cannot_tell + explanation; all causes) and `q_blame_split` (100 responsibility p
 the two steps + explanation; cause ≠ none).
 
 Judges: six open models on OpenRouter, a small and a large member of three families:
-Llama 3.1 8B, Qwen3 14B, gpt-oss 20B, Qwen3 32B, Llama 3.3 70B, gpt-oss 120B.
+Llama 3.1 8B, Qwen3 14B, gpt-oss 20B, Qwen3 32B, Llama 3.3 70B, gpt-oss 120B. Claude Sonnet 5
+(also via OpenRouter) was added as a seventh judge on 2026-10-15, after run 1's results were
+known; it is not part of the pre-registered judge set. It wrote the step-2 callers, and its
+family name is the ladder's frontier name (`self_in_ladder` in `config/judges.json`), so its F4
+status contrasts are not comparable with the other judges'.
 
 Source items: the 65 items whose verdict and twin verdict are `ok`, whose aim-visibility is not
 "no", and whose flavour is observable from a contract-correct caller (logic_error,
@@ -78,10 +82,13 @@ contrast is reported against `frontier_to_small` (also a strong name at step 1).
 
 ## Results
 
-Run 1 (2026-10-14, six judges, 23,068 rows) is in `results/run1/`; findings and deviations from
-this pre-registration are in `results/run1/STATUS.md`. In short: no last-touch bias in any judge;
-an upstream-blame bias in the small members of each family and in both Llamas; the Llamas name a
-culprit in most pipelines that actually passed; handoff-note spin and model names moved nothing.
+Run 1 (2026-10-14, six judges, 23,068 rows; Claude Sonnet 5 added 2026-10-15, 26,914 rows) is in
+`results/run1/`; findings and deviations from this pre-registration are in `results/run1/STATUS.md`.
+In short: no last-touch bias in any judge; an upstream-blame bias in the small members of each
+family and in both Llamas; the Llamas name a culprit in most pipelines that actually passed;
+handoff-note spin and model names moved nothing. Sonnet 5 is the most accurate and stable judge
+and shows none of the pre-registered effects. Three caller-fault scenarios turned out to depend on
+facts the judge is not shown; an exploratory re-analysis without them leaves the headline intact.
 
 ## How to run
 
@@ -95,10 +102,16 @@ python -m multi_model_attribution.run_judges --out-dir multi_model_attribution/r
 python -m multi_model_attribution.run_judges --out-dir multi_model_attribution/results/run1 --judge qwen3-32b --limit 20
 python -m multi_model_attribution.run_judges --out-dir multi_model_attribution/results/run1
 python -m multi_model_attribution.analyze --results-dir multi_model_attribution/results/run1
+# exploratory, labelled in STATUS.md: drop named scenarios, outputs get suffix _excl
+python -m multi_model_attribution.analyze --results-dir multi_model_attribution/results/run1 \
+  --exclude-scenarios is_freezing__logic_error__gemini25pro__001,celsius_to_fahrenheit__wrong_algorithm__gemini25pro__001,average_temperature__missing_edge_case__gpt5__001
 ```
 
 Operational settings inherited from the pilot: 4,096-token output cap, 240 s per-attempt
 deadline, fresh connection per call, 48 concurrent per judge, Groq-first routing for gpt-oss,
 price-sorted routing with `require_parameters` for the others, serving provider recorded per
 row. A judge may list question kinds under `prompted_json_for` to run them without a JSON
-grammar (one trailing format line, reply parsed); used for Llama 3.3 70B's split question. Long runs go through a launcher script in a tmux session under `caffeinate`.
+grammar (one trailing format line, reply parsed); used for Llama 3.3 70B's split question. A judge may
+set `rpm` (requests per minute, enforced across workers) and `sdk_max_retries` where the provider caps
+request rate; Sonnet 5 runs at 18 per minute with SDK retries off, under OpenRouter's 20-per-minute
+new-account cap. Long runs go through a launcher script in a tmux session under `caffeinate`.

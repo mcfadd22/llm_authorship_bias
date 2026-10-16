@@ -84,3 +84,18 @@ def test_raggedness_metrics_hand_computed(scenario, cfg, judge):
     assert rag["R3_excess_over_retest"]["mean"] == -1.0
     assert rag["R5_control_false_alarm"]["mean"] == 1.0        # every control answer names a step
     assert rag["params_b"]["mean"] == 32
+
+
+def test_main_excludes_named_scenarios_into_suffixed_outputs(scenario, cfg, judge, tmp_path):
+    import json
+    frame = _frame(_scenarios(scenario, 4), judge, cfg, lambda r: ("step_1", 30))
+    with open(tmp_path / f"{judge['id']}.jsonl", "w") as f:
+        for r in frame:
+            f.write(json.dumps(r) + "\n")
+    analyze.main(["--results-dir", str(tmp_path), "--n-boot", "9", "--exclude-scenarios", "s00,s01"])
+    out = (tmp_path / "descriptives_excl.csv").read_text()
+    assert out and not (tmp_path / "descriptives.csv").exists()
+    n_kept = sum(1 for r in frame if r["scenario_id"] not in ("s00", "s01") and r["variant"] == "base"
+                 and r["question_kind"] == "attribution" and r["cause"] == "callee")
+    lt = next(l for l in out.splitlines() if "last_touch_rate" in l)
+    assert lt.endswith(f",{n_kept}")

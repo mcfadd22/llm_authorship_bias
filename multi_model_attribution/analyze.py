@@ -227,14 +227,21 @@ def main(argv=None):
     p.add_argument("--results-dir", type=Path, required=True)
     p.add_argument("--n-boot", type=int, default=B_DEFAULT)
     p.add_argument("--exclude-caveated", action="store_true", help="sensitivity: drop scenarios whose item carries any caveat")
+    p.add_argument("--exclude-scenarios", default="", help="exploratory: comma-separated scenario ids to drop; outputs get suffix _excl")
     args = p.parse_args(argv)
     frame = load_frame(args.results_dir)
     if args.exclude_caveated:
         scen_dir = args.results_dir.parent.parent / "scenarios"
         caveated = {json.loads(f.read_text())["scenario_id"] for f in scen_dir.glob("*__*.json") if json.loads(f.read_text()).get("caveats")}
         frame = [r for r in frame if r["scenario_id"] not in caveated]
+    excluded = {s for s in args.exclude_scenarios.split(",") if s}
+    if excluded:
+        unknown = excluded - {r["scenario_id"] for r in frame}
+        if unknown:
+            raise SystemExit(f"unknown scenario id(s): {sorted(unknown)}")
+        frame = [r for r in frame if r["scenario_id"] not in excluded]
     tests = run_families(frame, args.n_boot)
-    suffix = "_nocaveat" if args.exclude_caveated else ""
+    suffix = ("_nocaveat" if args.exclude_caveated else "") + ("_excl" if excluded else "")
     write_csv(args.results_dir / f"tests{suffix}.csv", tests)
     write_csv(args.results_dir / f"descriptives{suffix}.csv", descriptives(frame))
     write_csv(args.results_dir / f"raggedness{suffix}.csv", raggedness(frame))
